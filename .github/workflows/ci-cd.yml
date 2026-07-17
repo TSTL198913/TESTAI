@@ -133,7 +133,7 @@ jobs:
 
     - name: Run mypy
       run: |
-        mypy src/ --ignore-missing-imports --allow-untyped-defs --no-error-summary --exit-zero
+        mypy src/ --ignore-missing-imports --allow-untyped-defs --no-error-summary || true
 
   build:
     runs-on: ubuntu-latest
