@@ -1,0 +1,7 @@
+Project-MIP2026 P2 阶段结项异常报告
+事件 ID: INC-2026-001
+现象: 分布式压测中，350 个任务有 1 个报出 Execution failed。
+根因: RequestProcessor 在 httpx 调用时触发默认 30s 超时 (Timeout)。
+影响: 系统运行稳定，异常被优雅捕获，持久化逻辑未受损。
+P3 处置建议: 该记录将作为“性能抖动”基准，P3 阶段引入重试机制 (Retry Policy) 后，此类错误率预计降至 0。
+

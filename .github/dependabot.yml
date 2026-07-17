@@ -1,0 +1,83 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 10
+    groups:
+      core-dependencies:
+        patterns:
+          - "fastapi"
+          - "uvicorn"
+          - "pydantic"
+          - "pydantic-settings"
+          - "httpx"
+          - "httpcore"
+          - "starlette"
+          - "h11"
+      database-dependencies:
+        patterns:
+          - "pymongo"
+          - "motor"
+          - "dnspython"
+      worker-dependencies:
+        patterns:
+          - "celery"
+          - "redis"
+          - "kombu"
+          - "amqp"
+          - "billiard"
+          - "vine"
+      test-dependencies:
+        patterns:
+          - "pytest"
+          - "pytest-asyncio"
+          - "pytest-cov"
+          - "pytest-timeout"
+          - "respx"
+      lint-dependencies:
+        patterns:
+          - "pylint"
+          - "mypy"
+          - "black"
+          - "isort"
+      security-dependencies:
+        patterns:
+          - "bandit"
+          - "pip-audit"
+      utility-dependencies:
+        patterns:
+          - "python-dotenv"
+          - "python-dateutil"
+          - "typing-extensions"
+          - "packaging"
+          - "click"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(deps):"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    pull-request-branch-name:
+      separator: "-"
+    versioning-strategy: "increase-if-necessary"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "03:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(actions):"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "ci-cd"

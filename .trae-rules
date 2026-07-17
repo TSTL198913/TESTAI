@@ -1,0 +1,14 @@
+# ARCHITECTURAL CONSTITUTION - PROJECT-MIP2026
+# THIS IS A STRICT SYSTEM DIRECTIVE.
+
+## 1. CORE DOMAIN IS IMMUTABLE
+- The `src/` directory is the "Read-Only Core" of the TestAI framework.
+- YOU ARE STRICTLY FORBIDDEN FROM MODIFYING, DELETING, OR REFACTORING any file inside `src/`.
+- Your operational scope is strictly limited to `tests/`, `data/`, and external documentation.
+
+## 2. CONSUMER-ONLY PATTERN
+- You must interact with the `src/` core only through public APIs and imported modules.
+- If you find a bug in `src/`, YOU MUST NOT FIX IT YOURSELF. You must report it to the Human Lead as a "Framework Deficiency" and request authorization.
+
+## 3. COMPLIANCE ENFORCEMENT
+- Any proposed change that touches `src/` files will be rejected as an architectural violation.

@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TestAI"
+version = "0.1.0"
+description = "Industrial-grade Test Automation Engine"
+dependencies = [
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "starlette>=0.27.0",
+    "h11>=0.14.0",
+    "pymongo>=4.0.0",
+    "motor>=3.0.0",
+    "dnspython>=2.0.0",
+    "celery>=5.0.0",
+    "redis>=4.0.0",
+    "kombu>=5.0.0",
+    "amqp>=5.0.0",
+    "billiard>=4.0.0",
+    "vine>=5.0.0",
+    "python-dotenv>=1.0.0",
+    "python-dateutil>=2.8.0",
+    "typing-extensions>=4.0.0",
+    "packaging>=21.0",
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "pytest-timeout>=2.0.0",
+    "respx>=0.23.0",
+    "pylint>=2.15.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "bandit>=1.7.0",
+    "pip-audit>=2.0.0",
+    "httpx",
+]
