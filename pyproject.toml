@@ -29,6 +29,8 @@ dependencies = [
     "packaging>=21.0",
     "click>=8.0.0",
     "jinja2>=3.0.0",
+    "libcst>=1.0.0",
+    "portalocker>=2.0.0",
 ]
 
 [project.optional-dependencies]
