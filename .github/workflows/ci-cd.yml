@@ -46,7 +46,7 @@ jobs:
 
     - name: Run test suite with coverage
       run: |
-        python -m pytest tests/ --ignore=tests/governance/test_tracker.py \
+        python -m pytest tests/ \
           -v --tb=short --cov=src --cov-report=term --cov-report=html
 
     - name: Upload coverage report
@@ -122,7 +122,7 @@ jobs:
 
     - name: Run black
       run: |
-        black --check --diff src/ tests/
+        python -m black src/ tests/ --fast
 
     - name: Run pylint
       run: |

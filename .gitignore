@@ -47,3 +47,5 @@ requirements.txt
 
 security_scan_report.json
 security_scan_report_v2.json
+black_output.txt
+black_error.txt
