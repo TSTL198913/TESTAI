@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-from src.worker.tasks import run_test_pipeline
-from src.core.tracer import set_trace_id, reset_trace_id
+
 from src.core.container import ResourceContainer
+from src.core.tracer import reset_trace_id, set_trace_id
+from src.worker.tasks import run_test_pipeline
 
 
 @pytest.fixture(autouse=True)
@@ -116,15 +118,10 @@ class TestWorkerTasks:
             assert key in request_dict, f"Missing required key: {key}"
 
     def test_task_execution_path_imports(self):
-        from src.worker.tasks import (
-            AsyncLoopManager,
-            ResourceContainer,
-            ExecutionContext,
-            ExecutionPipeline,
-            get_pipeline,
-            AIGovernanceAgent,
-            DiagnosticContext
-        )
+        from src.worker.tasks import (AIGovernanceAgent, AsyncLoopManager,
+                                      DiagnosticContext, ExecutionContext,
+                                      ExecutionPipeline, ResourceContainer,
+                                      get_pipeline)
         assert AsyncLoopManager is not None
         assert ResourceContainer is not None
         assert ExecutionContext is not None

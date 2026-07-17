@@ -2,6 +2,7 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
+
 from src.models.assertion import Assertion
 
 logger = logging.getLogger("ai_test_platform")

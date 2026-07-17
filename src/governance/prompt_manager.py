@@ -1,6 +1,8 @@
 # src/governance/prompt_manager.py
-import yaml
 import os
+
+import yaml
+
 
 class PromptManager:
     def __init__(self, prompts_dir="prompts"):

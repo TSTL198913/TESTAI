@@ -1,6 +1,7 @@
 # src/engine/processor/base.py
 import logging
 from abc import ABC
+
 from src.core.exceptions import ProcessorError
 
 

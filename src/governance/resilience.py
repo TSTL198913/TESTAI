@@ -1,7 +1,8 @@
-import time
 import logging
 import threading
+import time
 from enum import Enum
+
 
 class CircuitState(Enum):
     CLOSED = "closed"

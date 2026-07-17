@@ -1,9 +1,11 @@
-import pytest
 import os
 import threading
 import time
 from pathlib import Path
-from tests.governance.file_lock import FileLockManager, ConcurrentFileWriter
+
+import pytest
+
+from tests.governance.file_lock import ConcurrentFileWriter, FileLockManager
 
 
 class TestFileLockManager:

@@ -1,7 +1,10 @@
-import pytest
 from datetime import datetime, timedelta
-from src.governance.tracker import GovernanceTracker, GovernanceActionType, TrackingEvent
+
+import pytest
+
 from src.governance.models import PatchType
+from src.governance.tracker import (GovernanceActionType, GovernanceTracker,
+                                    TrackingEvent)
 
 
 class TestGovernanceActionType:

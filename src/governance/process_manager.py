@@ -1,10 +1,11 @@
 import os
-import subprocess
-import time
 import signal
+import subprocess
 import threading
-from typing import List, Optional
+import time
 from dataclasses import dataclass
+from typing import List, Optional
+
 
 @dataclass
 class ProcessInfo:

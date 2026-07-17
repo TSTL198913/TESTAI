@@ -1,6 +1,8 @@
-import pytest
-import os
 import copy
+import os
+
+import pytest
+
 from tests.utils.validator import EvaluationValidator, ValidationResult
 
 

@@ -1,8 +1,9 @@
 # 在测试文件顶部导入 HttpRequest
-from src.models.contract import HttpRequest
-from src.engine.processor.data import DataProcessor
-from src.core.context import ExecutionContext
 import pytest
+
+from src.core.context import ExecutionContext
+from src.engine.processor.data import DataProcessor
+from src.models.contract import HttpRequest
 
 
 @pytest.mark.asyncio

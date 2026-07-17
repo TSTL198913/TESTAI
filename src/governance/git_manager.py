@@ -1,7 +1,8 @@
 # src/governance/git_manager.py
-import subprocess
 import logging
+import subprocess
 from typing import Optional
+
 
 class GitTransactionManager:
     def __init__(self, repo_path: str):

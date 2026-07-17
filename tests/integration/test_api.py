@@ -1,9 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+
 from src.api.main import app, run_test_pipeline
 from src.models.contract import HttpRequest
-
 
 client = TestClient(app)
 
@@ -106,6 +107,7 @@ class TestAPIEndpoints:
 
     def test_execute_endpoint_has_error_handling(self):
         import inspect
+
         from src.api.main import execute_test
         
         source = inspect.getsource(execute_test)

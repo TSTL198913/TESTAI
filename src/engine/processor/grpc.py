@@ -1,9 +1,8 @@
 # src/engine/processor/grpc.py
+from src.core.exceptions import EngineError, InfrastructureError
+from src.engine.processor.base import BaseProcessor
 from src.models.contract import GrpcRequest
 from src.models.result import StepResult
-from src.core.exceptions import InfrastructureError, EngineError
-from src.engine.processor.base import BaseProcessor
-
 
 # src/engine/processor/grpc.py
 # ... imports 保持不变 ...

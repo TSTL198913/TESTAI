@@ -1,9 +1,12 @@
-import pytest
 import os
 from pathlib import Path
-from src.governance.models import PatchProposal, DiagnosticContext, PatchType
-from tests.governance.persistence import PersistentApprovalManager, PersistentGovernanceTracker
+
+import pytest
+
+from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 from src.governance.tracker import GovernanceActionType
+from tests.governance.persistence import (PersistentApprovalManager,
+                                          PersistentGovernanceTracker)
 
 
 @pytest.fixture

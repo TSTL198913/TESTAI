@@ -3,8 +3,8 @@ import uuid
 from fastapi import FastAPI
 
 from src.engine.pipeline import ExecutionPipeline
-from src.storage.repository import ResultRepository
 from src.models.contract import HttpRequest  # 假设这是你的请求模型
+from src.storage.repository import ResultRepository
 from src.worker.tasks import run_test_pipeline
 
 app = FastAPI(title="TestAI Engine Service")

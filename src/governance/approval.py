@@ -1,12 +1,12 @@
 import logging
-import threading
 import sqlite3
+import threading
 from datetime import datetime, timedelta
-from typing import Dict, Optional
 from enum import Enum
 from pathlib import Path
+from typing import Dict, Optional
 
-from src.governance.models import PatchProposal, DiagnosticContext
+from src.governance.models import DiagnosticContext, PatchProposal
 
 
 class ApprovalStatus(Enum):

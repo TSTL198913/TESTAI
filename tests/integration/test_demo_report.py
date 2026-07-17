@@ -1,7 +1,8 @@
 # tests/integration/test_demo_report.py
 import pytest
-from src.models.contract import Assertion, HttpRequest
+
 from src.engine.processor.assertion import AssertionProcessor
+from src.models.contract import Assertion, HttpRequest
 # 【核心调整】确保从 conftest 导入
 from tests.conftest import GLOBAL_RESULTS
 

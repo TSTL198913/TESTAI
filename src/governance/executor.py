@@ -3,14 +3,15 @@ import os
 import shutil
 import stat
 import tempfile
-import libcst as cst
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
+
+import libcst as cst
 import portalocker
 
+from src.governance.file_lock import FileLock
 from src.governance.registry import GovernanceRegistry, PatchType
 from src.governance.security import SecurePathValidator
-from src.governance.file_lock import FileLock
 
 
 # --- 1. 深度安全扫描器 (AST Visitor) ---

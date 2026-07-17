@@ -1,5 +1,6 @@
 import pytest
-from src.governance.baseline import GoldenBaselineManager, BaselineRecord
+
+from src.governance.baseline import BaselineRecord, GoldenBaselineManager
 
 
 class TestGoldenBaselineManager:

@@ -4,7 +4,8 @@ from pydantic import ValidationError
 
 from src.governance.models import AIGovernanceResult
 from src.models.assertion import Assertion
-from src.models.contract import ExecutionCase, HttpRequest, GrpcRequest
+from src.models.contract import ExecutionCase, GrpcRequest, HttpRequest
+
 
 def test_http_step_serialization():
     """验证 HTTP 协议的数据序列化与反序列化"""

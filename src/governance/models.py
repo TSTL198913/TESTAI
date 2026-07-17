@@ -1,9 +1,8 @@
 # src/governance/models.py
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
-
 from pydantic.dataclasses import dataclass
 
 from src.governance import PatchType

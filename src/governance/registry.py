@@ -2,10 +2,12 @@
 import logging
 import threading
 from enum import Enum
-from typing import Dict, Type, Any, Optional
+from typing import Any, Dict, Optional, Type
+
 import libcst as cst
 
-from src.governance.transformer import ContextAwareTransformer, FunctionTransformer
+from src.governance.transformer import (ContextAwareTransformer,
+                                        FunctionTransformer)
 
 
 # 1. 明确的分类：基于策略模式 (Strategy Pattern)

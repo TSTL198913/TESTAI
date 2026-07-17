@@ -1,12 +1,12 @@
-import logging
-import threading
-import sqlite3
 import json
-from datetime import datetime
-from typing import List, Dict, Optional
-from enum import Enum
+import logging
+import sqlite3
+import threading
 from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
 from pathlib import Path
+from typing import Dict, List, Optional
 
 from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 

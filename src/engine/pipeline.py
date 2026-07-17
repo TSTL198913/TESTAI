@@ -1,7 +1,9 @@
 # src/engine/pipeline.py
-from typing import List
 import logging
+from typing import List
+
 import httpx
+
 from src.engine.factory import StepFactory
 from src.engine.processor.base import BaseProcessor
 

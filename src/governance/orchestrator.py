@@ -1,14 +1,15 @@
-import logging
 import json
+import logging
 from contextlib import contextmanager
 from typing import Optional
 
 from src.governance.agent import AIGovernanceAgent
+from src.governance.approval import ApprovalManager, ApprovalStatus
 from src.governance.executor import GovernanceExecutor
 from src.governance.git_manager import GitTransactionManager
-from src.governance.models import DiagnosticContext, GovernanceAction, PatchProposal
-from src.governance.approval import ApprovalManager, ApprovalStatus
-from src.governance.tracker import GovernanceTracker, GovernanceActionType
+from src.governance.models import (DiagnosticContext, GovernanceAction,
+                                   PatchProposal)
+from src.governance.tracker import GovernanceActionType, GovernanceTracker
 
 
 @contextmanager

@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-from src.engine.processor.grpc import GrpcProcessor
+
 from src.core.context import ExecutionContext
+from src.engine.processor.grpc import GrpcProcessor
 
 
 class TestGrpcProcessor:

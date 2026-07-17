@@ -1,6 +1,9 @@
-from typing import Any, Dict, List, Literal, Optional, Annotated, Union
-from pydantic import BaseModel, Field, HttpUrl, ConfigDict, AnyUrl
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, HttpUrl
+
 from .assertion import Assertion
+
 
 class BaseStep(BaseModel):
     """所有协议请求的抽象基类"""

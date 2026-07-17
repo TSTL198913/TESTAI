@@ -1,6 +1,8 @@
 # src/core/context.py
 from typing import Any, Dict, Optional
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class ContextKeys:
     LAST_RESPONSE = "last_response"     

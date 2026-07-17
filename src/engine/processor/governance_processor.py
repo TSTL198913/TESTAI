@@ -1,7 +1,7 @@
 # src/engine/processor/governance_processor.py
 from src.engine.processor.base import BaseProcessor
-from src.governance.orchestrator import GovernanceOrchestrator
 from src.governance.models import DiagnosticContext
+from src.governance.orchestrator import GovernanceOrchestrator
 
 
 class GovernanceProcessor(BaseProcessor):

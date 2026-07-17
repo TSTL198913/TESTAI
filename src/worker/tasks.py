@@ -1,9 +1,10 @@
-import time
 import logging
-from src.core.loop_manager import AsyncLoopManager
+import time
+
 from src.core.container import ResourceContainer
 from src.core.context import ExecutionContext
-from src.core.tracer import set_trace_id, reset_trace_id
+from src.core.loop_manager import AsyncLoopManager
+from src.core.tracer import reset_trace_id, set_trace_id
 from src.engine.pipeline import ExecutionPipeline
 from src.engine.registry import get_pipeline
 from src.governance.agent import AIGovernanceAgent

@@ -1,7 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from src.governance.approval import ApprovalManager, ApprovalStatus, ApprovalRecord
-from src.governance.models import PatchProposal, DiagnosticContext, PatchType
+
+from src.governance.approval import (ApprovalManager, ApprovalRecord,
+                                     ApprovalStatus)
+from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 
 
 class TestApprovalStatus:

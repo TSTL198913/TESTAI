@@ -1,7 +1,8 @@
 import threading
-from typing import Optional, Any
-from src.governance.resilience import CircuitBreaker
+from typing import Any, Optional
+
 from src.governance.config import GovernanceConfig
+from src.governance.resilience import CircuitBreaker
 
 
 class MockLLMResponse:

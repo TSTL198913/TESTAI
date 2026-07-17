@@ -1,8 +1,8 @@
-from typing import Dict, Callable
+from typing import Callable, Dict
 
 from src.core.context import ExecutionContext
 from src.engine.processor.base import BaseProcessor
-from src.models.contract import TestStep, HttpRequest, GrpcRequest
+from src.models.contract import GrpcRequest, HttpRequest, TestStep
 from src.utils.template import render_template
 
 

@@ -1,11 +1,13 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from src.core.context import ExecutionContext
 from src.engine.pipeline import ExecutionPipeline
-from src.engine.processor.env import EnvironmentProcessor
 from src.engine.processor.data import DataProcessor
-from src.models.contract import HttpRequest
+from src.engine.processor.env import EnvironmentProcessor
 from src.engine.processor.http import HTTPProcessor
+from src.models.contract import HttpRequest
 
 
 @pytest.mark.asyncio

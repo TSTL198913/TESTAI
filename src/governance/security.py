@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import threading
+from pathlib import Path
 
 
 class SecurePathValidator:

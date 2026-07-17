@@ -1,7 +1,7 @@
 import pytest
-from src.governance.monitoring import (
-    AlertLevel, AlertRecord, AlertManager, StructuredLogger, HealthMonitor
-)
+
+from src.governance.monitoring import (AlertLevel, AlertManager, AlertRecord,
+                                       HealthMonitor, StructuredLogger)
 
 
 class TestAlertLevel:

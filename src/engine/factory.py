@@ -1,7 +1,8 @@
 # src/engine/factory.py
-from pydantic import ValidationError, TypeAdapter
-from src.models.contract import TestStep
+from pydantic import TypeAdapter, ValidationError
+
 from src.engine.transformers import TRANSFORMER_REGISTRY
+from src.models.contract import TestStep
 
 step_adapter = TypeAdapter(TestStep)
 

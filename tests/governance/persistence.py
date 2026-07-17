@@ -1,11 +1,13 @@
-import sqlite3
 import json
+import sqlite3
 import threading
 from datetime import datetime
 from pathlib import Path
 
-from src.governance.approval import ApprovalManager, ApprovalRecord, ApprovalStatus
-from src.governance.tracker import GovernanceTracker, TrackingEvent, GovernanceActionType
+from src.governance.approval import (ApprovalManager, ApprovalRecord,
+                                     ApprovalStatus)
+from src.governance.tracker import (GovernanceActionType, GovernanceTracker,
+                                    TrackingEvent)
 
 
 class PersistentApprovalManager:
@@ -49,7 +51,8 @@ class PersistentApprovalManager:
                 tx_id, proposal_json, context_json, status, created_at, \
                 approved_by, approved_at, reason, expires_at = row
 
-                from src.governance.models import PatchProposal, DiagnosticContext
+                from src.governance.models import (DiagnosticContext,
+                                                   PatchProposal)
                 proposal = PatchProposal.model_validate_json(proposal_json)
                 context = DiagnosticContext.model_validate_json(context_json)
 

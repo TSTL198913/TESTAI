@@ -1,11 +1,14 @@
 # src/engine/processor/http.py
-import httpx
 import logging
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+import httpx
+from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
+                      wait_exponential)
+
+from src.core.exceptions import EngineError, InfrastructureError
+from src.engine.processor.base import BaseProcessor
 from src.models.contract import HttpRequest
 from src.models.result import StepResult
-from src.engine.processor.base import BaseProcessor
-from src.core.exceptions import EngineError, InfrastructureError
 
 logger = logging.getLogger("ai_test_platform")
 

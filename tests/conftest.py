@@ -1,5 +1,6 @@
 # src/conftest.py
 import pytest
+
 from src.report.generator import generator
 from src.report.storage import registry
 

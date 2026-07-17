@@ -1,7 +1,8 @@
 # src/governance/transformer.py
-from typing import Optional, List
-import libcst as cst
 from abc import ABC
+from typing import List, Optional
+
+import libcst as cst
 
 
 class BaseGovernanceTransformer(cst.CSTTransformer, ABC):

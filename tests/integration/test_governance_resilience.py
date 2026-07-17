@@ -1,10 +1,11 @@
+import asyncio
 import time
+from unittest.mock import AsyncMock, patch
 
 import pytest
-import asyncio
-from unittest.mock import AsyncMock, patch
-from src.governance.sdk import GovernanceClientSDK
+
 from src.governance.resilience import CircuitState
+from src.governance.sdk import GovernanceClientSDK
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 # src/core/tracer.py
 import contextvars
-import uuid
 import logging
+import uuid
 from typing import Optional
 
 _trace_id_ctx = contextvars.ContextVar("trace_id", default="system")

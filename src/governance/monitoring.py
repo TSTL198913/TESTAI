@@ -1,9 +1,10 @@
-import logging
 import json
+import logging
 import threading
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
+
 from src.governance.config import GovernanceConfig
 
 

@@ -1,14 +1,17 @@
-import pytest
 import os
 import sys
 from pathlib import Path
 
+import pytest
+
 
 class TestP0GapVerifications:
     def test_persistence_fixed_approval_survives_reboot(self):
-        from tests.governance.persistence import PersistentApprovalManager
-        from src.governance.models import PatchProposal, DiagnosticContext, PatchType
         import tempfile
+
+        from src.governance.models import (DiagnosticContext, PatchProposal,
+                                           PatchType)
+        from tests.governance.persistence import PersistentApprovalManager
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             db_path = os.path.join(tmp_dir, "test.db")
@@ -37,9 +40,10 @@ class TestP0GapVerifications:
             assert record.approved_by == "tech_committee"
 
     def test_persistence_fixed_tracker_survives_reboot(self):
-        from tests.governance.persistence import PersistentGovernanceTracker
-        from src.governance.tracker import GovernanceActionType
         import tempfile
+
+        from src.governance.tracker import GovernanceActionType
+        from tests.governance.persistence import PersistentGovernanceTracker
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             db_path = os.path.join(tmp_dir, "test.db")
@@ -115,7 +119,8 @@ class TestP0GapVerifications:
         assert hasattr(orchestrator, 'executor')
 
     def test_models_have_core_classes(self):
-        from src.governance.models import PatchProposal, DiagnosticContext, AIGovernanceResult
+        from src.governance.models import (AIGovernanceResult,
+                                           DiagnosticContext, PatchProposal)
 
         proposal = PatchProposal(
             target_function="test_func",
@@ -134,7 +139,8 @@ class TestP0GapVerifications:
 
     def test_approval_manager_is_singleton(self):
         from src.governance.approval import ApprovalManager
-        from src.governance.models import PatchProposal, DiagnosticContext, PatchType
+        from src.governance.models import (DiagnosticContext, PatchProposal,
+                                           PatchType)
 
         mgr = ApprovalManager()
         proposal = PatchProposal(

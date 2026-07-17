@@ -1,16 +1,17 @@
+import httpx
 import pytest
 import respx
-import httpx
+
+from src.core.container import ResourceContainer
 from src.core.context import ExecutionContext
 from src.engine.pipeline import ExecutionPipeline
-from src.engine.processor.base import ProcessorError
-from src.engine.processor.env import EnvironmentProcessor
-from src.engine.processor.data import DataProcessor
 from src.engine.processor.assertion import AssertionProcessor
+from src.engine.processor.base import ProcessorError
+from src.engine.processor.data import DataProcessor
 from src.engine.processor.dispatcher import DispatchProcessor
-from src.models.contract import HttpRequest
+from src.engine.processor.env import EnvironmentProcessor
 from src.models.assertion import Assertion
-from src.core.container import ResourceContainer
+from src.models.contract import HttpRequest
 
 
 @pytest.mark.asyncio

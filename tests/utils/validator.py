@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class ValidationError(Exception):

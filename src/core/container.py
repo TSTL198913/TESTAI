@@ -1,8 +1,10 @@
 import asyncio
 
 import httpx
+
 from src.core.config import settings
 from src.storage.repository import ResultRepository
+
 
 class ResourceContainer:
     _client: httpx.AsyncClient = None

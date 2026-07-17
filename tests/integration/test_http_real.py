@@ -1,14 +1,15 @@
 import httpx
 import pytest
+import respx  # 确保导入
+
+from src.core.container import ResourceContainer
 from src.core.context import ExecutionContext
 from src.engine.pipeline import ExecutionPipeline
-from src.engine.processor.env import EnvironmentProcessor
 from src.engine.processor.data import DataProcessor
 from src.engine.processor.dispatcher import DispatchProcessor
+from src.engine.processor.env import EnvironmentProcessor
 from src.models.contract import HttpRequest
-from src.core.container import ResourceContainer
 
-import respx # 确保导入
 # ...
 
 @pytest.mark.asyncio

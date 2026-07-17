@@ -1,19 +1,21 @@
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from src.engine.pipeline import ExecutionPipeline
-from src.engine.processor.data import DataProcessor
-from src.engine.processor.http import HTTPProcessor
-from src.engine.processor.assertion import AssertionProcessor
-from src.engine.processor.governance_processor import GovernanceProcessor
-from src.core.context import ExecutionContext
+
+import pytest
+
 from src.core.container import ResourceContainer
-from src.governance.resilience import CircuitBreaker
+from src.core.context import ExecutionContext
+from src.engine.pipeline import ExecutionPipeline
+from src.engine.processor.assertion import AssertionProcessor
+from src.engine.processor.data import DataProcessor
+from src.engine.processor.governance_processor import GovernanceProcessor
+from src.engine.processor.http import HTTPProcessor
 from src.governance.agent import AIGovernanceAgent
 from src.governance.orchestrator import GovernanceOrchestrator
-from src.storage.repository import ResultRepository
-from src.models.contract import HttpRequest, GrpcRequest, ExecutionCase
+from src.governance.resilience import CircuitBreaker
+from src.models.contract import ExecutionCase, GrpcRequest, HttpRequest
 from src.models.result import StepResult
+from src.storage.repository import ResultRepository
 
 
 @pytest.fixture(autouse=True)

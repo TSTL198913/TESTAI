@@ -1,6 +1,7 @@
 # src/report/storage.py
 import threading
 
+
 class Registry:
     def __init__(self):
         self._results = {}

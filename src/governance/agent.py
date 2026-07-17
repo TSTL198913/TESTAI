@@ -1,12 +1,14 @@
+import asyncio
 import json
 import logging
 import re
-import asyncio
 from typing import Optional
-from src.governance.sdk import GovernanceClientSDK
-from src.governance.models import AIGovernanceResult, DiagnosticContext, PatchProposal
-from src.governance.registry import PatchType
+
 from src.governance.config import GovernanceConfig
+from src.governance.models import (AIGovernanceResult, DiagnosticContext,
+                                   PatchProposal)
+from src.governance.registry import PatchType
+from src.governance.sdk import GovernanceClientSDK
 
 
 class AIGovernanceAgent:

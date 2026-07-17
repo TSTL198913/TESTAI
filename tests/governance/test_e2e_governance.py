@@ -1,10 +1,12 @@
-import pytest
-import os
 import asyncio
-import tempfile
+import os
 import shutil
+import tempfile
 
-from src.governance.models import DiagnosticContext, AIGovernanceResult, PatchProposal
+import pytest
+
+from src.governance.models import (AIGovernanceResult, DiagnosticContext,
+                                   PatchProposal)
 from src.governance.orchestrator import GovernanceOrchestrator
 
 BUGGY_CODE = """

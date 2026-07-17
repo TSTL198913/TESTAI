@@ -1,9 +1,11 @@
 import os
+
 import pytest
-from src.governance.config import GovernanceConfig
-from src.governance.sdk import GovernanceClientSDK
+
 from src.governance.agent import AIGovernanceAgent
+from src.governance.config import GovernanceConfig
 from src.governance.models import DiagnosticContext
+from src.governance.sdk import GovernanceClientSDK
 
 
 class TestGovernanceConfig:

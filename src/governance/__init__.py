@@ -1,6 +1,7 @@
 # src/governance/__init__.py
 from src.governance.registry import GovernanceRegistry, PatchType
-from src.governance.transformer import FunctionTransformer # 引入你的 Transformer
+from src.governance.transformer import FunctionTransformer  # 引入你的 Transformer
+
 
 # 自动注册策略
 def bootstrap_governance():
@@ -11,4 +12,5 @@ def bootstrap_governance():
 bootstrap_governance()
 
 from .orchestrator import GovernanceOrchestrator
+
 # ... 其他导出 ...

@@ -1,9 +1,10 @@
 # src/engine/processor/assertion.py
 from jsonpath_ng import parse
-from src.engine.processor.base import BaseProcessor
+
 from src.core.exceptions import EngineError
+from src.engine.processor.base import BaseProcessor
 from src.models.contract import TestStep
-from src.models.result import StepResult, AssertionRecord
+from src.models.result import AssertionRecord, StepResult
 
 
 class AssertionProcessor(BaseProcessor):

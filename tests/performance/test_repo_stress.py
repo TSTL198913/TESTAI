@@ -1,8 +1,10 @@
-import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from src.storage.repository import ResultRepository
+
+import pytest
+
 from src.models.result import StepResult
+from src.storage.repository import ResultRepository
 
 
 @pytest.mark.asyncio
