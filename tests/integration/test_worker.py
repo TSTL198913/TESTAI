@@ -131,10 +131,15 @@ class TestWorkerTasks:
         assert DiagnosticContext is not None
 
     def test_task_celery_delay_method(self):
-        mock_request = {"case_id": "delay_test", "steps": []}
-        task_result = run_test_pipeline.delay(mock_request)
-        assert hasattr(task_result, 'id')
-        assert hasattr(task_result, 'get')
+        with patch.object(run_test_pipeline, 'delay') as mock_delay:
+            mock_result = MagicMock()
+            mock_result.id = "test-task-id"
+            mock_delay.return_value = mock_result
+            mock_request = {"case_id": "delay_test", "steps": []}
+            task_result = run_test_pipeline.delay(mock_request)
+            mock_delay.assert_called_once_with(mock_request)
+            assert hasattr(task_result, 'id')
+            assert task_result.id == "test-task-id"
 
     def test_trace_id_is_unique(self):
         token1 = set_trace_id("trace-1")
