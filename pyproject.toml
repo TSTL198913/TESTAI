@@ -33,6 +33,7 @@ dependencies = [
     "portalocker>=2.0.0",
     "jsonpath-ng>=1.5.0",
     "tenacity>=8.0.0",
+    "openai>=1.0.0",
 ]
 
 [project.optional-dependencies]
