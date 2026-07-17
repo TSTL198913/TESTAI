@@ -28,6 +28,7 @@ dependencies = [
     "typing-extensions>=4.0.0",
     "packaging>=21.0",
     "click>=8.0.0",
+    "jinja2>=3.0.0",
 ]
 
 [project.optional-dependencies]
