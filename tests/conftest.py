@@ -1,5 +1,9 @@
 # src/conftest.py
+import os
 import pytest
+
+os.environ.setdefault("MONGO_URI", "mongodb://localhost:27017/testai")
+os.environ.setdefault("DEEPSEEK_API_KEY", "test-key-for-ci")
 
 from src.report.generator import generator
 from src.report.storage import registry
