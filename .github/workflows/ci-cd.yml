@@ -85,7 +85,7 @@ jobs:
 
     - name: Run pip-audit dependency scan
       run: |
-        pip-audit -f json --exit-zero
+        pip-audit -f json || true
 
     - name: Upload security report
       uses: actions/upload-artifact@v4

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -259,7 +260,7 @@ class TestApprovalManager:
         mgr.create_approval("tx_cleanup_001", proposal, context)
 
         record = mgr.get_approval("tx_cleanup_001")
-        record.expires_at = record.created_at.replace(minute=record.created_at.minute - 1)
+        record.expires_at = record.created_at - timedelta(minutes=1)
 
         mgr.cleanup_expired()
 
