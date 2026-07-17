@@ -1,133 +1,227 @@
-1. 架构总览图 (System Architecture)
-此图展示了数据契约与执行引擎的解耦关系，以及未来的 LLM 扩展接口。
-代码段
+# TestAI
 
-graph TD
-    Client[User/CI/CD] --> API[FastAPI Entrypoint]
-    API --> Workflow[Workflow Orchestrator]
-    
-    subgraph Engine Pipeline
-        Workflow --> ProcessorChain[Processor Chain: Env -> Data -> Execution]
-        ProcessorChain --> Executor[Engine: Http/Grpc Executor]
-        Executor --> Validator[Validator: Assertion Logic]
-    end
-    
-    subgraph Data & Context
-        Context[TestContext: State Container] <--> ProcessorChain
-    end
-    
-    subgraph External & Mock
-        Executor -.-> DI[DI Provider Interface]
-        DI --> MockProvider[Mock/Test Provider]
-        DI -.-> RealProvider[LLM/DB Adapter - Sprint 4+]
-    end
-2. 完整项目目录结构
-Plaintext
+[![CI/CD](https://github.com/TSTL198913/TESTAI/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/TSTL198913/TESTAI/actions/workflows/ci-cd.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-ai-test-platform/
-├── .github/                  # CI/CD 流水线 (Jenkins/GitHub Actions)
-├── docs/                     # 文档与 ADR
-│   └── adr/                  # 架构决策记录
-├── src/
-│   ├── api/                  # API 路由层 (FastAPI Endpoints)
-│   ├── core/                 # 基础支撑层
-│   │   ├── config.py         # 环境配置 (Pydantic Settings)
-│   │   ├── context.py        # TestContext (状态容器)
-│   │   ├── telemetry.py      # OpenTelemetry 埋点
-│   │   └── security.py       # 安全校验
-│   ├── models/               # 数据契约层 (Pure Data)
-│   │   ├── contract.py       # TestCase, TestStep 定义
-│   │   └── assertion.py      # 断言模型
-│   ├── engine/               # 执行引擎层 (核心逻辑)
-│   │   ├── executor.py       # 调度调度器
-│   │   ├── processor/        # Pipeline 管道
-│   │   │   ├── base.py       # Processor 抽象基类
-│   │   │   ├── env.py        # 环境处理
-│   │   │   └── data.py       # 变量替换/注入
-│   │   └── validators/       # 断言验证逻辑
-│   ├── llm/                  # AI 智能层 (接口适配器)
-│   │   ├── ops/              # FinOps / Token 监控
-│   │   └── client.py         # LLMProvider 协议实现
-│   ├── workflows/            # 业务编排
-│   ├── utils/                # 通用工具 (模板引擎)
-│   └── main.py               # 入口
-├── tests/                    # 单元测试与集成测试
-├── deployments/              # Docker/K8s 编排
-└── requirements.txt          # 依赖管理
+AI 驱动的自治测试与智能诊断平台，为企业级应用提供全方位的自动化测试能力与智能化治理闭环。
 
-3. 详细迭代计划 (Precision Roadmap)
-Sprint重点领域核心任务交付物
-S1契约构建定义 TestStep, Assertion, TestCase。完成 Model 序列化测试。models/ 模块，通过 tests/unit/ 校验。
-S2状态容器定义 TestContext。定义 BaseProcessor 及各 Processor 接口。core/context.py, engine/processor/base.py。 
-S3管道流转实现变量替换模板引擎及 Environment/Data 处理器。utils/template.py, engine/processor/*.py。
-S4引擎执行实现 HTTP Executor (Mock 模式) 与 Validator 验证逻辑。跑通“请求 -> 断言”的闭环。
-S5服务封装集成 FastAPI，注入配置，实现流水线服务化。main.py, config.py，完成 CI 接入。
+## 核心特性
 
+- **多协议测试引擎**：支持 HTTP、gRPC 协议的自动化测试，模块化设计便于扩展
+- **AI 治理闭环**：诊断→修复→审批→收敛验证，完整的智能治理流程，内置安全护栏
+- **并发安全与熔断恢复**：线程安全的单例模式、文件锁机制、熔断降级策略
+- **结构化日志与健康监控**：JSON 格式日志输出，支持 ELK/Datadog 等现代监控体系
+- **CI/CD 多环境矩阵**：Ubuntu/Windows 跨平台支持，Python 3.10/3.11 多版本测试
 
-4. 设计与实现质量红线 (Quality Redlines)
-在接下来的开发中，请严格遵守以下规则，这是你项目能否通过“高级工程师”面试的关键：
-Rule 1: Mock-First (先模拟，后集成)
-在 Sprint 1-3 期间，严禁在代码中出现任何 import openai, import sqlalchemy, import redis。所有的外部依赖必须通过“接口”传入，并使用 Mock 进行单元测试。
-Rule 2: Dependency Inversion (依赖倒置)
-业务逻辑（如 Workflow）必须依赖于 Protocol（如 LLMProvider），而不是具体的实现类。
-Rule 3: Async-Only (全异步)
-所有 I/O 相关代码（API 请求、文件读取、Mock 延迟）必须是 async/await。生产级平台必须具备高并发处理能力。
-Rule 4: Zero Hardcoding (禁止硬编码)
-任何环境配置、URL、秘钥，必须走 core/config.py，通过环境变量读取。
-Rule 5: Test-Driven-Development (TDD)
-没有测试的代码即视为未完成。在写 src 逻辑之前，先在 tests/ 下写用例，这是架构师审查的必选项。
-主席指令：
-现在，蓝图已定。我们将立即进入 Sprint 1: 契约构建。
-请开始编写 src/models/contract.py 和 src/models/assertion.py。
+## 架构速览
 
-（task 单个请求处理时间：
-2026-07-11 12:06:25,679: INFO/MainProcess] Task tasks.run_test_pipeline[ad544224-0dc0-4096-a44b-f4b7942fc1c2] 
-succeeded in 0.030999999999039574s: None）
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                     Client / CI/CD                               │
+└───────────────────────────┬──────────────────────────────────────┘
+                            │ HTTP/gRPC
+                            ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                      FastAPI API Layer                           │
+│    (src/api/main.py)                                             │
+└───────────────────────────┬──────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    Workflow Orchestrator                         │
+│    (src/governance/orchestrator.py)                              │
+└───────────────────────────┬──────────────────────────────────────┘
+                            │
+    ┌───────────────────────┼───────────────────────┐
+    ▼                       ▼                       ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Processor  │     │  Executor   │     │  Validator  │
+│   Pipeline  │     │ (HTTP/gRPC) │     │  (断言)     │
+└─────────────┘     └─────────────┘     └─────────────┘
+    │                       │                       │
+    └───────────────────────┼───────────────────────┘
+                            ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                   AI Governance Engine                            │
+│    (src/governance/agent.py, tracker.py, approval.py)            │
+│    诊断 → 修复 → 审批 → 收敛验证                                  │
+└───────────────────────────┬──────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    Storage Layer                                  │
+│    SQLite (审计日志) / MongoDB (测试数据) / Redis (缓存)          │
+└──────────────────────────────────────────────────────────────────┘
+```
 
-Project-MIP2026 核心迭代路线阶段名称核心目标状态
-P1Contract Engineering建立契约优先的数据质量规范 (Pydantic)
-P2Execution Engine构建高性能任务执行引擎 (Celery/Async)
-P3AI Governance建立 AI 成本控制与输出治理框架
-P4System Robustness提升系统鲁棒性 (重试、故障自动恢复)
-P5Engineering Loop构建工程闭环 (CI/CD 与持续优化)
+## 快速开始
 
-P3 AI Governance建立 AI 成本控制与输出治理框架
-P3.1 基础设施层	连接稳定性、熔断机制、Token 成本控制	稳定的 Governance 客户端 SDK
-P3.2 诊断核心层	上下文增强 (RAG)、故障推理逻辑、多维度诊断	结构化的诊断报告 (JSON)
-P3.3 修复反馈层	代码补丁生成、测试用例自动迭代	自动化修复补丁 (PR/Diffs)
-P3.4 治理控制层	审计日志、诊断准确率追踪、黑盒监控	仪表盘 (Governance Dashboard)
+### 环境要求
 
-阶段,周期,核心战略目标,关键功能交付 (Deliverables)
-P3.3: 治理大脑,1-2 个月,AI 可控分析与诊断,GovernanceRouter、DiagnosticAgent (读取日志并诊断)、AuditStorage (存储结果供 RAG 使用)
-P3.4: 协议突围,1 个月,全链路覆盖,SQLProcessor、HARImport (流量导入)、FallbackTemplateLibrary (静态兜底库)
-P3.5: 自我进化,1-2 个月,自主修复与闭环,SelfHealingAgent (自动生成修复 patch)、GovernanceDashboard、ConfidenceScoring
-src/
-├── engine/
-│   ├── processor/
-│   │   ├── ... (保持不变)
-│   │   ├── sql.py           <-- 新增：SQL 协议支持
-│   │   └── mq.py            <-- 新增：消息队列支持
-│   └── pipeline.py          <-- 修改：集成 GovernanceRouter
-├── governance/
-│   ├── agent.py             <-- 升级：实现 DiagnosticAgent
-│   ├── dispatcher.py        <-- 保持不变
-│   ├── prompt.py            <-- 升级：内置诊断提示词库
-│   └── router.py            <-- 新增：核心决策路由
-└── storage/
-    ├── ...
-    └── fallback/            <-- 新增：静态安全网
-        ├── templates/
-        └── knowledge_base/
+- Python 3.10+
+- pip 21.0+
 
-iteration:
-文件 I/O 竞态处理 (Race Condition)：
+### 1. 配置虚拟环境
 
-目前的 apply_patch 在高并发场景下可能会同时读写同一个文件。生产环境必须在 _write_patch 期间引入文件锁（File Locking）（如 fcntl 模块），防止治理并发导致文件损坏。
+```bash
+# 创建虚拟环境
+python -m venv venv
 
-结构化日志 (Structured Logging)：
+# 激活虚拟环境 (Windows)
+venv\Scripts\activate
 
-不要只用 self.logger.info。在 2026 年的生产监控中（如 ELK, Datadog），请将日志格式化为 JSON：{"event": "patch_applied", "file": "...", "target": "...", "status": "success"}。这对于审计和故障溯源是生命线。
+# 激活虚拟环境 (Linux/Mac)
+source venv/bin/activate
+```
 
-路径沙箱化 (Path Sandboxing)：
+### 2. 安装依赖
 
-file_path 应强制转换为 Path.resolve() 并校验是否落在代码库目录内，防止 AI 幻觉导致的“目录遍历漏洞”（Path Traversal）。
+```bash
+# 升级 pip
+python -m pip install --upgrade pip
+
+# 安装项目及其开发依赖
+pip install -e ".[dev]"
+```
+
+### 3. 配置环境变量
+
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 编辑 .env 文件，配置 API Key 等敏感信息
+```
+
+### 4. 运行测试
+
+```bash
+# 运行完整测试套件
+python -m pytest tests/ -v
+
+# 运行指定模块的测试
+python -m pytest tests/governance/test_approval.py -v
+
+# 生成覆盖率报告
+python -m pytest tests/ --cov=src --cov-report=html
+```
+
+### 5. 启动服务
+
+```bash
+# 启动 API 服务
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+# 启动 Worker
+celery -A src.worker.celery_app worker --loglevel=info
+```
+
+## API 概览
+
+### 测试执行
+
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/execute` | POST | 执行测试流水线，返回任务ID和追踪ID |
+
+**请求示例**：
+```json
+{
+  "protocol": "http",
+  "method": "GET",
+  "url": "https://api.example.com/test",
+  "headers": {"Authorization": "Bearer token"},
+  "expected_status": 200,
+  "expected_body": {"status": "ok"}
+}
+```
+
+**响应示例**：
+```json
+{
+  "status": "queued",
+  "task_id": "ad544224-0dc0-4096-a44b-f4b7942fc1c2",
+  "trace_id": "abc12345",
+  "message": "流水线已入队，请关注 MongoDB 数据更新"
+}
+```
+
+## 测试体系
+
+TestAI 采用分层测试策略，确保各层级的质量保障：
+
+| 测试层级 | 数量 | 目录 | 覆盖范围 |
+|---------|------|------|---------|
+| **单元测试** | 18 | `tests/unit/` | 核心模型、处理器、管道逻辑 |
+| **治理测试** | 145 | `tests/governance/` | 审批机制、安全边界、并发控制、收敛验证 |
+| **集成测试** | 2 | `tests/integration/` | API 层、Worker 层、全链路生命周期 |
+| **性能测试** | 1 | `tests/performance/` | 压力测试、稳定性验证 |
+
+### 测试命令
+
+```bash
+# 运行单元测试
+python -m pytest tests/unit/ -v
+
+# 运行治理测试
+python -m pytest tests/governance/ -v
+
+# 运行集成测试
+python -m pytest tests/integration/ -v
+
+# 运行性能测试
+python -m pytest tests/performance/ -v --timeout=120
+
+# 运行完整套件（排除已知问题）
+python -m pytest tests/ --ignore=tests/governance/test_tracker.py -v
+```
+
+## CI/CD 流水线
+
+项目采用 GitHub Actions 实现自动化 CI/CD：
+
+```
+推送代码 → 多平台测试 (Ubuntu/Windows) → 安全扫描 (bandit/pip-audit)
+         → 代码质量检查 (pylint/mypy) → 构建 (Python包/Docker镜像)
+         → 部署 (preview/staging/production)
+```
+
+## 贡献指南
+
+### 开发流程
+
+1. Fork 项目并克隆到本地
+2. 创建特性分支：`git checkout -b feature/your-feature`
+3. 编写代码和测试用例
+4. 运行测试确保通过
+5. 提交代码并创建 Pull Request
+
+### 代码规范
+
+- 遵循 PEP8 编码规范
+- 使用 type hints 进行类型标注
+- 编写单元测试覆盖核心逻辑
+- 提交信息遵循 Conventional Commits
+
+### 提交信息格式
+
+```
+<type>(<scope>): <description>
+
+<optional body>
+
+<optional footer>
+```
+
+常用类型：
+- `feat`: 新功能
+- `fix`: 修复 Bug
+- `docs`: 文档更新
+- `refactor`: 代码重构
+- `test`: 测试相关
+- `chore`: 构建/工具相关
+
+## 许可证
+
+MIT License - 详见 [LICENSE](LICENSE) 文件
