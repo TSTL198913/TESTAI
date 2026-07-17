@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>TestAI 自动化执行报告</title>
+    <style>
+        :root { --primary: #007bff; --pass: #28a745; --fail: #dc3545; --warning: #ffc107; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #f4f7f6; padding: 40px; }
+        .container { max-width: 1200px; margin: auto; }
+
+        /* 统计栏 */
+        .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* 卡片 */
+        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 24px; }
+
+        /* 徽章 */
+        .badge { padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85em; color: white; }
+        .bg-pass { background: var(--pass); }
+        .bg-fail { background: var(--fail); }
+
+        /* 治理洞察样式 */
+        .gov-insight { background: #fffdf2; border: 1px solid #ffeeba; border-left: 6px solid var(--warning); padding: 15px; margin-top: 15px; border-radius: 4px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; padding: 12px; border-bottom: 2px solid #eee; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #f0f0f0; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New'; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 TestAI 自动化执行报告</h1>
+        <p>执行时间: {{ stats.time }}</p>
+
+        <!-- 统计栏 -->
+        <div class="summary-bar">
+            <div class="stat-card"><div>测试总量</div><div>{{ stats.total }}</div></div>
+            <div class="stat-card"><div>通过数</div><div>{{ stats.passed }}</div></div>
+            <div class="stat-card"><div>失败数</div><div>{{ stats.failed }}</div></div>
+            <div class="stat-card"><div>通过率</div><div>{{ stats.pass_rate }}</div></div>
+        </div>
+
+        <!-- 详情循环 -->
+        {% for step_id, res in results.items() %}
+        <div class="card">
+            <h3>{{ step_id }}
+                <span class="badge {{ 'bg-pass' if res.status == 'PASSED' else 'bg-fail' }}">
+                    {{ res.status }}
+                </span>
+            </h3>
+
+            {% if res.error %}
+            <p style="color: var(--fail);"><strong>故障详情:</strong> {{ res.error }}</p>
+            {% endif %}
+
+            <!-- AI 治理洞察模块 -->
+            {% if res.governance_insight %}
+            <div class="gov-insight">
+                <h4 style="margin-top:0; color: #856404;">🤖 AI 治理洞察 (信心指数: {{ (res.governance_insight.confidence_score * 100)|int }}%)</h4>
+                <p><strong>诊断结论:</strong> {{ res.governance_insight.reasoning }}</p>
+                {% if res.governance_insight.suggested_fix %}
+                <p><strong>建议修复:</strong></p>
+                <pre style="background: #272822; color: #f8f8f2; padding: 10px; border-radius: 5px;"><code>{{ res.governance_insight.suggested_fix }}</code></pre>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- 断言历史 -->
+            {% if res.assertions %}
+            <table>
+                <tr><th>检查项</th><th>预期值</th><th>实际值</th><th>结论</th></tr>
+                {% for item in res.assertions %}
+                <tr>
+                    <td><code>{{ item.check }}</code></td>
+                    <td>{{ item.expected }}</td>
+                    <td>{{ item.actual }}</td>
+                    <td>
+                        <span class="badge {{ 'bg-pass' if item.passed else 'bg-fail' }}">
+                            {{ 'PASS' if item.passed else 'FAIL' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

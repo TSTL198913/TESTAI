@@ -29,10 +29,11 @@ coverage.xml
 .hypothesis/
 
 reports/
-data/
+/data/
 *.log
 test_*.txt
 *.html
+!src/report/templates/*.html
 
 Dockerfile.local
 docker-compose.local.yml
