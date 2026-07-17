@@ -8,27 +8,13 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml .
+COPY . .
 
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -e . \
-    && pip install --no-cache-dir \
-        pytest \
-        pytest-asyncio \
-        pytest-cov \
-        pytest-timeout \
-        httpx \
-        respx \
-        celery \
-        redis \
-        bandit \
-        pip-audit \
-        pylint \
-        mypy
-
-COPY . .
+    && pip install --no-cache-dir -e ".[dev]"
 
 RUN groupadd -r testai && useradd -r -g testai testai \
     && chown -R testai:testai /app
