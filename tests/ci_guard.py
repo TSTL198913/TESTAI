@@ -144,39 +144,39 @@ def run():
         "test_strict_validation.py",
     ]
     
-    print("🔍 扫描 CI 守卫规则...")
+    print("[SCAN] 扫描 CI 守卫规则...")
     
     violations = []
     
     print("\n1. 扫描 assert hasattr(...) 弱断言...")
     hasattr_violations = scan_for_weak_assertions(tests_dir, exclude_files=exclude_files)
     if hasattr_violations:
-        print(f"   ❌ 发现 {len(hasattr_violations)} 处违反：")
+        print(f"   [FAIL] 发现 {len(hasattr_violations)} 处违反：")
         for v in hasattr_violations:
             print(f"      {v}")
         violations.extend(hasattr_violations)
     else:
-        print("   ✅ 未发现违反")
+        print("   [PASS] 未发现违反")
     
     print("\n2. 扫描 pytest.skip(...) 失败跳过...")
     skip_violations = scan_for_pytest_skip(tests_dir, exclude_files=exclude_files)
     if skip_violations:
-        print(f"   ❌ 发现 {len(skip_violations)} 处违反：")
+        print(f"   [FAIL] 发现 {len(skip_violations)} 处违反：")
         for v in skip_violations:
             print(f"      {v}")
         violations.extend(skip_violations)
     else:
-        print("   ✅ 未发现违反")
+        print("   [PASS] 未发现违反")
     
     print("\n3. 扫描 except Exception: pass 异常吞没...")
     exception_violations = scan_for_exception_pass(tests_dir, exclude_files=exclude_files)
     if exception_violations:
-        print(f"   ❌ 发现 {len(exception_violations)} 处违反：")
+        print(f"   [FAIL] 发现 {len(exception_violations)} 处违反：")
         for v in exception_violations:
             print(f"      {v}")
         violations.extend(exception_violations)
     else:
-        print("   ✅ 未发现违反")
+        print("   [PASS] 未发现违反")
     
     # 运行测试有效性门控
     print("\n4. 运行测试有效性门控...")
@@ -186,20 +186,20 @@ def run():
         text=True
     )
     if result.returncode != 0:
-        print("   ❌ 测试有效性门控失败")
+        print("   [FAIL] 测试有效性门控失败")
         print(result.stdout)
         print(result.stderr)
         violations.append("TEST_EFFECTIVENESS_GATE_FAILED")
     else:
-        print("   ✅ 测试有效性门控通过")
+        print("   [PASS] 测试有效性门控通过")
     
     print("\n" + "="*60)
     
     if violations:
-        print(f"❌ CI 守卫失败：发现 {len(violations)} 处违反")
+        print(f"[FAIL] CI 守卫失败：发现 {len(violations)} 处违反")
         sys.exit(1)
     else:
-        print("✅ CI 守卫通过：所有规则符合要求")
+        print("[PASS] CI 守卫通过：所有规则符合要求")
         sys.exit(0)
 
 

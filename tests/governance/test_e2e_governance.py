@@ -73,21 +73,25 @@ async def test_governance_e2e_loop():
         print("\n✅ E2E 治理闭环测试通过：AI 成功诊断并修复了目标代码！")
 
     finally:
+        import logging
+        logger = logging.getLogger(__name__)
         for root, dirs, files in os.walk(temp_dir, topdown=False):
             for file in files:
                 try:
                     os.remove(os.path.join(root, file))
-                except Exception:
-                    pass
+                except PermissionError as e:
+                    logger.warning(f"无法删除文件 {os.path.join(root, file)}: {e}")
+                except Exception as e:
+                    logger.warning(f"清理文件失败 {os.path.join(root, file)}: {type(e).__name__}: {e}")
             for dir in dirs:
                 try:
                     os.rmdir(os.path.join(root, dir))
-                except Exception:
-                    pass
+                except OSError as e:
+                    logger.warning(f"无法删除目录 {os.path.join(root, dir)}: {e}")
         try:
             os.rmdir(temp_dir)
-        except Exception:
-            pass
+        except OSError as e:
+            logger.warning(f"无法删除临时目录 {temp_dir}: {e}")
 
 
 if __name__ == "__main__":
