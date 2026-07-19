@@ -31,9 +31,9 @@ class GovernanceProcessor(BaseProcessor):
 
             diagnostic_context = DiagnosticContext(
                 step_id=step.step_id,
-                component_name=step.step_id,
-                input_data=step_result.get("data"),
-                actual_output=step_result.get("data"),
+                component_name=step.processor if hasattr(step, 'processor') else 'pipeline',
+                input_data=step.model_dump() if hasattr(step, 'model_dump') else str(step),
+                actual_output=step_result.get("body"),
                 expected_baseline=step_result.get("expected_baseline"),
                 exception_trace="; ".join(errors)
             )

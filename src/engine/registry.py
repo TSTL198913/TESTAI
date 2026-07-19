@@ -10,6 +10,7 @@ _PROCESSOR_MAP = {
     "assertion": "src.engine.processor.assertion.AssertionProcessor",
     "http": "src.engine.processor.http.HTTPProcessor",
     "grpc": "src.engine.processor.grpc.GrpcProcessor",
+    "governance": "src.engine.processor.governance_processor.GovernanceProcessor",
 }
 
 def register_processor(name: str, path: str):
@@ -30,11 +31,20 @@ def get_processor_instance(name: str, **kwargs):
     processor_cls = get_processor_class(name)
     return processor_cls(**kwargs)
 
+import warnings
+
+
 def get_pipeline(pipeline_config: list):
     processors = []
     for name in pipeline_config:
         if name == "request":
+            warnings.warn(
+                "The 'request' processor alias is deprecated. Use 'http' instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
             name = "http"
+        
         try:
             processors.append(get_processor_instance(name))
         except ValueError:

@@ -54,11 +54,9 @@ async def test_governance_lifecycle_triggered():
     )
     step_data = {"protocol": "http", "http": step.model_dump()}
 
-    # 4. 执行
-    try:
+    # 4. 执行（预期断言失败会抛出异常，但治理处理器仍会执行）
+    with pytest.raises(Exception):
         await pipeline.run(context, [step_data], client)
-    except Exception:
-        pass
 
     # 5. 验证与注册 (关键步骤)
     result = context.results.get("gov_step_01")

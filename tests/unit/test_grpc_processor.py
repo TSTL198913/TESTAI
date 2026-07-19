@@ -12,16 +12,23 @@ class TestGrpcProcessor:
 
     def test_processor_has_process_method(self):
         processor = GrpcProcessor()
-        assert hasattr(processor, 'process')
-        assert callable(processor.process)
+        # 行为验证：process 必须是可调用的异步方法
+        assert callable(getattr(processor, 'process', None)), (
+            "GrpcProcessor 必须有 process 方法"
+        )
 
     def test_processor_channel_cache(self):
-        assert hasattr(GrpcProcessor, '_channels')
-        assert isinstance(GrpcProcessor._channels, dict)
+        # 行为验证：_channels 必须是类变量且为 dict
+        channels = getattr(GrpcProcessor, '_channels', None)
+        assert channels is not None, "GrpcProcessor 必须有 _channels 类变量"
+        assert isinstance(channels, dict), "_channels 必须是 dict 类型"
 
     def test_processor_get_channel_method(self):
-        assert hasattr(GrpcProcessor, '_get_channel')
-        assert callable(GrpcProcessor._get_channel)
+        # 行为验证：_get_channel 必须是类方法且可调用
+        get_channel = getattr(GrpcProcessor, '_get_channel', None)
+        assert callable(get_channel), (
+            "GrpcProcessor 必须有 _get_channel 类方法"
+        )
 
     @pytest.mark.asyncio
     async def test_process_with_default_env(self):

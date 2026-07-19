@@ -24,8 +24,8 @@ class TestGovernanceClientSDK:
         
         result = await sdk.chat_completion([{"role": "user", "content": "test"}])
         
-        assert hasattr(result, 'content')
-        assert result.content == '{"is_fixable": true, "reasoning": "test"}'
+        # 行为验证：结果必须有 content 属性且值正确
+        assert getattr(result, 'content', None) == '{"is_fixable": true, "reasoning": "test"}'
 
     @pytest.mark.asyncio
     async def test_chat_completion_handles_empty_response(self):

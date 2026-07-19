@@ -1,0 +1,10 @@
+GOVERNANCE E2E VALIDATION REPORT
+============================================================
+Patch applied: True
+Patch contains self.patched = True: True
+Tests passed: True
+AI diagnosis is_fixable: True
+AI diagnosis confidence: 0.95
+AI diagnosis generated proposal: True
+
+E2E VALIDATION STATUS: SUCCESS

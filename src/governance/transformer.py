@@ -47,10 +47,9 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
         class_match = (self.target_class is None or self.current_class == self.target_class)
 
         if name_match and class_match:
-            # 只有匹配成功才打补丁
+            self.patched = True
             return updated_node.with_changes(body=cst.IndentedBlock(body=self.new_body_nodes))
 
-        # 记录不匹配原因，用于排查
         if name_match and self.target_class and self.current_class != self.target_class:
             print(f"[DEBUG] Class mismatch: Expected {self.target_class}, found {self.current_class}")
 

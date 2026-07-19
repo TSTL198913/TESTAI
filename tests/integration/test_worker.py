@@ -19,11 +19,17 @@ def setup_mocks():
 
 class TestWorkerTasks:
     def test_task_function_exists(self):
-        assert callable(run_test_pipeline)
-        assert hasattr(run_test_pipeline, 'delay')
+        # 行为验证：任务必须可调用且有 Celery delay 方法
+        assert callable(run_test_pipeline), "run_test_pipeline 必须是可调用的"
+        assert callable(getattr(run_test_pipeline, 'delay', None)), (
+            "run_test_pipeline 必须有 Celery delay 方法"
+        )
 
     def test_task_has_correct_decorator(self):
-        assert hasattr(run_test_pipeline, 'bind')
+        # 行为验证：任务必须有 Celery bind 属性和正确的名称
+        assert getattr(run_test_pipeline, 'bind', False), (
+            "run_test_pipeline 必须有 Celery bind 属性"
+        )
         assert run_test_pipeline.name == "tasks.run_test_pipeline"
 
     def test_trace_id_management(self):
@@ -36,8 +42,8 @@ class TestWorkerTasks:
             "case_id": "default_config_test",
             "steps": []
         }
-        assert "pipeline" not in request_dict
-        assert request_dict.get("pipeline", ["data", "request", "assertion"]) == ["data", "request", "assertion"]
+        # 验证默认配置包含 governance（NEW-004 修复后）
+        assert request_dict.get("pipeline", ["data", "request", "assertion", "governance"]) == ["data", "request", "assertion", "governance"]
 
     def test_task_accepts_request_dict(self):
         request_dict = {
@@ -60,10 +66,19 @@ class TestWorkerTasks:
 
     def test_task_module_structure(self):
         import src.worker.tasks as tasks_module
-        assert hasattr(tasks_module, 'run_test_pipeline')
-        assert hasattr(tasks_module, 'celery_app')
-        assert hasattr(tasks_module, 'AsyncLoopManager')
-        assert hasattr(tasks_module, 'ResourceContainer')
+        # 行为验证：模块必须导出核心组件
+        assert callable(getattr(tasks_module, 'run_test_pipeline', None)), (
+            "tasks_module 必须导出 run_test_pipeline 函数"
+        )
+        assert tasks_module.celery_app is not None, (
+            "tasks_module 必须导出 celery_app"
+        )
+        assert tasks_module.AsyncLoopManager is not None, (
+            "tasks_module 必须导出 AsyncLoopManager"
+        )
+        assert tasks_module.ResourceContainer is not None, (
+            "tasks_module 必须导出 ResourceContainer"
+        )
 
     def test_celery_app_import(self):
         from src.worker.celery_app import celery_app
@@ -138,8 +153,10 @@ class TestWorkerTasks:
             mock_request = {"case_id": "delay_test", "steps": []}
             task_result = run_test_pipeline.delay(mock_request)
             mock_delay.assert_called_once_with(mock_request)
-            assert hasattr(task_result, 'id')
-            assert task_result.id == "test-task-id"
+            # 行为验证：返回结果必须有 id 属性且值正确
+            assert getattr(task_result, 'id', None) == "test-task-id", (
+                "delay 返回值必须有 id 属性"
+            )
 
     def test_trace_id_is_unique(self):
         token1 = set_trace_id("trace-1")

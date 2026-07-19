@@ -1,0 +1,45 @@
+name: Test Quality Gate
+
+on:
+  pull_request:
+    paths:
+      - "tests/**"
+      - "src/**"
+
+jobs:
+  test-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest pytest-rerunfailures
+
+      - name: Step 1 - CI Guard Check
+        run: |
+          echo "🔍 Running CI Guard..."
+          python tests/ci_guard.py
+
+      - name: Step 2 - Mutation Gate
+        run: |
+          echo "🧬 Running Mutation Gate..."
+          python tests/utils/auto_mutation_gate.py --test tests/governance/test_transformer_new.py
+
+      - name: Step 3 - Layered Effectiveness
+        run: |
+          echo "📊 Running Layered Effectiveness..."
+          python -m pytest tests/governance/test_layered_effectiveness.py -v
+
+      - name: Step 4 - Full Test Suite
+        run: |
+          echo "🧪 Running Full Test Suite..."
+          python -m pytest tests/ -q --tb=short

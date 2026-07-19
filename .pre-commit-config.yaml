@@ -1,0 +1,52 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ci-guard
+        name: CI Guard
+        entry: python tests/ci_guard.py
+        language: python
+        pass_filenames: false
+        description: "Run CI guard checks"
+        
+      - id: unit-tests
+        name: Unit Tests
+        entry: python -m pytest tests/unit/ -x -q --tb=short
+        language: python
+        pass_filenames: false
+        description: "Run unit tests"
+        
+      - id: governance-tests
+        name: Governance Tests
+        entry: python -m pytest tests/governance/ -x -q --tb=short
+        language: python
+        pass_filenames: false
+        description: "Run governance tests"
+        
+      - id: effectiveness-gate
+        name: Effectiveness Gate
+        entry: python -m pytest tests/governance/test_effectiveness_gate.py -x -q --tb=short
+        language: python
+        pass_filenames: false
+        description: "Run effectiveness gate"
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ["--max-line-length=120", "--extend-ignore=E203,W503"]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]

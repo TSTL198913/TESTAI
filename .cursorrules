@@ -1,0 +1,32 @@
+# Cursor规则 - AI代理测试编写标准
+
+## 引用规范文件
+
+本文件引用统一测试标准：`.agent_rules/test_standard.md`
+
+## 核心约束
+
+### 禁止清单
+- 禁止 `assert hasattr(...)` 弱断言
+- 禁止 `pytest.skip()` 失败跳过
+- 禁止 `except Exception: pass` 异常吞没
+
+### 必须清单
+- 必须覆盖五种场景：正向、负向、边界、异常、依赖
+- 必须包含强断言（验证业务逻辑而非仅验证存在）
+- 必须覆盖至少1条业务规则
+
+### 质量阈值
+- 变异测试kill rate ≥80%
+- 断言强度评分 ≥85分
+- 五种场景覆盖率 100%
+
+## 验证流程
+
+1. 编写测试后运行 `python tests/utils/auto_mutation_gate.py --test <测试文件>`
+2. 运行 `python tests/ci_guard.py` 检查反模式
+3. 未通过则重写测试
+
+## 详细规范
+
+请阅读完整规范：`.agent_rules/test_standard.md`

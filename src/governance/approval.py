@@ -34,7 +34,19 @@ class ApprovalRecord:
 
     @property
     def requires_approval(self) -> bool:
-        return self.proposal.patch_type.value in ["security", "refactoring"]
+        patch_type = self.proposal.patch_type.value
+
+        if patch_type in ["security", "refactoring"]:
+            return True
+
+        if patch_type == "functional" and self._is_large_change():
+            return True
+
+        return False
+    
+    def _is_large_change(self) -> bool:
+        code = self.proposal.suggested_code or ""
+        return len(code.splitlines()) > 20
 
 
 class ApprovalManager:

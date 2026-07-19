@@ -101,8 +101,12 @@ class TestP0GapVerifications:
         from src.governance.sdk import GovernanceClientSDK
 
         sdk = GovernanceClientSDK()
-        assert hasattr(sdk, 'client')
-        assert hasattr(sdk, 'breaker')
+        # 行为验证：client 和 breaker 必须存在且可用
+        assert sdk.client is not None, "SDK client 不应为 None"
+        assert sdk.breaker is not None, "SDK circuit breaker 不应为 None"
+        # 验证 breaker 有核心方法（CircuitBreaker 的实际方法名）
+        assert hasattr(sdk.breaker, 'can_execute'), "CircuitBreaker 必须有 can_execute 方法"
+        assert hasattr(sdk.breaker, 'record_failure'), "CircuitBreaker 必须有 record_failure 方法"
 
     def test_llm_depends_on_env_variable(self):
         import os
@@ -111,12 +115,22 @@ class TestP0GapVerifications:
 
     def test_orchestrator_has_core_methods(self):
         from src.governance.orchestrator import GovernanceOrchestrator
+        from src.governance.approval import ApprovalManager
+        from src.governance.tracker import GovernanceTracker
+        from src.governance.executor import GovernanceExecutor
 
         orchestrator = GovernanceOrchestrator()
-        assert hasattr(orchestrator, 'approval_mgr')
-        assert hasattr(orchestrator, 'tracker')
-        assert hasattr(orchestrator, 'agent')
-        assert hasattr(orchestrator, 'executor')
+
+        # 行为验证：组件必须存在且类型正确
+        assert isinstance(orchestrator.approval_mgr, ApprovalManager), (
+            "approval_mgr 必须是 ApprovalManager 实例"
+        )
+        assert isinstance(orchestrator.tracker, GovernanceTracker), (
+            "tracker 必须是 GovernanceTracker 实例"
+        )
+        assert isinstance(orchestrator.executor, GovernanceExecutor), (
+            "executor 必须是 GovernanceExecutor 实例"
+        )
 
     def test_models_have_core_classes(self):
         from src.governance.models import (AIGovernanceResult,

@@ -1,0 +1,6 @@
+[mutmut]
+paths_to_mutate = ["src/governance/"]
+test_command = "python -m pytest -x -q --tb=short"
+runner = "pytest"
+use_coverage = false
+mutation_report_path = "mutmut_report.html"
