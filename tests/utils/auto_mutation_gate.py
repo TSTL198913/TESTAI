@@ -13,14 +13,14 @@ Trae提交测试后，自动对被测代码注入变异，计算kill rate，
     - 详细评估报告
     - 通过/拒绝结论
 """
+import argparse
 import os
-import sys
 import shutil
 import subprocess
-import argparse
+import sys
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -65,7 +65,7 @@ def backup_and_restore(filepath):
             if os.path.exists(backup_path):
                 os.remove(backup_path)
         except Exception as e:
-            print(f"⚠️ 恢复文件失败: {e}")
+            print(f"[WARN] 恢复文件失败: {e}")
             if os.path.exists(backup_path):
                 try:
                     shutil.copy2(backup_path, filepath)
@@ -203,7 +203,7 @@ class MutationGate:
         return os.path.join("src", "governance", "transformer.py")
 
     def run(self) -> GateResult:
-        print(f"🚀 启动变异验证门")
+        print(f"[LAUNCH] 启动变异验证门")
         print(f"  测试文件: {self.test_file}")
         print(f"  源文件: {self.source_file}")
         print(f"  Kill rate阈值: {self.kill_rate_threshold * 100:.0f}%")
@@ -221,7 +221,7 @@ class MutationGate:
                 message="未生成任何变异点"
             )
 
-        print(f"🧬 生成了 {len(mutants)} 个变异点")
+        print(f"[MUTATE] 生成了 {len(mutants)} 个变异点")
         print()
 
         killed_count = 0
@@ -243,10 +243,10 @@ class MutationGate:
                 if result.returncode != 0:
                     mutant.killed = True
                     killed_count += 1
-                    print("    ✅ 已杀死（测试失败）")
+                    print("    [PASS] 已杀死（测试失败）")
                 else:
                     mutant.killed = False
-                    print("    ❌ 存活（测试通过）")
+                    print("    [FAIL] 存活（测试通过）")
                 
                 results.append(mutant)
                 print()
@@ -256,9 +256,9 @@ class MutationGate:
 
         message = ""
         if passed:
-            message = f"✅ 验证通过！Kill rate: {kill_rate * 100:.1f}% ≥ {self.kill_rate_threshold * 100:.0f}%"
+            message = f"[PASS] 验证通过！Kill rate: {kill_rate * 100:.1f}% ≥ {self.kill_rate_threshold * 100:.0f}%"
         else:
-            message = f"❌ 验证失败！Kill rate: {kill_rate * 100:.1f}% < {self.kill_rate_threshold * 100:.0f}%"
+            message = f"[FAIL] 验证失败！Kill rate: {kill_rate * 100:.1f}% < {self.kill_rate_threshold * 100:.0f}%"
 
         return GateResult(
             passed=passed,
@@ -277,7 +277,7 @@ def format_report(result: GateResult) -> str:
     lines.append("=" * 70)
     lines.append("")
 
-    lines.append(f"结论: {'✅ 通过' if result.passed else '❌ 拒绝'}")
+    lines.append(f"结论: {'[PASS] 通过' if result.passed else '[FAIL] 拒绝'}")
     lines.append(f"Kill Rate: {result.kill_rate * 100:.1f}%")
     lines.append(f"总变异点: {result.total_mutants}")
     lines.append(f"被杀死: {result.killed_mutants}")
@@ -286,7 +286,7 @@ def format_report(result: GateResult) -> str:
 
     lines.append("详细结果:")
     for mutant in result.results:
-        status = "✅ 已杀死" if mutant.killed else "❌ 存活"
+        status = "[PASS] 已杀死" if mutant.killed else "[FAIL] 存活"
         lines.append(f"  {mutant.mutant_id} | {mutant.file}:{mutant.line} | {mutant.mutation_type} | {status}")
 
     lines.append("")

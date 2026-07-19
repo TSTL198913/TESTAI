@@ -66,6 +66,7 @@ class TestWorkerTasks:
 
     def test_task_module_structure(self):
         import src.worker.tasks as tasks_module
+
         # 行为验证：模块必须导出核心组件
         assert callable(getattr(tasks_module, 'run_test_pipeline', None)), (
             "tasks_module 必须导出 run_test_pipeline 函数"

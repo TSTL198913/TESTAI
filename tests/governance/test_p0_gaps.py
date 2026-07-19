@@ -114,10 +114,10 @@ class TestP0GapVerifications:
         assert api_key is None or isinstance(api_key, str)
 
     def test_orchestrator_has_core_methods(self):
-        from src.governance.orchestrator import GovernanceOrchestrator
         from src.governance.approval import ApprovalManager
-        from src.governance.tracker import GovernanceTracker
         from src.governance.executor import GovernanceExecutor
+        from src.governance.orchestrator import GovernanceOrchestrator
+        from src.governance.tracker import GovernanceTracker
 
         orchestrator = GovernanceOrchestrator()
 
@@ -177,3 +177,45 @@ class TestP0GapVerifications:
         record = mgr2.get_approval("tx_p0_memory_001")
 
         assert record is not None
+
+    def test_transformer_patched_flag_function(self):
+        import libcst as cst
+
+        from src.governance.transformer import FunctionTransformer
+
+        source_code = """
+def my_function():
+    return 1
+"""
+        tree = cst.parse_module(source_code)
+        transformer = FunctionTransformer(
+            target_function="my_function",
+            new_body="return 2"
+        )
+
+        tree = tree.visit(transformer)
+
+        assert transformer.patched is True, "FunctionTransformer 补丁标记应设为True"
+        assert "return 2" in tree.code, "代码应被替换"
+
+    def test_transformer_patched_flag_context_aware(self):
+        import libcst as cst
+
+        from src.governance.transformer import ContextAwareTransformer
+
+        source_code = """
+class TargetClass:
+    def my_method():
+        return 1
+"""
+        tree = cst.parse_module(source_code)
+        transformer = ContextAwareTransformer(
+            target_function="my_method",
+            new_body="return 2",
+            target_class="TargetClass"
+        )
+
+        tree = tree.visit(transformer)
+
+        assert transformer.patched is True, "ContextAwareTransformer 补丁标记应设为True"
+        assert "return 2" in tree.code, "代码应被替换"

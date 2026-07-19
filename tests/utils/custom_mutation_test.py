@@ -5,6 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Tuple
 
+
 @dataclass
 class MutationResult:
     file: str

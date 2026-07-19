@@ -4,8 +4,8 @@
 
 自动扫描src/目录，从代码中提取人类可读的业务规则清单。
 """
-import os
 import ast
+import os
 
 
 def extract_rules_from_transformer():

@@ -34,15 +34,8 @@ class ApprovalRecord:
 
     @property
     def requires_approval(self) -> bool:
-        patch_type = self.proposal.patch_type.value
-
-        if patch_type in ["security", "refactoring"]:
-            return True
-
-        if patch_type == "functional" and self._is_large_change():
-            return True
-
-        return False
+        from src.governance.models import PatchType
+        return self.proposal.patch_type in [PatchType.SECURITY, PatchType.REFACTORING]
     
     def _is_large_change(self) -> bool:
         code = self.proposal.suggested_code or ""

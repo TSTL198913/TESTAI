@@ -7,8 +7,8 @@ BR-02: ContextAwareTransformer必须精确匹配目标类中的方法
 - 位置: 第47行
 - 说明: class_match条件为(target_class is None or current_class == target_class)
 """
-import pytest
 import libcst as cst
+import pytest
 
 from src.governance.transformer import ContextAwareTransformer
 

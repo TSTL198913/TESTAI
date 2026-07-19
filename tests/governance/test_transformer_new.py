@@ -1,14 +1,11 @@
 """
 Transformer模块测试 - Trae编写标准示例
 """
-import pytest
 import libcst as cst
+import pytest
 
-from src.governance.transformer import (
-    ContextAwareTransformer,
-    FunctionTransformer,
-    ImportApplier
-)
+from src.governance.transformer import (ContextAwareTransformer,
+                                        FunctionTransformer, ImportApplier)
 
 
 class TestContextAwareTransformer:

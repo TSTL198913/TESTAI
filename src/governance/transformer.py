@@ -63,7 +63,6 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
         return updated_node
 
 
-
 class ImportApplier(cst.CSTTransformer):
     def __init__(self, required_imports: List[str]):
         super().__init__()
