@@ -44,7 +44,7 @@ build/
 .installed.cfg
 *.egg
 
-requirements.txt
+# requirements.txt
 
 security_scan_report.json
 security_scan_report_v2.json
