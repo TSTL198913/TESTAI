@@ -1,11 +1,11 @@
-from tests.utils.custom_mutation_test import CustomMutationTester
+import sys
+sys.path.insert(0, 'tests/utils')
+from custom_mutation_test import CustomMutationTester
 
-t = CustomMutationTester(
+tester = CustomMutationTester(
     target_dir='src/governance/',
-    test_command='python -m pytest tests/governance/test_transformer_new.py -x -q'
+    test_command='python -m pytest tests/governance/ -x -q --tb=short'
 )
-r = t.run()
-print(f'Applied: {r["summary"]["mutations_applied"]}')
-print(f'Killed: {r["summary"]["mutations_killed"]}')
-print(f'Survived: {r["summary"]["mutations_survived"]}')
-print(f'Kill Rate: {r["summary"]["kill_rate"]}')
+report = tester.run()
+print(f"Kill rate: {report['summary']['kill_rate']}")
+print(f"Survived: {len(report['survived_mutations'])}")

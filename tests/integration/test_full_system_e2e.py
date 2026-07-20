@@ -55,7 +55,7 @@ class TestFullSystemE2E:
                 "protocol": "http",
                 "method": "GET",
                 "url": "https://example.com/api/test",
-                "params": {"id": "123"}
+                "params": {"id": "123"},
             }
         ]
 
@@ -63,7 +63,7 @@ class TestFullSystemE2E:
             case_id="full_e2e_test",
             env={"env": "test"},
             vars={"user_id": "123"},
-            results={}
+            results={},
         )
 
         processed_steps = await pipeline.run(context, test_steps, mock_client)
@@ -91,15 +91,19 @@ class TestFullSystemE2E:
                 "protocol": "http",
                 "method": "GET",
                 "url": "${base_url}/users/${user_id}",
-                "params": {"token": "${api_token}"}
+                "params": {"token": "${api_token}"},
             }
         ]
 
         context = ExecutionContext(
             case_id="var_render_test",
             env={},
-            vars={"base_url": "https://api.example.com", "user_id": "456", "api_token": "abc123"},
-            results={}
+            vars={
+                "base_url": "https://api.example.com",
+                "user_id": "456",
+                "api_token": "abc123",
+            },
+            results={},
         )
 
         await pipeline.run(context, test_steps, mock_client)
@@ -126,15 +130,12 @@ class TestFullSystemE2E:
                 "description": "Error handling test",
                 "protocol": "http",
                 "method": "GET",
-                "url": "https://example.com/api/fail"
+                "url": "https://example.com/api/fail",
             }
         ]
 
         context = ExecutionContext(
-            case_id="error_handling_test",
-            env={},
-            vars={},
-            results={}
+            case_id="error_handling_test", env={}, vars={}, results={}
         )
 
         with pytest.raises(Exception):
@@ -176,7 +177,7 @@ class TestFullSystemE2E:
             input_data={"test": "data"},
             actual_output="result",
             expected_baseline=None,
-            exception_trace=None
+            exception_trace=None,
         )
 
         result = await orchestrator.execute_governance_flow(diag_context)
@@ -190,7 +191,7 @@ class TestFullSystemE2E:
             description="Model validation test",
             protocol="http",
             method="GET",
-            url="https://example.com"
+            url="https://example.com",
         )
         assert http_request.step_id == "model_test_001"
         assert http_request.method == "GET"
@@ -202,7 +203,7 @@ class TestFullSystemE2E:
             proto_file_path="test.proto",
             service="TestService",
             method="TestMethod",
-            payload={"key": "value"}
+            payload={"key": "value"},
         )
         assert grpc_request.service == "TestService"
 
@@ -217,7 +218,7 @@ class TestFullSystemE2E:
 
         execution_data = {
             "case_id": "repo_test_001",
-            "results": {"step1": {"status": "PASSED"}}
+            "results": {"step1": {"status": "PASSED"}},
         }
 
         await repo.save_execution(execution_data["case_id"], execution_data["results"])
@@ -246,29 +247,26 @@ class TestFullSystemE2E:
                 "protocol": "http",
                 "method": "POST",
                 "url": "https://example.com/api/login",
-                "body": {"username": "test", "password": "pass"}
+                "body": {"username": "test", "password": "pass"},
             },
             {
                 "step_id": "multi_step_002",
                 "description": "Step 2",
                 "protocol": "http",
                 "method": "GET",
-                "url": "https://example.com/api/profile"
+                "url": "https://example.com/api/profile",
             },
             {
                 "step_id": "multi_step_003",
                 "description": "Step 3",
                 "protocol": "http",
                 "method": "GET",
-                "url": "https://example.com/api/settings"
-            }
+                "url": "https://example.com/api/settings",
+            },
         ]
 
         context = ExecutionContext(
-            case_id="multi_step_test",
-            env={},
-            vars={},
-            results={}
+            case_id="multi_step_test", env={}, vars={}, results={}
         )
 
         processed_steps = await pipeline.run(context, test_steps, mock_client)
@@ -287,9 +285,9 @@ class TestFullSystemE2E:
                     description="Test HTTP",
                     protocol="http",
                     method="GET",
-                    url="https://example.com"
+                    url="https://example.com",
                 )
-            ]
+            ],
         )
 
         case_dict = case.model_dump()
@@ -316,14 +314,14 @@ class TestFullSystemE2E:
             case_id="context_isolation_test_1",
             env={"env": "test1"},
             vars={"user": "user1"},
-            results={}
+            results={},
         )
 
         context2 = ExecutionContext(
             case_id="context_isolation_test_2",
             env={"env": "test2"},
             vars={"user": "user2"},
-            results={}
+            results={},
         )
 
         test_steps = [
@@ -332,7 +330,7 @@ class TestFullSystemE2E:
                 "description": "Isolation test",
                 "protocol": "http",
                 "method": "GET",
-                "url": "https://example.com/api/test"
+                "url": "https://example.com/api/test",
             }
         ]
 

@@ -5,8 +5,10 @@ import pytest
 
 from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 from src.governance.tracker import GovernanceActionType
-from tests.governance.persistence import (PersistentApprovalManager,
-                                          PersistentGovernanceTracker)
+from tests.governance.persistence import (
+    PersistentApprovalManager,
+    PersistentGovernanceTracker,
+)
 
 
 @pytest.fixture
@@ -26,14 +28,14 @@ class TestPersistentApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step_001",
             component_name="TestComponent",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
 
         mgr.create_approval("tx_persist_001", proposal, context)
@@ -49,14 +51,14 @@ class TestPersistentApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step_002",
             component_name="TestComponent",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
 
         mgr1.create_approval("tx_reinstantiate_001", proposal, context)
@@ -75,14 +77,14 @@ class TestPersistentApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step_003",
             component_name="TestComponent",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
 
         mgr.create_approval("tx_reject_001", proposal, context)
@@ -98,14 +100,14 @@ class TestPersistentApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step_004",
             component_name="TestComponent",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
 
         for i in range(5):
@@ -123,7 +125,7 @@ class TestPersistentGovernanceTracker:
             trace_id="trace_persist_001",
             action_type=GovernanceActionType.DIAGNOSE_START,
             component="TestComponent",
-            status="STARTED"
+            status="STARTED",
         )
 
         count = tracker.get_event_count()
@@ -136,7 +138,7 @@ class TestPersistentGovernanceTracker:
             trace_id="trace_reinstantiate_001",
             action_type=GovernanceActionType.PATCH_APPLIED,
             component="TestComponent",
-            status="FIXED"
+            status="FIXED",
         )
 
         tracker2 = PersistentGovernanceTracker(db_path=temp_db)
@@ -153,7 +155,7 @@ class TestPersistentGovernanceTracker:
             tracker.record_event(
                 trace_id=f"trace_multi_{i}",
                 action_type=GovernanceActionType.DIAGNOSE_START,
-                component="TestComponent"
+                component="TestComponent",
             )
 
         count = tracker.get_event_count()
@@ -165,7 +167,7 @@ class TestPersistentGovernanceTracker:
         tracker.record_event(
             trace_id="trace_clear_001",
             action_type=GovernanceActionType.DIAGNOSE_START,
-            component="TestComponent"
+            component="TestComponent",
         )
 
         assert tracker.get_event_count() == 1
@@ -179,11 +181,10 @@ class TestPersistentGovernanceTracker:
 
         tracker1.record_event(
             trace_id="trace_summary_001",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            action_type=GovernanceActionType.DIAGNOSE_START,
         )
         tracker1.record_event(
-            trace_id="trace_summary_001",
-            action_type=GovernanceActionType.PATCH_APPLIED
+            trace_id="trace_summary_001", action_type=GovernanceActionType.PATCH_APPLIED
         )
 
         tracker2 = PersistentGovernanceTracker(db_path=temp_db)

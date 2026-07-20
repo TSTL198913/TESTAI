@@ -7,6 +7,7 @@ BR-02: ContextAwareTransformer必须精确匹配目标类中的方法
 - 位置: 第47行
 - 说明: class_match条件为(target_class is None or current_class == target_class)
 """
+
 import libcst as cst
 import pytest
 
@@ -34,7 +35,7 @@ class OtherClass:
         transformer = ContextAwareTransformer(
             target_function="target_method",
             new_body='return "patched"',
-            target_class="TargetClass"
+            target_class="TargetClass",
         )
 
         tree = tree.visit(transformer)
@@ -62,7 +63,7 @@ class OtherClass:
         transformer = ContextAwareTransformer(
             target_function="target_method",
             new_body='return "patched"',
-            target_class="WrongClass"
+            target_class="WrongClass",
         )
 
         tree = tree.visit(transformer)
@@ -90,7 +91,7 @@ class ClassB:
         transformer = ContextAwareTransformer(
             target_function="shared_method",
             new_body='return "patched"',
-            target_class=None
+            target_class=None,
         )
 
         tree = tree.visit(transformer)
@@ -132,7 +133,7 @@ class OtherClass:
         transformer = ContextAwareTransformer(
             target_function="target_method",
             new_body='return "patched"',
-            target_class="TargetClass"
+            target_class="TargetClass",
         )
 
         tree = tree.visit(transformer)

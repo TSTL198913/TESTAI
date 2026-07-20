@@ -15,10 +15,11 @@ class ProcessInfo:
     timeout: Optional[float] = None
     callback: Optional[callable] = None
 
+
 class ProcessManager:
     _instance = None
     _lock = threading.RLock()
-    
+
     def __new__(cls):
         with cls._lock:
             if cls._instance is None:
@@ -27,19 +28,21 @@ class ProcessManager:
                 cls._instance._monitor_thread = None
                 cls._instance._running = False
             return cls._instance
-    
+
     def start_monitor(self, check_interval: float = 5.0):
         if self._running:
             return
         self._running = True
-        self._monitor_thread = threading.Thread(target=self._monitor_loop, args=(check_interval,), daemon=True)
+        self._monitor_thread = threading.Thread(
+            target=self._monitor_loop, args=(check_interval,), daemon=True
+        )
         self._monitor_thread.start()
-    
+
     def stop_monitor(self):
         self._running = False
         if self._monitor_thread:
             self._monitor_thread.join(timeout=5)
-    
+
     def _monitor_loop(self, interval: float):
         while self._running:
             try:
@@ -48,7 +51,7 @@ class ProcessManager:
             except Exception:
                 pass
             time.sleep(interval)
-    
+
     def _check_timeouts(self):
         now = time.time()
         to_remove = []
@@ -58,7 +61,7 @@ class ProcessManager:
                 to_remove.append(pid)
         for pid in to_remove:
             del self._processes[pid]
-    
+
     def _cleanup_zombies(self):
         to_remove = []
         for pid, info in self._processes.items():
@@ -71,13 +74,14 @@ class ProcessManager:
                 to_remove.append(pid)
         for pid in to_remove:
             del self._processes[pid]
-    
+
     def _is_process_alive(self, pid: int) -> bool:
         try:
-            if os.name == 'nt':
+            if os.name == "nt":
                 result = subprocess.run(
-                    ['tasklist', '/FI', f'PID eq {pid}', '/NH'],
-                    capture_output=True, text=True
+                    ["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+                    capture_output=True,
+                    text=True,
                 )
                 return str(pid) in result.stdout
             else:
@@ -85,21 +89,29 @@ class ProcessManager:
                 return True
         except (OSError, subprocess.CalledProcessError):
             return False
-    
-    def register_process(self, pid: int, command: str, timeout: Optional[float] = None, callback: Optional[callable] = None):
+
+    def register_process(
+        self,
+        pid: int,
+        command: str,
+        timeout: Optional[float] = None,
+        callback: Optional[callable] = None,
+    ):
         with self._lock:
             self._processes[pid] = ProcessInfo(
                 pid=pid,
                 command=command,
                 start_time=time.time(),
                 timeout=timeout,
-                callback=callback
+                callback=callback,
             )
-    
+
     def kill_process(self, pid: int) -> bool:
         try:
-            if os.name == 'nt':
-                subprocess.run(['taskkill', '/F', '/T', '/PID', str(pid)], capture_output=True)
+            if os.name == "nt":
+                subprocess.run(
+                    ["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True
+                )
             else:
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(1)
@@ -108,7 +120,7 @@ class ProcessManager:
             return True
         except Exception:
             return False
-    
+
     def cleanup_all(self) -> int:
         killed = 0
         pids = list(self._processes.keys())
@@ -117,15 +129,16 @@ class ProcessManager:
                 killed += 1
         self._processes.clear()
         return killed
-    
+
     def list_processes(self) -> List[ProcessInfo]:
         return list(self._processes.values())
-    
+
     def get_process(self, pid: int) -> Optional[ProcessInfo]:
         return self._processes.get(pid)
-    
+
     def shutdown(self):
         self.stop_monitor()
         self.cleanup_all()
+
 
 process_manager = ProcessManager()

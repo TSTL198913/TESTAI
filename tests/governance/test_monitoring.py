@@ -1,7 +1,12 @@
 import pytest
 
-from src.governance.monitoring import (AlertLevel, AlertManager, AlertRecord,
-                                       HealthMonitor, StructuredLogger)
+from src.governance.monitoring import (
+    AlertLevel,
+    AlertManager,
+    AlertRecord,
+    HealthMonitor,
+    StructuredLogger,
+)
 
 
 class TestAlertLevel:
@@ -18,7 +23,7 @@ class TestAlertRecord:
             alert_id="alert-1",
             level=AlertLevel.ERROR,
             message="Test error",
-            component="test"
+            component="test",
         )
         assert alert.alert_id == "alert-1"
         assert alert.level == AlertLevel.ERROR
@@ -33,7 +38,7 @@ class TestAlertRecord:
             message="Test warning",
             component="test",
             trace_id="trace-123",
-            details={"key": "value"}
+            details={"key": "value"},
         )
         alert_dict = alert.to_dict()
         assert alert_dict["alert_id"] == "alert-1"
@@ -70,7 +75,7 @@ class TestAlertManager:
             "Test error alert",
             "test-component",
             trace_id="trace-123",
-            details={"test": "data"}
+            details={"test": "data"},
         )
         assert alert is not None
         assert alert.level == AlertLevel.ERROR

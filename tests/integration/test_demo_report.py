@@ -3,6 +3,7 @@ import pytest
 
 from src.engine.processor.assertion import AssertionProcessor
 from src.models.contract import Assertion, HttpRequest
+
 # 【核心调整】确保从 conftest 导入
 from tests.conftest import GLOBAL_RESULTS
 
@@ -16,7 +17,7 @@ async def test_assertion_report_flow():
         "status": "PENDING",
         "status_code": 200,
         "body": {"code": 0, "data": {"user_id": 123, "role": "admin"}},
-        "assertions_history": []
+        "assertions_history": [],
     }
 
     class MockContext:
@@ -32,8 +33,8 @@ async def test_assertion_report_flow():
         method="GET",
         assertions=[
             Assertion(check="status_code", expected=200),
-            Assertion(check="jsonpath", path="$.data.role", expected="admin")
-        ]
+            Assertion(check="jsonpath", path="$.data.role", expected="admin"),
+        ],
     )
 
     processor = AssertionProcessor()

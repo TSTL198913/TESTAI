@@ -14,7 +14,9 @@ class TestSecurePathValidator:
 
     def test_validate_reports_path(self):
         validator = SecurePathValidator()
-        valid, msg = validator.validate_path(str(Path("reports/test_report.html").resolve()))
+        valid, msg = validator.validate_path(
+            str(Path("reports/test_report.html").resolve())
+        )
         assert valid is True
 
     def test_reject_path_traversal(self):
@@ -43,7 +45,9 @@ class TestSecurePathValidator:
 
     def test_is_sandboxed_returns_true_for_allowed(self):
         validator = SecurePathValidator()
-        assert validator.is_sandboxed(str(Path("tests/data/file.txt").resolve())) is True
+        assert (
+            validator.is_sandboxed(str(Path("tests/data/file.txt").resolve())) is True
+        )
 
     def test_is_sandboxed_returns_false_for_traversal(self):
         validator = SecurePathValidator()

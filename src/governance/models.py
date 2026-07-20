@@ -17,6 +17,7 @@ class PatchProposal(BaseModel):
     required_imports: list[str] = Field(default_factory=list)
     patch_type: PatchType = PatchType.FUNCTIONAL  # 默认值防止 AI 遗漏
 
+
 class AIGovernanceResult(BaseModel):
     is_fixable: bool
     reasoning: str
@@ -47,6 +48,7 @@ class PatchAction:
     target_class: str
     suggested_code: str
     required_imports: List[str]
+
 
 class GovernanceAction(Enum):
     RETRY = "system_retry"

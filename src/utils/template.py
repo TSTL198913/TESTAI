@@ -2,7 +2,9 @@ import re
 from typing import Any, Dict
 
 
-def render_template(data: Any, lookup_dict: Dict[str, Any], strict: bool = False) -> Any:
+def render_template(
+    data: Any, lookup_dict: Dict[str, Any], strict: bool = False
+) -> Any:
     """递归渲染模板，支持严格模式"""
 
     if isinstance(data, str):
@@ -20,7 +22,9 @@ def render_template(data: Any, lookup_dict: Dict[str, Any], strict: bool = False
         return pattern.sub(replacer, data)
 
     elif isinstance(data, dict):
-        return {k: render_template(v, lookup_dict, strict=strict) for k, v in data.items()}
+        return {
+            k: render_template(v, lookup_dict, strict=strict) for k, v in data.items()
+        }
     elif isinstance(data, list):
         return [render_template(item, lookup_dict, strict=strict) for item in data]
 

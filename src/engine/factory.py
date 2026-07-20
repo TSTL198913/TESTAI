@@ -7,7 +7,8 @@ from src.models.contract import TestStep
 step_adapter = TypeAdapter(TestStep)
 
 
-class FactoryError(Exception): pass
+class FactoryError(Exception):
+    pass
 
 
 class StepFactory:
@@ -30,4 +31,6 @@ class StepFactory:
             return step_adapter.validate_python(data_to_validate)
 
         except ValidationError as e:
-            raise FactoryError(f"步骤 {raw_step.get('step_id')} 契约校验失败: {e.errors()}")
+            raise FactoryError(
+                f"步骤 {raw_step.get('step_id')} 契约校验失败: {e.errors()}"
+            )

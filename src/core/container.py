@@ -19,7 +19,10 @@ class ResourceContainer:
             else:
                 try:
                     current_loop = asyncio.get_running_loop()
-                    if hasattr(cls._client, '_loop') and cls._client._loop != current_loop:
+                    if (
+                        hasattr(cls._client, "_loop")
+                        and cls._client._loop != current_loop
+                    ):
                         await cls._client.aclose()
                         cls._client = None
                 except RuntimeError:
@@ -44,5 +47,3 @@ class ResourceContainer:
             cls._repo = ResultRepository(uri=settings.MONGO_URI)
             await cls._repo.__aenter__()
         return cls._repo
-
-

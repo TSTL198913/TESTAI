@@ -47,7 +47,8 @@ def test_concurrency_stress():
     print("✅ [Concurrency Test Passed] 锁定机制生效，数据完整性未受损！")
 
     # 清理
-    if os.path.exists(test_file): os.remove(test_file)
+    if os.path.exists(test_file):
+        os.remove(test_file)
 
 
 if __name__ == "__main__":

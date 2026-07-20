@@ -10,6 +10,7 @@ _PROCESSOR_MAP = {
     "assertion": "src.engine.processor.assertion.AssertionProcessor",
     "http": "src.engine.processor.http.HTTPProcessor",
     "grpc": "src.engine.processor.grpc.GrpcProcessor",
+    "governance": "src.engine.processor.governance_processor.GovernanceProcessor",
 }
 
 

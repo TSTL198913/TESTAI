@@ -3,8 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.governance.approval import (ApprovalManager, ApprovalRecord,
-                                     ApprovalStatus)
+from src.governance.approval import ApprovalManager, ApprovalRecord, ApprovalStatus
 from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 
 
@@ -21,14 +20,14 @@ class TestApprovalRecord:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         record = ApprovalRecord("tx_001", proposal, context)
 
@@ -41,14 +40,14 @@ class TestApprovalRecord:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         record = ApprovalRecord("tx_001", proposal, context)
         assert record.requires_approval is True
@@ -57,14 +56,14 @@ class TestApprovalRecord:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         record = ApprovalRecord("tx_001", proposal, context)
         assert record.requires_approval is False
@@ -73,14 +72,14 @@ class TestApprovalRecord:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.REFACTORING
+            patch_type=PatchType.REFACTORING,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         record = ApprovalRecord("tx_001", proposal, context)
         assert record.requires_approval is True
@@ -101,14 +100,14 @@ class TestApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         record = mgr.create_approval("tx_create_001", proposal, context)
 
@@ -121,14 +120,14 @@ class TestApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         mgr.create_approval("tx_approve_001", proposal, context)
 
@@ -144,14 +143,14 @@ class TestApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         mgr.create_approval("tx_reject_001", proposal, context)
 
@@ -177,14 +176,14 @@ class TestApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         mgr.create_approval("tx_is_approved_001", proposal, context)
 
@@ -199,14 +198,14 @@ class TestApprovalManager:
         security_proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         mgr.create_approval("tx_requires_001", security_proposal, context)
         assert mgr.requires_approval("tx_requires_001") is True
@@ -214,7 +213,7 @@ class TestApprovalManager:
         functional_proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         mgr.create_approval("tx_requires_002", functional_proposal, context)
         assert mgr.requires_approval("tx_requires_002") is False
@@ -224,14 +223,14 @@ class TestApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         mgr.create_approval("tx_pending_001", proposal, context)
         mgr.create_approval("tx_pending_002", proposal, context)
@@ -248,14 +247,14 @@ class TestApprovalManager:
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step",
             component_name="test_component",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         mgr.create_approval("tx_cleanup_001", proposal, context)
 

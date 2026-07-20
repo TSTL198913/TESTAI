@@ -9,6 +9,7 @@ class CircuitState(Enum):
     OPEN = "open"
     HALF_OPEN = "half"
 
+
 class CircuitBreaker:
     def __init__(self, threshold=3, recovery_timeout=30):
         self.threshold = threshold

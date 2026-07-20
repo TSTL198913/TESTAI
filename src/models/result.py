@@ -11,6 +11,7 @@ class AssertionRecord(BaseModel):
     passed: bool
     message: Optional[str] = None
 
+
 class StepResult(BaseModel):
     status: str  # "PASSED" or "FAILED"
     status_code: Optional[int] = None

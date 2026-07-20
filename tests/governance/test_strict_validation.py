@@ -10,266 +10,251 @@
 
 如果测试在代码被破坏时仍然通过，说明测试无效。
 """
+
 import os
+import re
 import shutil
 import subprocess
+import tempfile
 from contextlib import contextmanager
 
 import pytest
 
 
-@contextmanager
-def backup_and_restore(filepath):
-    backup_path = filepath + ".strict_bak"
-    shutil.copy2(filepath, backup_path)
-    try:
-        yield
-    finally:
-        shutil.copy2(backup_path, filepath)
-        os.remove(backup_path)
-
-
 class TestStrictValidation:
     """严格验证每个测试用例的有效性"""
 
-    def test_tn_01_patches_correct_method_in_class(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+    def _run_test_with_mutation(self, target_test, mutation_func):
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_project = os.path.join(temp_dir, "test_project")
+            shutil.copytree(project_root, temp_project, dirs_exist_ok=True)
+            
+            src_file = os.path.join(temp_project, "src", "governance", "transformer.py")
+            
+            with open(src_file, "r", encoding="utf-8") as f:
                 content = f.read()
             
-            content = content.replace("self.patched = True", "# self.patched = True")
+            content = mutation_func(content)
             
-            with open(filepath, "w", encoding="utf-8") as f:
+            with open(src_file, "w", encoding="utf-8") as f:
                 f.write(content)
             
             result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_patches_correct_method_in_class",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
+                [
+                    "python",
+                    "-m",
+                    "pytest",
+                    target_test,
+                    "-v",
+                    "--tb=short",
+                    "--no-header",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=temp_project,
+                timeout=60,
             )
             
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-01 验证通过：能检测到 patched=True 被删除")
+            return result
+
+    def test_tn_01_patches_correct_method_in_class(self):
+        def mutate(content):
+            return content.replace("self.patched = True", "# self.patched = True")
+        
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_patches_correct_method_in_class",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-01 验证通过：能检测到 patched=True 被删除")
 
     def test_tn_02_rejects_wrong_class_name(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return re.sub(
+                r"class_match\s*=\s*\([^)]+\)",
+                "class_match = True",
+                content,
+            )
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
-                "class_match = (self.target_class is None or self.current_class == self.target_class)",
-                "# [MUTATION] class_match always True\nclass_match = True"
-            )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_rejects_wrong_class_name",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-02 验证通过：能检测到 class_match 被强制为 True")
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_rejects_wrong_class_name",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-02 验证通过：能检测到 class_match 被强制为 True")
 
     def test_tn_03_handles_empty_new_body(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return content.replace("self.patched = True", "# self.patched = True")
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace("self.patched = True", "# self.patched = True")
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_handles_empty_new_body",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-03 验证通过：能检测到 patched=True 被删除")
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_handles_empty_new_body",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-03 验证通过：能检测到 patched=True 被删除")
 
     def test_tn_04_raises_error_on_invalid_syntax(self):
-        pytest.skip("此测试验证外部库行为，无需变异验证")
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_project = os.path.join(temp_dir, "test_project")
+            shutil.copytree(project_root, temp_project, dirs_exist_ok=True)
+            
+            test_file = os.path.join(temp_project, "tests", "governance", "test_transformer_new.py")
+            
+            with open(test_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            
+            lines = content.split('\n')
+            for i, line in enumerate(lines):
+                if 'test_raises_error_on_invalid_syntax' in line:
+                    for j in range(i, min(i+30, len(lines))):
+                        if 'new_body=' in lines[j] and 'invalid(' in lines[j]:
+                            lines[j] = lines[j].replace('def invalid(', 'def valid():\\n    return 1')
+                            break
+                    break
+            
+            content = '\n'.join(lines)
+            
+            with open(test_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            
+            result = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_raises_error_on_invalid_syntax",
+                    "-v",
+                    "--tb=short",
+                    "--no-header",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=temp_project,
+                timeout=60,
+            )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！无效语法应引发错误\n输出:\n{result.stdout}"
+        print("✅ TN-04 验证通过：能检测到无效语法")
 
     def test_tn_05_works_without_class_filter(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return re.sub(
+                r"class_match\s*=\s*\([^)]+\)",
+                "class_match = False",
+                content,
+            )
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
-                "class_match = (self.target_class is None or self.current_class == self.target_class)",
-                "# [MUTATION] class_match inverted\nclass_match = not (self.target_class is None or self.current_class == self.target_class)"
-            )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_works_without_class_filter",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-05 验证通过：能检测到 class_match 条件反转")
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestContextAwareTransformer::test_works_without_class_filter",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-05 验证通过：能检测到 class_match 条件被强制为 False")
 
     def test_tn_06_patches_standalone_function(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return content.replace(
+                "self.patched = True",
+                "# self.patched = True",
+            )
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
-                "def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):\n        if original_node.name.value == self.target_function:\n            self.patched = True",
-                "def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):\n        if original_node.name.value == self.target_function:\n            # [MUTATION] patched=True removed"
-            )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestFunctionTransformer::test_patches_standalone_function",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-06 验证通过：能检测到 FunctionTransformer.patched=True 被删除")
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestFunctionTransformer::test_patches_standalone_function",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-06 验证通过：能检测到 FunctionTransformer.patched=True 被删除")
 
     def test_tn_07_ignores_non_matching_function(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
-        
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
+        def mutate(content):
+            return content.replace(
                 "if original_node.name.value == self.target_function:",
-                "# [MUTATION] match inverted\nif original_node.name.value != self.target_function:"
+                "if original_node.name.value != self.target_function:",
             )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestFunctionTransformer::test_ignores_non_matching_function",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-07 验证通过：能检测到 FunctionTransformer 匹配条件反转")
+        
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestFunctionTransformer::test_ignores_non_matching_function",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-07 验证通过：能检测到 FunctionTransformer 匹配条件反转")
 
     def test_tn_08_adds_imports_at_correct_position(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return content.replace(
+                "new_body.extend(self.new_import_nodes)",
+                "# new_body.extend(self.new_import_nodes)",
+            )
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
-                "if isinstance(node, (cst.Import, cst.ImportFrom)) and not inserted:\n                new_body.extend(self.new_import_nodes)\n                inserted = True",
-                "# [MUTATION] import insertion removed\nif isinstance(node, (cst.Import, cst.ImportFrom)) and not inserted:\n                inserted = True"
-            )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestImportApplier::test_adds_imports_at_correct_position",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-08 验证通过：能检测到 ImportApplier 插入逻辑被删除")
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestImportApplier::test_adds_imports_at_correct_position",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-08 验证通过：能检测到 ImportApplier 插入逻辑被删除")
 
     def test_tn_09_handles_no_existing_imports(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return content.replace(
+                "new_body = self.new_import_nodes + new_body",
+                "# new_body = self.new_import_nodes + new_body",
+            )
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
-                "if not inserted:\n            new_body = self.new_import_nodes + new_body",
-                "# [MUTATION] fallback insertion removed\nif not inserted:\n            pass"
-            )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestImportApplier::test_handles_no_existing_imports",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            assert result.returncode != 0, (
-                f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
-            )
-            print("✅ TN-09 验证通过：能检测到 ImportApplier 末尾插入逻辑被删除")
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestImportApplier::test_handles_no_existing_imports",
+            mutate,
+        )
+        
+        assert (
+            result.returncode != 0
+        ), f"测试无效！破坏后测试仍通过\n输出:\n{result.stdout}"
+        print("✅ TN-09 验证通过：能检测到 ImportApplier 末尾插入逻辑被删除")
 
     def test_tn_10_handles_empty_imports_list(self):
-        filepath = os.path.join("src", "governance", "transformer.py")
+        def mutate(content):
+            return content.replace(
+                "return updated_node",
+                "# return updated_node",
+            )
         
-        with backup_and_restore(filepath):
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
-            
-            content = content.replace(
-                "if not self.new_import_nodes:\n            return updated_node",
-                "# [MUTATION] early return removed\nif not self.new_import_nodes:\n            pass"
+        result = self._run_test_with_mutation(
+            "tests/governance/test_transformer_new.py::TestImportApplier::test_handles_empty_imports_list",
+            mutate,
+        )
+        
+        if result.returncode == 0:
+            print(
+                "⚠️ TN-10 警告：测试过于宽松（仅验证 result is not None），建议增加更严格的断言"
             )
-            
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            result = subprocess.run(
-                ["python", "-m", "pytest",
-                 "tests/governance/test_transformer_new.py::TestImportApplier::test_handles_empty_imports_list",
-                 "-v", "--tb=short", "--no-header"],
-                capture_output=True, text=True
-            )
-            
-            if result.returncode == 0:
-                print("⚠️ TN-10 警告：测试过于宽松（仅验证 result is not None），建议增加更严格的断言")
-            print("✅ TN-10 验证完成")
+        print("✅ TN-10 验证完成")
 
 
 class TestCIGuardEffectiveness:
@@ -277,7 +262,7 @@ class TestCIGuardEffectiveness:
 
     def test_ci_guard_blocks_weak_assertion(self):
         test_file = os.path.join("tests", "governance", "test_temp_weak.py")
-        
+
         try:
             with open(test_file, "w", encoding="utf-8") as f:
                 f.write("""
@@ -287,10 +272,11 @@ def test_weak():
     obj = {"attr": 1}
     assert hasattr(obj, 'attr')
 """)
-            
+
             from tests.ci_guard import scan_for_weak_assertions
+
             violations = scan_for_weak_assertions(os.path.dirname(test_file))
-            
+
             assert len(violations) > 0, "CI 守卫未能检测到弱断言"
             print("✅ CI-01 验证通过：能检测 assert hasattr")
         finally:
@@ -299,7 +285,7 @@ def test_weak():
 
     def test_ci_guard_blocks_pytest_skip(self):
         test_file = os.path.join("tests", "governance", "test_temp_skip.py")
-        
+
         try:
             with open(test_file, "w", encoding="utf-8") as f:
                 f.write("""
@@ -308,10 +294,11 @@ import pytest
 def test_skipped():
     pytest.skip("broken")
 """)
-            
+
             from tests.ci_guard import scan_for_pytest_skip
+
             violations = scan_for_pytest_skip(os.path.dirname(test_file))
-            
+
             assert len(violations) > 0, "CI 守卫未能检测到 pytest.skip"
             print("✅ CI-02 验证通过：能检测 pytest.skip")
         finally:
@@ -320,7 +307,7 @@ def test_skipped():
 
     def test_ci_guard_blocks_exception_pass(self):
         test_file = os.path.join("tests", "governance", "test_temp_pass.py")
-        
+
         try:
             with open(test_file, "w", encoding="utf-8") as f:
                 f.write("""
@@ -330,10 +317,11 @@ def test_pass():
     except Exception:
         pass
 """)
-            
+
             from tests.ci_guard import scan_for_exception_pass
+
             violations = scan_for_exception_pass(os.path.dirname(test_file))
-            
+
             assert len(violations) > 0, "CI 守卫未能检测到 except Exception: pass"
             print("✅ CI-03 验证通过：能检测 except Exception: pass")
         finally:

@@ -22,7 +22,7 @@ def setup_logging():
     # 此时不需要 [TraceID:%(trace_id)s]，因为我们要在自定义 Filter 中注入
     # 但为了兼容性，保留 %(trace_id)s 在 format 中是安全的，filter 会处理
     formatter = logging.Formatter(
-        '[%(asctime)s] [%(levelname)s] [%(name)s] [TraceID:%(trace_id)s] %(message)s'
+        "[%(asctime)s] [%(levelname)s] [%(name)s] [TraceID:%(trace_id)s] %(message)s"
     )
 
     # 实例化 Filter

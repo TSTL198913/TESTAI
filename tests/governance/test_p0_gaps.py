@@ -9,8 +9,7 @@ class TestP0GapVerifications:
     def test_persistence_fixed_approval_survives_reboot(self):
         import tempfile
 
-        from src.governance.models import (DiagnosticContext, PatchProposal,
-                                           PatchType)
+        from src.governance.models import DiagnosticContext, PatchProposal, PatchType
         from tests.governance.persistence import PersistentApprovalManager
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -20,14 +19,14 @@ class TestP0GapVerifications:
             proposal = PatchProposal(
                 target_function="test_func",
                 suggested_code="pass",
-                patch_type=PatchType.SECURITY
+                patch_type=PatchType.SECURITY,
             )
             context = DiagnosticContext(
                 step_id="test_step_p0_001",
                 component_name="TestComponent",
                 input_data={},
                 actual_output="",
-                expected_baseline=""
+                expected_baseline="",
             )
             mgr1.create_approval("tx_p0_persistence_001", proposal, context)
             mgr1.approve("tx_p0_persistence_001", "tech_committee", "Approved")
@@ -53,7 +52,7 @@ class TestP0GapVerifications:
                 trace_id="trace_p0_tracker_001",
                 action_type=GovernanceActionType.PATCH_APPLIED,
                 component="TestComponent",
-                status="FIXED"
+                status="FIXED",
             )
 
             tracker2 = PersistentGovernanceTracker(db_path=db_path)
@@ -104,12 +103,14 @@ class TestP0GapVerifications:
         # 行为验证：client 和 breaker 必须存在且可用
         assert sdk.client is not None, "SDK client 不应为 None"
         assert sdk.breaker is not None, "SDK circuit breaker 不应为 None"
-        # 验证 breaker 有核心方法（CircuitBreaker 的实际方法名）
-        assert hasattr(sdk.breaker, 'can_execute'), "CircuitBreaker 必须有 can_execute 方法"
-        assert hasattr(sdk.breaker, 'record_failure'), "CircuitBreaker 必须有 record_failure 方法"
+        # 验证 breaker 核心方法的行为
+        assert sdk.breaker.can_execute() is True, "CircuitBreaker 初始状态应允许执行"
+        sdk.breaker.record_failure()
+        assert sdk.breaker.failures == 1, "record_failure 应增加失败计数"
 
     def test_llm_depends_on_env_variable(self):
         import os
+
         api_key = os.getenv("DEEPSEEK_API_KEY")
         assert api_key is None or isinstance(api_key, str)
 
@@ -122,24 +123,24 @@ class TestP0GapVerifications:
         orchestrator = GovernanceOrchestrator()
 
         # 行为验证：组件必须存在且类型正确
-        assert isinstance(orchestrator.approval_mgr, ApprovalManager), (
-            "approval_mgr 必须是 ApprovalManager 实例"
-        )
-        assert isinstance(orchestrator.tracker, GovernanceTracker), (
-            "tracker 必须是 GovernanceTracker 实例"
-        )
-        assert isinstance(orchestrator.executor, GovernanceExecutor), (
-            "executor 必须是 GovernanceExecutor 实例"
-        )
+        assert isinstance(
+            orchestrator.approval_mgr, ApprovalManager
+        ), "approval_mgr 必须是 ApprovalManager 实例"
+        assert isinstance(
+            orchestrator.tracker, GovernanceTracker
+        ), "tracker 必须是 GovernanceTracker 实例"
+        assert isinstance(
+            orchestrator.executor, GovernanceExecutor
+        ), "executor 必须是 GovernanceExecutor 实例"
 
     def test_models_have_core_classes(self):
-        from src.governance.models import (AIGovernanceResult,
-                                           DiagnosticContext, PatchProposal)
-
-        proposal = PatchProposal(
-            target_function="test_func",
-            suggested_code="pass"
+        from src.governance.models import (
+            AIGovernanceResult,
+            DiagnosticContext,
+            PatchProposal,
         )
+
+        proposal = PatchProposal(target_function="test_func", suggested_code="pass")
         assert proposal.target_function == "test_func"
 
         context = DiagnosticContext(
@@ -147,27 +148,26 @@ class TestP0GapVerifications:
             component_name="TestComponent",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
         assert context.step_id == "test_step"
 
     def test_approval_manager_is_singleton(self):
         from src.governance.approval import ApprovalManager
-        from src.governance.models import (DiagnosticContext, PatchProposal,
-                                           PatchType)
+        from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 
         mgr = ApprovalManager()
         proposal = PatchProposal(
             target_function="test_func",
             suggested_code="pass",
-            patch_type=PatchType.FUNCTIONAL
+            patch_type=PatchType.FUNCTIONAL,
         )
         context = DiagnosticContext(
             step_id="test_step_p0_002",
             component_name="TestComponent",
             input_data={},
             actual_output="",
-            expected_baseline=""
+            expected_baseline="",
         )
 
         mgr.create_approval("tx_p0_memory_001", proposal, context)
@@ -189,8 +189,7 @@ def my_function():
 """
         tree = cst.parse_module(source_code)
         transformer = FunctionTransformer(
-            target_function="my_function",
-            new_body="return 2"
+            target_function="my_function", new_body="return 2"
         )
 
         tree = tree.visit(transformer)
@@ -210,9 +209,7 @@ class TargetClass:
 """
         tree = cst.parse_module(source_code)
         transformer = ContextAwareTransformer(
-            target_function="my_method",
-            new_body="return 2",
-            target_class="TargetClass"
+            target_function="my_method", new_body="return 2", target_class="TargetClass"
         )
 
         tree = tree.visit(transformer)

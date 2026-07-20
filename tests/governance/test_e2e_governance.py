@@ -5,8 +5,7 @@ import tempfile
 
 import pytest
 
-from src.governance.models import (AIGovernanceResult, DiagnosticContext,
-                                   PatchProposal)
+from src.governance.models import AIGovernanceResult, DiagnosticContext, PatchProposal
 from src.governance.orchestrator import GovernanceOrchestrator
 
 BUGGY_CODE = """
@@ -32,15 +31,17 @@ class MockAgent:
             patch_proposal=PatchProposal(
                 target_function="calculate_score",
                 suggested_code="return a + b",
-                required_imports=[]
-            )
+                required_imports=[],
+            ),
         )
 
 
 @pytest.mark.asyncio
 async def test_governance_e2e_loop():
-    temp_dir = tempfile.mkdtemp(prefix="testai_e2e_")
-    
+    import os
+    temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "e2e_temp")
+    os.makedirs(temp_dir, exist_ok=True)
+
     try:
         target_file = await setup_lab(temp_dir)
 
@@ -52,7 +53,7 @@ async def test_governance_e2e_loop():
             component_name="test_target",
             input_data={"a": 10, "b": 5},
             actual_output=5,
-            expected_baseline=15
+            expected_baseline=15,
         )
 
         manager._resolve_file_path = lambda x: target_file
@@ -60,10 +61,7 @@ async def test_governance_e2e_loop():
         result = await manager.execute_governance_flow(context)
         print(f"DEBUG: result = {result}")
 
-        if result["status"] == "FAILED":
-            pytest.skip("Skipping due to environment-specific restrictions")
-
-        assert result["status"] == "FIXED"
+        assert result["status"] == "FIXED", f"治理流程失败: {result}"
 
         with open(target_file, "r", encoding="utf-8") as f:
             content = f.read()
@@ -74,6 +72,7 @@ async def test_governance_e2e_loop():
 
     finally:
         import logging
+
         logger = logging.getLogger(__name__)
         for root, dirs, files in os.walk(temp_dir, topdown=False):
             for file in files:
@@ -82,7 +81,9 @@ async def test_governance_e2e_loop():
                 except PermissionError as e:
                     logger.warning(f"无法删除文件 {os.path.join(root, file)}: {e}")
                 except Exception as e:
-                    logger.warning(f"清理文件失败 {os.path.join(root, file)}: {type(e).__name__}: {e}")
+                    logger.warning(
+                        f"清理文件失败 {os.path.join(root, file)}: {type(e).__name__}: {e}"
+                    )
             for dir in dirs:
                 try:
                     os.rmdir(os.path.join(root, dir))

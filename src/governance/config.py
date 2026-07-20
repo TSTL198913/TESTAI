@@ -14,7 +14,9 @@ class GovernanceConfig:
     MAX_CONCURRENT_LLM_CALLS = int(os.getenv("MAX_CONCURRENT_LLM_CALLS", "5"))
     APPROVAL_EXPIRY_MINUTES = int(os.getenv("APPROVAL_EXPIRY_MINUTES", "30"))
     CIRCUIT_BREAKER_THRESHOLD = int(os.getenv("CIRCUIT_BREAKER_THRESHOLD", "3"))
-    CIRCUIT_BREAKER_RECOVERY_TIMEOUT = int(os.getenv("CIRCUIT_BREAKER_RECOVERY_TIMEOUT", "30"))
+    CIRCUIT_BREAKER_RECOVERY_TIMEOUT = int(
+        os.getenv("CIRCUIT_BREAKER_RECOVERY_TIMEOUT", "30")
+    )
 
     @classmethod
     def is_llm_configured(cls) -> bool:
@@ -32,5 +34,5 @@ class GovernanceConfig:
             "db_path": cls.GOVERNANCE_DB_PATH,
             "log_level": cls.LOG_LEVEL,
             "max_concurrent_llm_calls": cls.MAX_CONCURRENT_LLM_CALLS,
-            "approval_expiry_minutes": cls.APPROVAL_EXPIRY_MINUTES
+            "approval_expiry_minutes": cls.APPROVAL_EXPIRY_MINUTES,
         }

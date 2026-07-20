@@ -4,10 +4,12 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
-from src.governance.approval import (ApprovalManager, ApprovalRecord,
-                                     ApprovalStatus)
-from src.governance.tracker import (GovernanceActionType, GovernanceTracker,
-                                    TrackingEvent)
+from src.governance.approval import ApprovalManager, ApprovalRecord, ApprovalStatus
+from src.governance.tracker import (
+    GovernanceActionType,
+    GovernanceTracker,
+    TrackingEvent,
+)
 
 
 class PersistentApprovalManager:
@@ -24,7 +26,7 @@ class PersistentApprovalManager:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS approval_records (
                     tx_id TEXT PRIMARY KEY,
                     proposal_json TEXT NOT NULL,
@@ -36,7 +38,7 @@ class PersistentApprovalManager:
                     reason TEXT,
                     expires_at TEXT NOT NULL
                 )
-            ''')
+            """)
 
             conn.commit()
             conn.close()
@@ -45,14 +47,23 @@ class PersistentApprovalManager:
         with self._lock:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM approval_records')
+            cursor.execute("SELECT * FROM approval_records")
 
             for row in cursor.fetchall():
-                tx_id, proposal_json, context_json, status, created_at, \
-                approved_by, approved_at, reason, expires_at = row
+                (
+                    tx_id,
+                    proposal_json,
+                    context_json,
+                    status,
+                    created_at,
+                    approved_by,
+                    approved_at,
+                    reason,
+                    expires_at,
+                ) = row
 
-                from src.governance.models import (DiagnosticContext,
-                                                   PatchProposal)
+                from src.governance.models import DiagnosticContext, PatchProposal
+
                 proposal = PatchProposal.model_validate_json(proposal_json)
                 context = DiagnosticContext.model_validate_json(context_json)
 
@@ -60,7 +71,9 @@ class PersistentApprovalManager:
                 record.status = ApprovalStatus(status)
                 record.created_at = datetime.fromisoformat(created_at)
                 record.approved_by = approved_by
-                record.approved_at = datetime.fromisoformat(approved_at) if approved_at else None
+                record.approved_at = (
+                    datetime.fromisoformat(approved_at) if approved_at else None
+                )
                 record.reason = reason
                 record.expires_at = datetime.fromisoformat(expires_at)
 
@@ -74,22 +87,25 @@ class PersistentApprovalManager:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO approval_records
                 (tx_id, proposal_json, context_json, status, created_at,
                  approved_by, approved_at, reason, expires_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                record.tx_id,
-                record.proposal.model_dump_json(),
-                record.context.model_dump_json(),
-                record.status.value,
-                record.created_at.isoformat(),
-                record.approved_by,
-                record.approved_at.isoformat() if record.approved_at else None,
-                record.reason,
-                record.expires_at.isoformat()
-            ))
+            """,
+                (
+                    record.tx_id,
+                    record.proposal.model_dump_json(),
+                    record.context.model_dump_json(),
+                    record.status.value,
+                    record.created_at.isoformat(),
+                    record.approved_by,
+                    record.approved_at.isoformat() if record.approved_at else None,
+                    record.reason,
+                    record.expires_at.isoformat(),
+                ),
+            )
 
             conn.commit()
             conn.close()
@@ -138,7 +154,7 @@ class PersistentApprovalManager:
         with self._lock:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('SELECT tx_id, status, created_at FROM approval_records')
+            cursor.execute("SELECT tx_id, status, created_at FROM approval_records")
             results = cursor.fetchall()
             conn.close()
             return results
@@ -158,7 +174,7 @@ class PersistentGovernanceTracker:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tracking_events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     trace_id TEXT NOT NULL,
@@ -172,7 +188,7 @@ class PersistentGovernanceTracker:
                     message TEXT,
                     metadata_json TEXT
                 )
-            ''')
+            """)
 
             conn.commit()
             conn.close()
@@ -184,11 +200,22 @@ class PersistentGovernanceTracker:
 
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM tracking_events ORDER BY id')
+            cursor.execute("SELECT * FROM tracking_events ORDER BY id")
 
             for row in cursor.fetchall():
-                _, trace_id, action_type, timestamp, component, \
-                step_id, tx_id, patch_type, status, message, metadata_json = row
+                (
+                    _,
+                    trace_id,
+                    action_type,
+                    timestamp,
+                    component,
+                    step_id,
+                    tx_id,
+                    patch_type,
+                    status,
+                    message,
+                    metadata_json,
+                ) = row
 
                 event = TrackingEvent(
                     trace_id=trace_id,
@@ -200,7 +227,7 @@ class PersistentGovernanceTracker:
                     patch_type=patch_type,
                     status=status,
                     message=message,
-                    metadata=json.loads(metadata_json) if metadata_json else {}
+                    metadata=json.loads(metadata_json) if metadata_json else {},
                 )
 
                 with self._inner._lock:
@@ -213,32 +240,52 @@ class PersistentGovernanceTracker:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO tracking_events
                 (trace_id, action_type, timestamp, component, step_id,
                  tx_id, patch_type, status, message, metadata_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                event.trace_id,
-                event.action_type.value,
-                event.timestamp.isoformat(),
-                event.component,
-                event.step_id,
-                event.tx_id,
-                event.patch_type,
-                event.status,
-                event.message,
-                json.dumps(event.metadata)
-            ))
+            """,
+                (
+                    event.trace_id,
+                    event.action_type.value,
+                    event.timestamp.isoformat(),
+                    event.component,
+                    event.step_id,
+                    event.tx_id,
+                    event.patch_type,
+                    event.status,
+                    event.message,
+                    json.dumps(event.metadata),
+                ),
+            )
 
             conn.commit()
             conn.close()
 
-    def record_event(self, trace_id, action_type, component=None, step_id=None,
-                     tx_id=None, patch_type=None, status=None, message=None, **metadata):
+    def record_event(
+        self,
+        trace_id,
+        action_type,
+        component=None,
+        step_id=None,
+        tx_id=None,
+        patch_type=None,
+        status=None,
+        message=None,
+        **metadata
+    ):
         self._inner.record_event(
-            trace_id, action_type, component, step_id, tx_id,
-            patch_type, status, message, **metadata
+            trace_id,
+            action_type,
+            component,
+            step_id,
+            tx_id,
+            patch_type,
+            status,
+            message,
+            **metadata
         )
         events = self._inner.get_events_by_trace(trace_id)
         if events:
@@ -267,7 +314,7 @@ class PersistentGovernanceTracker:
         with self._lock:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM tracking_events')
+            cursor.execute("DELETE FROM tracking_events")
             conn.commit()
             conn.close()
 
@@ -278,7 +325,7 @@ class PersistentGovernanceTracker:
         with self._lock:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('SELECT COUNT(*) FROM tracking_events')
+            cursor.execute("SELECT COUNT(*) FROM tracking_events")
             count = cursor.fetchone()[0]
             conn.close()
             return count

@@ -26,7 +26,4 @@ class GrpcTransformer(StepTransformer):
         return raw_step
 
 
-TRANSFORMER_REGISTRY = {
-    "http": HttpTransformer(),
-    "grpc": GrpcTransformer()
-}
+TRANSFORMER_REGISTRY = {"http": HttpTransformer(), "grpc": GrpcTransformer()}

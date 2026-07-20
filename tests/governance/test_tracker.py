@@ -3,8 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 
 from src.governance.models import PatchType
-from src.governance.tracker import (GovernanceActionType, GovernanceTracker,
-                                    TrackingEvent)
+from src.governance.tracker import (
+    GovernanceActionType,
+    GovernanceTracker,
+    TrackingEvent,
+)
 
 
 class TestGovernanceActionType:
@@ -29,7 +32,7 @@ class TestTrackingEvent:
             tx_id="tx_001",
             patch_type="functional",
             status="STARTED",
-            message="Starting diagnosis"
+            message="Starting diagnosis",
         )
 
         assert event.trace_id == "trace_001"
@@ -59,7 +62,7 @@ class TestGovernanceTracker:
             action_type=GovernanceActionType.DIAGNOSE_START,
             component="TestComponent",
             step_id="step_001",
-            status="STARTED"
+            status="STARTED",
         )
 
         events = tracker.get_events_by_trace("trace_record_001")
@@ -74,7 +77,7 @@ class TestGovernanceTracker:
             action_type=GovernanceActionType.PATCH_CREATE,
             component="TestComponent",
             tx_id="tx_001",
-            patch_type=PatchType.SECURITY
+            patch_type=PatchType.SECURITY,
         )
 
         events = tracker.get_events_by_trace("trace_patch_001")
@@ -85,16 +88,14 @@ class TestGovernanceTracker:
         tracker = GovernanceTracker()
 
         tracker.record_event(
-            trace_id="trace_filter_001",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            trace_id="trace_filter_001", action_type=GovernanceActionType.DIAGNOSE_START
         )
         tracker.record_event(
             trace_id="trace_filter_001",
-            action_type=GovernanceActionType.DIAGNOSE_COMPLETE
+            action_type=GovernanceActionType.DIAGNOSE_COMPLETE,
         )
         tracker.record_event(
-            trace_id="trace_filter_002",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            trace_id="trace_filter_002", action_type=GovernanceActionType.DIAGNOSE_START
         )
 
         events = tracker.get_events_by_trace("trace_filter_001")
@@ -106,17 +107,17 @@ class TestGovernanceTracker:
         tracker.record_event(
             trace_id="trace_001",
             action_type=GovernanceActionType.DIAGNOSE_START,
-            component="ComponentA"
+            component="ComponentA",
         )
         tracker.record_event(
             trace_id="trace_002",
             action_type=GovernanceActionType.DIAGNOSE_START,
-            component="ComponentB"
+            component="ComponentB",
         )
         tracker.record_event(
             trace_id="trace_003",
             action_type=GovernanceActionType.DIAGNOSE_START,
-            component="ComponentA"
+            component="ComponentA",
         )
 
         events = tracker.get_events_by_component("ComponentA")
@@ -126,19 +127,18 @@ class TestGovernanceTracker:
         tracker = GovernanceTracker()
 
         tracker.record_event(
-            trace_id="trace_001",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            trace_id="trace_001", action_type=GovernanceActionType.DIAGNOSE_START
         )
         tracker.record_event(
-            trace_id="trace_001",
-            action_type=GovernanceActionType.PATCH_APPLIED
+            trace_id="trace_001", action_type=GovernanceActionType.PATCH_APPLIED
         )
         tracker.record_event(
-            trace_id="trace_002",
-            action_type=GovernanceActionType.PATCH_FAILED
+            trace_id="trace_002", action_type=GovernanceActionType.PATCH_FAILED
         )
 
-        applied_events = tracker.get_events_by_action(GovernanceActionType.PATCH_APPLIED)
+        applied_events = tracker.get_events_by_action(
+            GovernanceActionType.PATCH_APPLIED
+        )
         assert len(applied_events) == 1
 
     def test_get_recent_events(self):
@@ -146,8 +146,7 @@ class TestGovernanceTracker:
 
         for i in range(60):
             tracker.record_event(
-                trace_id=f"trace_{i}",
-                action_type=GovernanceActionType.DIAGNOSE_START
+                trace_id=f"trace_{i}", action_type=GovernanceActionType.DIAGNOSE_START
             )
 
         recent = tracker.get_recent_events(limit=50)
@@ -160,25 +159,25 @@ class TestGovernanceTracker:
             trace_id="trace_001",
             action_type=GovernanceActionType.DIAGNOSE_START,
             component="CompA",
-            status="STARTED"
+            status="STARTED",
         )
         tracker.record_event(
             trace_id="trace_001",
             action_type=GovernanceActionType.PATCH_APPLIED,
             component="CompA",
-            status="FIXED"
+            status="FIXED",
         )
         tracker.record_event(
             trace_id="trace_002",
             action_type=GovernanceActionType.PATCH_FAILED,
             component="CompB",
-            status="FAILED"
+            status="FAILED",
         )
         tracker.record_event(
             trace_id="trace_003",
             action_type=GovernanceActionType.CONVERGED,
             component="CompA",
-            status="CONVERGED"
+            status="CONVERGED",
         )
 
         summary = tracker.get_summary()
@@ -200,15 +199,14 @@ class TestGovernanceTracker:
 
         tracker.record_event(
             trace_id="trace_summary_001",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            action_type=GovernanceActionType.DIAGNOSE_START,
         )
         tracker.record_event(
-            trace_id="trace_summary_001",
-            action_type=GovernanceActionType.PATCH_APPLIED
+            trace_id="trace_summary_001", action_type=GovernanceActionType.PATCH_APPLIED
         )
         tracker.record_event(
             trace_id="trace_summary_002",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            action_type=GovernanceActionType.DIAGNOSE_START,
         )
 
         summary = tracker.get_summary(trace_id="trace_summary_001")
@@ -221,7 +219,7 @@ class TestGovernanceTracker:
             trace_id="trace_export_001",
             action_type=GovernanceActionType.DIAGNOSE_START,
             component="TestComponent",
-            step_id="step_001"
+            step_id="step_001",
         )
 
         exported = tracker.export_events()
@@ -235,11 +233,11 @@ class TestGovernanceTracker:
 
         tracker.record_event(
             trace_id="trace_export_filter_001",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            action_type=GovernanceActionType.DIAGNOSE_START,
         )
         tracker.record_event(
             trace_id="trace_export_filter_002",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            action_type=GovernanceActionType.DIAGNOSE_START,
         )
 
         exported = tracker.export_events(trace_id="trace_export_filter_001")
@@ -249,8 +247,7 @@ class TestGovernanceTracker:
         tracker = GovernanceTracker()
 
         tracker.record_event(
-            trace_id="trace_clear_001",
-            action_type=GovernanceActionType.DIAGNOSE_START
+            trace_id="trace_clear_001", action_type=GovernanceActionType.DIAGNOSE_START
         )
         assert len(tracker.get_recent_events()) == 1
 

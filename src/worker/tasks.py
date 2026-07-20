@@ -31,7 +31,7 @@ def run_test_pipeline(self, request_dict: dict):
             case_id=request_dict.get("case_id", "default_case"),
             env=request_dict.get("env", {}),
             vars=request_dict.get("vars", {}),
-            results={}
+            results={},
         )
 
         await pipeline.run(execution_context, request_dict.get("steps", []), client)
@@ -43,6 +43,7 @@ def run_test_pipeline(self, request_dict: dict):
         return future.result(timeout=60)
     except Exception as e:
         try:
+
             async def _governance():
                 agent = AIGovernanceAgent()
                 diag_context = DiagnosticContext(
@@ -51,7 +52,7 @@ def run_test_pipeline(self, request_dict: dict):
                     input_data=request_dict,
                     actual_output=str(e),
                     expected_baseline=None,
-                    exception_trace=str(e)
+                    exception_trace=str(e),
                 )
                 governance_result = await agent.analyze_with_context(diag_context)
                 return governance_result.model_dump()
