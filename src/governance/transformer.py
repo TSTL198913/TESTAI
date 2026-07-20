@@ -25,7 +25,7 @@ class FunctionTransformer(BaseGovernanceTransformer):
 
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
         if original_node.name.value == self.target_function:
-            self.patched = True
+            # [MUTANT] # [MUTANT] self.patched = True
             return updated_node.with_changes(
                 body=cst.IndentedBlock(body=self.new_body_nodes)
             )
@@ -44,10 +44,11 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
 
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
         name_match = (original_node.name.value == self.target_function)
-        class_match = (self.target_class is None or self.current_class == self.target_class)
+        # [MUTANT] class_match always True
+class_match = True
 
         if name_match and class_match:
-            self.patched = True
+            # [MUTANT] # [MUTANT] self.patched = True
             return updated_node.with_changes(body=cst.IndentedBlock(body=self.new_body_nodes))
 
         if name_match and self.target_class and self.current_class != self.target_class:

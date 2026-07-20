@@ -10,7 +10,7 @@ _PROCESSOR_MAP = {
     "assertion": "src.engine.processor.assertion.AssertionProcessor",
     "http": "src.engine.processor.http.HTTPProcessor",
     "grpc": "src.engine.processor.grpc.GrpcProcessor",
-    "governance": "src.governance.processor.GovernanceProcessor",
+    "governance": "src.engine.processor.governance_processor.GovernanceProcessor",
 }
 
 def register_processor(name: str, path: str):

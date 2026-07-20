@@ -26,8 +26,7 @@ class ExecutionPipeline:
             last_exception = None
 
             for processor in self.processors:
-                # [MUTATION] wrong processor name
-is_governance_processor = processor.__class__.__name__ == "WrongProcessor"
+                is_governance_processor = processor.__class__.__name__ == "GovernanceProcessor"
 
                 if is_failed and not is_governance_processor:
                     continue
