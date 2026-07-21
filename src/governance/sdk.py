@@ -41,6 +41,10 @@ class GovernanceClientSDK:
         )
         self._initialized = True
 
+    @classmethod
+    def reset_instance(cls):
+        cls._instance = None
+
     @property
     def client(self):
         if self._client is None and GovernanceConfig.is_llm_configured() and not GovernanceConfig.USE_MOCK_LLM:
@@ -114,6 +118,9 @@ class GovernanceClientSDK:
                 additional_info={"model": model},
             )
             raise ValueError(error_msg)
+
+        except ValueError:
+            raise
 
         except Exception as e:
             self.breaker.record_failure()

@@ -119,6 +119,51 @@
       "acknowledged_at": "2026-07-21T14:40:51.983243",
       "resolved_by": "",
       "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000009",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T16:18:17.356016",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T16:18:17.358175",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000010",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T16:22:40.088610",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T16:22:40.090406",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000011",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T16:30:12.834319",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T16:30:12.836255",
+      "resolved_by": "",
+      "resolved_at": null
     }
   ],
   "rules": [
@@ -131,7 +176,7 @@
       "threshold": 0.1,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T14:40:51.981721"
+      "created_at": "2026-07-21T16:30:12.834319"
     },
     {
       "rule_id": "rule_performance",
@@ -142,7 +187,7 @@
       "threshold": 2000,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T14:40:51.981721"
+      "created_at": "2026-07-21T16:30:12.834319"
     },
     {
       "rule_id": "rule_performance_critical",
@@ -153,7 +198,7 @@
       "threshold": 5000,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T14:40:51.981721"
+      "created_at": "2026-07-21T16:30:12.834319"
     },
     {
       "rule_id": "rule_kill_rate",
@@ -164,7 +209,7 @@
       "threshold": 80,
       "window_seconds": 0,
       "enabled": true,
-      "created_at": "2026-07-21T14:40:51.981721"
+      "created_at": "2026-07-21T16:30:12.834319"
     },
     {
       "rule_id": "rule_coverage",
@@ -175,7 +220,7 @@
       "threshold": 80,
       "window_seconds": 0,
       "enabled": true,
-      "created_at": "2026-07-21T14:40:51.981721"
+      "created_at": "2026-07-21T16:30:12.834319"
     }
   ]
 }
