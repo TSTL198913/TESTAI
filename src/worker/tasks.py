@@ -44,15 +44,15 @@ def run_test_pipeline(self, request_dict: dict):
     except Exception as e:
         try:
 
-            async def _governance(e):
+            async def _governance(err):
                 agent = AIGovernanceAgent()
                 diag_context = DiagnosticContext(
                     step_id=request_dict.get("case_id", "unknown"),
                     component_name="pipeline",
                     input_data=request_dict,
-                    actual_output=str(e),
+                    actual_output=str(err),
                     expected_baseline=None,
-                    exception_trace=str(e),
+                    exception_trace=str(err),
                 )
                 governance_result = await agent.analyze_with_context(diag_context)
                 return governance_result.model_dump()
