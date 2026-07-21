@@ -38,8 +38,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run CI Guard
         run: python tests/ci_guard.py
@@ -65,8 +65,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           pip install pytest-cov
           
       - name: Run Unit Tests
@@ -100,8 +100,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run Integration Tests
         run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py
@@ -127,8 +127,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run Governance Tests
         run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning
@@ -156,8 +156,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run Governance E2E Validation
         run: python -m pytest tests/governance/test_e2e_governance.py -v --tb=short -W error::RuntimeWarning
@@ -191,8 +191,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run Effectiveness Gate
         run: python -m pytest tests/governance/test_effectiveness_gate.py -v --tb=short -W error::RuntimeWarning
@@ -220,8 +220,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           pip install mutmut
           
       - name: Run Mutation Test (mutmut)
@@ -262,8 +262,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run Custom Mutation Test
         run: python tests/utils/custom_mutation_test.py
@@ -315,8 +315,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           pip install bandit pip-audit
           
       - name: Run Bandit Security Scan
@@ -421,8 +421,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           
       - name: Run Full Test Suite
         run: python -m pytest -v --tb=short --no-header -q -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py
