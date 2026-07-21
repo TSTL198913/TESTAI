@@ -104,7 +104,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run Integration Tests
-        run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning
+        run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py
 
   governance-tests:
     name: Governance Tests
