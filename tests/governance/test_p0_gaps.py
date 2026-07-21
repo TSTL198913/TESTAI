@@ -97,16 +97,22 @@ class TestP0GapVerifications:
         assert manager.is_locked("test_file.txt") is False
 
     def test_llm_requires_api_key(self):
+        import os
         from src.governance.sdk import GovernanceClientSDK
+        from src.governance.config import GovernanceConfig
 
+        GovernanceClientSDK.reset_instance()
         sdk = GovernanceClientSDK()
-        # 行为验证：client 和 breaker 必须存在且可用
-        assert sdk.client is not None, "SDK client 不应为 None"
+        
         assert sdk.breaker is not None, "SDK circuit breaker 不应为 None"
-        # 验证 breaker 核心方法的行为
         assert sdk.breaker.can_execute() is True, "CircuitBreaker 初始状态应允许执行"
         sdk.breaker.record_failure()
         assert sdk.breaker.failures == 1, "record_failure 应增加失败计数"
+        
+        if GovernanceConfig.is_llm_configured():
+            assert sdk.client is not None, "SDK client 不应为 None"
+        else:
+            assert sdk.client is None, "未配置API key时client应为None"
 
     def test_llm_depends_on_env_variable(self):
         import os
