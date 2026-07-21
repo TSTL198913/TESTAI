@@ -166,6 +166,7 @@ class DatabaseManager:
         """执行查询并返回结果"""
         with self.engine.connect() as conn:
             if isinstance(query, str):
+                from sqlalchemy import text
                 return conn.execute(text(query))
             result = conn.execute(query)
             conn.commit()

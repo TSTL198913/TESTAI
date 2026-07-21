@@ -4,7 +4,7 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 SECRET_KEY = "hardcoded_key_12345"
 
 
-def process_user_expression():
+def process_user_expression(expression):
     import ast
 
     try:

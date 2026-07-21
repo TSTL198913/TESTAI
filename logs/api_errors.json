@@ -1033,5 +1033,31 @@
     },
     "testai_rule_13_compliant": true,
     "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T20:17:10.581656",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T20:17:10.590610",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
   }
 ]

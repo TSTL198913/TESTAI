@@ -44,7 +44,7 @@ def run_test_pipeline(self, request_dict: dict):
     except Exception as e:
         try:
 
-            async def _governance():
+            async def _governance(e):
                 agent = AIGovernanceAgent()
                 diag_context = DiagnosticContext(
                     step_id=request_dict.get("case_id", "unknown"),
@@ -57,7 +57,7 @@ def run_test_pipeline(self, request_dict: dict):
                 governance_result = await agent.analyze_with_context(diag_context)
                 return governance_result.model_dump()
 
-            gov_future = AsyncLoopManager.run_coroutine(_governance())
+            gov_future = AsyncLoopManager.run_coroutine(_governance(e))
             return gov_future.result(timeout=60)
         except Exception as ai_err:
             logging.error(f"AI Governance Failed: {ai_err}", exc_info=True)
