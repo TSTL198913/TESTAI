@@ -18,7 +18,6 @@ async def test_repository_concurrent_writes():
         await asyncio.sleep(0.01)  # 模拟 10ms 的数据库响应时间
         return None
 
-
     # 1. 准备 Mock 环境
     mock_db = MagicMock()
     # 模拟 insert_one 需要返回一个 Future 对象 (在 motor 中是 Future)
@@ -48,7 +47,9 @@ async def test_repository_error_resilience():
     """
     mock_db = MagicMock()
     # 模拟数据库插入失败
-    mock_db.execution_results.insert_one = AsyncMock(side_effect=Exception("DB Connection Lost"))
+    mock_db.execution_results.insert_one = AsyncMock(
+        side_effect=Exception("DB Connection Lost")
+    )
 
     repo = ResultRepository(db=mock_db)
 

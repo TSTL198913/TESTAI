@@ -9,6 +9,7 @@ from src.storage.utils import sanitize_for_mongo
 
 logger = logging.getLogger(__name__)
 
+
 class ResultRepository:
     def __init__(self, uri: str = None, db=None):
         self.uri = uri
@@ -29,7 +30,9 @@ class ResultRepository:
     async def save_execution(self, step_id: str, results: dict) -> None:
         # 这里必须确保 self.db 已经初始化，否则会抛出 AttributeError
         if self.db is None:
-            raise ConnectionError("Repository not initialized. Use 'async with' context manager.")
+            raise ConnectionError(
+                "Repository not initialized. Use 'async with' context manager."
+            )
 
         try:
             # 1. 数据清洗
@@ -39,7 +42,7 @@ class ResultRepository:
             document = {
                 "step_id": step_id,
                 "results": clean_results,
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.utcnow(),
             }
 
             # 3. 执行写入

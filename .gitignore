@@ -44,10 +44,29 @@ build/
 .installed.cfg
 *.egg
 
-# requirements.txt
-
 security_scan_report.json
 security_scan_report_v2.json
 black_output.txt
 black_error.txt
 push_to_github.py
+
+# Monorepo - Frontend ignores
+apps/web/node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/.build/
+apps/web/npm-debug.log*
+apps/web/yarn-debug.log*
+apps/web/yarn-error.log*
+apps/web/.tsbuildinfo
+
+# Monorepo - Backend ignores
+apps/server/__pycache__/
+apps/server/.pytest_cache/
+apps/server/.cache/
+apps/server/dist/
+apps/server/build/
+apps/server/*.egg-info/
+
+# Turborepo
+.turbo/

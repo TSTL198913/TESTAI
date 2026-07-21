@@ -30,7 +30,7 @@ class TestAPIEndpoints:
             "description": "API Test",
             "protocol": "http",
             "method": "GET",
-            "url": "https://example.com/api/test"
+            "url": "https://example.com/api/test",
         }
 
         response = client.post("/execute", json=request_data)
@@ -53,7 +53,7 @@ class TestAPIEndpoints:
             "description": "Invalid method",
             "protocol": "http",
             "method": "INVALID_METHOD",
-            "url": "https://example.com"
+            "url": "https://example.com",
         }
 
         response = client.post("/execute", json=invalid_data)
@@ -63,9 +63,7 @@ class TestAPIEndpoints:
 
     @patch("src.api.main.run_test_pipeline")
     def test_execute_endpoint_missing_required_fields(self, mock_task):
-        incomplete_data = {
-            "description": "Missing step_id"
-        }
+        incomplete_data = {"description": "Missing step_id"}
 
         response = client.post("/execute", json=incomplete_data)
 
@@ -85,7 +83,7 @@ class TestAPIEndpoints:
             "method": "POST",
             "url": "https://example.com/api/post",
             "headers": {"Authorization": "Bearer token123"},
-            "body": {"key": "value"}
+            "body": {"key": "value"},
         }
 
         response = client.post("/execute", json=request_data)
@@ -100,7 +98,7 @@ class TestAPIEndpoints:
             description="Model validation",
             protocol="http",
             method="GET",
-            url="https://example.com"
+            url="https://example.com",
         )
         assert valid_request.step_id == "model_valid_test"
         assert valid_request.protocol == "http"
@@ -109,7 +107,7 @@ class TestAPIEndpoints:
         import inspect
 
         from src.api.main import execute_test
-        
+
         source = inspect.getsource(execute_test)
-        assert 'try' in source
-        assert 'except' in source
+        assert "try" in source
+        assert "except" in source

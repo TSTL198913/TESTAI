@@ -4,6 +4,7 @@ import threading
 
 logger = logging.getLogger("LoopManager")
 
+
 class AsyncLoopManager:
     _loop: asyncio.AbstractEventLoop = None
     _thread: threading.Thread = None
@@ -14,7 +15,9 @@ class AsyncLoopManager:
         with cls._lock:
             if cls._loop is None:
                 cls._loop = asyncio.new_event_loop()
-                cls._thread = threading.Thread(target=cls._loop.run_forever, daemon=True)
+                cls._thread = threading.Thread(
+                    target=cls._loop.run_forever, daemon=True
+                )
                 cls._thread.start()
                 logger.info("Background Async Loop started.")
 

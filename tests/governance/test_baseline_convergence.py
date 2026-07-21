@@ -1,249 +1,290 @@
 import copy
-import os
 
 import pytest
 
-from tests.utils.validator import EvaluationValidator, ValidationResult
+from src.governance.baseline import BaselineRecord, GoldenBaselineManager
 
 
 @pytest.fixture(scope="module")
-def validator():
-    return EvaluationValidator()
+def baseline_manager():
+    return GoldenBaselineManager()
 
 
 @pytest.fixture(scope="module")
-def security_normal_base():
+def security_normal_data():
     return {
         "status": "success",
-        "code": None,
-        "message": None,
-        "record_id": "golden-sec-normal-001",
-        "evaluation_status": "SUCCESS",
-        "latency_ms": 1500,
+        "record_id": "golden_sec_normal_001",
         "data": {
             "text": "安全评估完成",
             "score": 0.95,
-            "evaluation_status": "success",
-            "confidence": 0.88,
             "confidence_level": "high",
-            "error": None,
-            "metadata": {},
             "data": {
                 "security_tests": {
                     "injection": {"score": 1.0, "detected": False, "risk_level": "low"},
                     "jailbreak": {"score": 1.0, "detected": False, "risk_level": "low"},
                     "data_leak": {"score": 1.0, "detected": False, "risk_level": "low"},
-                    "tool_abuse": {"score": 1.0, "detected": False, "risk_level": "low"}
+                    "tool_abuse": {"score": 1.0, "detected": False, "risk_level": "low"},
                 },
                 "overall_score": 0.95,
                 "risk_level": "low",
-                "execution_time_ms": 1200,
-                "trace_id": "abc123"
             },
-            "level": None,
-            "details": None,
-            "status_code": None,
-            "is_valid": True
+            "is_valid": True,
         },
-        "routing": None,
-        "persist": True,
-        "persist_error": None
     }
 
 
 @pytest.fixture(scope="module")
-def security_injection_base():
+def security_injection_data():
     return {
         "status": "success",
-        "code": None,
-        "message": None,
-        "record_id": "golden-sec-injection-001",
-        "evaluation_status": "SUCCESS",
-        "latency_ms": 2000,
+        "record_id": "golden_sec_injection_001",
         "data": {
             "text": "检测到安全威胁",
             "score": 0.15,
-            "evaluation_status": "success",
-            "confidence": 0.90,
             "confidence_level": "high",
-            "error": None,
-            "metadata": {},
             "data": {
                 "security_tests": {
                     "injection": {"score": 0.1, "detected": True, "risk_level": "high"},
                     "jailbreak": {"score": 0.05, "detected": True, "risk_level": "high"},
                     "data_leak": {"score": 0.15, "detected": True, "risk_level": "high"},
-                    "tool_abuse": {"score": 0.12, "detected": True, "risk_level": "high"}
+                    "tool_abuse": {"score": 0.12, "detected": True, "risk_level": "high"},
                 },
                 "overall_score": 0.12,
                 "risk_level": "high",
-                "detected_items": ["injection", "jailbreak"],
-                "execution_time_ms": 1800,
-                "trace_id": "ghi789"
             },
-            "level": "poor",
-            "details": None,
-            "status_code": None,
-            "is_valid": True
+            "is_valid": True,
         },
-        "routing": None,
-        "persist": True,
-        "persist_error": None
     }
 
 
 @pytest.fixture(scope="module")
-def qa_high_quality_base():
+def qa_high_quality_data():
     return {
         "status": "success",
-        "code": None,
-        "message": None,
-        "record_id": "golden-qa-high-quality-001",
-        "evaluation_status": "SUCCESS",
-        "latency_ms": 5000,
+        "record_id": "golden_qa_high_quality_001",
         "data": {
             "text": "QA评估完成",
             "score": 0.88,
-            "evaluation_status": "success",
-            "confidence": 0.82,
             "confidence_level": "high",
-            "error": None,
-            "metadata": {},
             "data": {
                 "question": "什么是人工智能？",
-                "expected_output": "人工智能（Artificial Intelligence，简称AI）是计算机科学的一个分支，旨在研究、开发用于模拟、延伸和扩展人的智能的理论、方法、技术及应用系统。",
+                "expected_output": "人工智能是计算机科学的分支...",
                 "raw_output": "人工智能是计算机科学的分支...",
                 "evaluator": "qa",
-                "execution_time_ms": 4500,
-                "trace_id": "def456"
             },
-            "level": "excellent",
-            "details": None,
-            "status_code": None,
-            "is_valid": True
+            "is_valid": True,
         },
-        "routing": {},
-        "persist": True,
-        "persist_error": None
     }
 
 
-class TestGoldenBaselineLoading:
-    def test_baseline_file_exists(self, validator):
-        assert os.path.exists(validator.baseline_path)
+class TestGoldenBaselineManagerInitialization:
+    def test_manager_is_singleton(self):
+        manager1 = GoldenBaselineManager()
+        manager2 = GoldenBaselineManager()
+        assert manager1 is manager2
 
-    def test_baseline_version_parsing(self, validator):
-        assert validator.baseline_data["golden_baseline_version"] == "1.0"
-
-    def test_baseline_has_scenarios(self, validator):
-        scenarios = validator.baseline_data.get("scenarios", [])
-        assert len(scenarios) == 3
-
-    def test_get_scenario_by_id(self, validator):
-        scenario = validator.get_scenario("golden_sec_normal_001")
-        assert scenario is not None
-        assert scenario["name"] == "Security Evaluator - Normal Input"
-
-    def test_get_scenarios_by_type(self, validator):
-        security_scenarios = validator.get_scenarios_by_type("security")
-        qa_scenarios = validator.get_scenarios_by_type("qa")
-        assert len(security_scenarios) == 2
-        assert len(qa_scenarios) == 1
+    def test_default_baselines_loaded(self, baseline_manager):
+        baseline_ids = baseline_manager.get_all_baseline_ids()
+        assert len(baseline_ids) >= 3
+        assert "golden_sec_normal_001" in baseline_ids
+        assert "golden_sec_injection_001" in baseline_ids
+        assert "golden_qa_high_quality_001" in baseline_ids
 
 
-class TestSecurityEvaluatorNormalScenario:
-    def test_security_normal_valid_output(self, validator, security_normal_base):
-        result = validator.validate(security_normal_base, "golden_sec_normal_001")
-        assert result.passed, f"Validation failed: {result.errors}"
+class TestGoldenBaselineManagerGetters:
+    def test_get_baseline_returns_record(self, baseline_manager):
+        record = baseline_manager.get_baseline("golden_sec_normal_001")
+        assert record is not None
+        assert isinstance(record, BaselineRecord)
+        assert record.record_id == "golden_sec_normal_001"
+        assert record.baseline_type == "security"
 
-    def test_security_normal_score_below_minimum(self, validator, security_normal_base):
-        data = copy.deepcopy(security_normal_base)
+    def test_get_baseline_returns_none_for_invalid_id(self, baseline_manager):
+        record = baseline_manager.get_baseline("nonexistent_id")
+        assert record is None
+
+    def test_get_baselines_by_type(self, baseline_manager):
+        security_baselines = baseline_manager.get_baselines_by_type("security")
+        qa_baselines = baseline_manager.get_baselines_by_type("qa")
+        assert len(security_baselines) >= 2
+        assert len(qa_baselines) >= 1
+        for baseline in security_baselines:
+            assert baseline.baseline_type == "security"
+
+
+class TestValidateAgainstBaselineSecurityNormal:
+    def test_security_normal_valid_output(self, baseline_manager, security_normal_data):
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_normal_001", security_normal_data
+        )
+        assert result["passed"] is True, f"Validation failed: {result['errors']}"
+        assert len(result["errors"]) == 0
+        assert result["baseline_id"] == "golden_sec_normal_001"
+
+    def test_security_normal_score_below_minimum(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
         data["data"]["score"] = 0.85
         data["data"]["data"]["overall_score"] = 0.85
-        result = validator.validate(data, "golden_sec_normal_001")
-        assert not result.passed
-        assert any("score" in error and "below minimum" in error for error in result.errors)
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_normal_001", data
+        )
+        assert result["passed"] is False, "Should fail when score below minimum"
+        assert any("below minimum" in error for error in result["errors"])
 
-    def test_security_normal_risk_level_incorrect(self, validator, security_normal_base):
-        data = copy.deepcopy(security_normal_base)
-        data["data"]["data"]["security_tests"]["injection"]["risk_level"] = "medium"
-        result = validator.validate(data, "golden_sec_normal_001")
-        assert not result.passed
-        assert any("injection" in error and "risk_level" in error for error in result.errors)
+    def test_security_normal_risk_level_incorrect(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["data"]["risk_level"] = "medium"
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_normal_001", data
+        )
+        assert result["passed"] is False, "Should fail when risk level is incorrect"
+        assert any("Risk level" in error for error in result["errors"])
 
-
-class TestQAEvaluatorHighQualityScenario:
-    def test_qa_high_quality_valid_output(self, validator, qa_high_quality_base):
-        result = validator.validate(qa_high_quality_base, "golden_qa_high_quality_001")
-        assert result.passed, f"Validation failed: {result.errors}"
-
-    def test_qa_high_quality_confidence_level_one_of(self, validator, qa_high_quality_base):
-        data = copy.deepcopy(qa_high_quality_base)
-        data["data"]["confidence_level"] = "medium"
-        data["data"]["level"] = "good"
-        result = validator.validate(data, "golden_qa_high_quality_001")
-        assert result.passed, f"Validation failed: {result.errors}"
-
-    def test_qa_high_quality_confidence_level_invalid(self, validator, qa_high_quality_base):
-        data = copy.deepcopy(qa_high_quality_base)
-        data["data"]["confidence_level"] = "invalid_level"
-        result = validator.validate(data, "golden_qa_high_quality_001")
-        assert not result.passed
-        assert any("confidence_level" in error and "one of" in error for error in result.errors)
+    def test_security_normal_detected_true_when_should_be_false(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["data"]["security_tests"]["injection"]["detected"] = True
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_normal_001", data
+        )
+        assert result["passed"] is False, "Should fail when detected is True but expected False"
+        assert any("Detected" in error for error in result["errors"])
 
 
-class TestSecurityEvaluatorInjectionScenario:
-    def test_security_injection_valid_output(self, validator, security_injection_base):
-        result = validator.validate(security_injection_base, "golden_sec_injection_001")
-        assert result.passed, f"Validation failed: {result.errors}"
+class TestValidateAgainstBaselineSecurityInjection:
+    def test_security_injection_valid_output(self, baseline_manager, security_injection_data):
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_injection_001", security_injection_data
+        )
+        assert result["passed"] is True, f"Validation failed: {result['errors']}"
+        assert len(result["errors"]) == 0
 
-    def test_security_injection_score_above_maximum(self, validator, security_injection_base):
-        data = copy.deepcopy(security_injection_base)
+    def test_security_injection_score_above_maximum(self, baseline_manager, security_injection_data):
+        data = copy.deepcopy(security_injection_data)
         data["data"]["score"] = 0.45
         data["data"]["data"]["overall_score"] = 0.45
-        data["data"]["data"]["security_tests"]["injection"]["score"] = 0.35
-        result = validator.validate(data, "golden_sec_injection_001")
-        assert not result.passed
-        assert any("exceeds maximum" in error for error in result.errors)
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_injection_001", data
+        )
+        assert result["passed"] is False, "Should fail when score exceeds maximum"
+        assert any("exceeds maximum" in error for error in result["errors"])
 
-    def test_security_injection_detected_false(self, validator, security_injection_base):
-        data = copy.deepcopy(security_injection_base)
+    def test_security_injection_detected_false_when_should_be_true(self, baseline_manager, security_injection_data):
+        data = copy.deepcopy(security_injection_data)
         data["data"]["data"]["security_tests"]["injection"]["detected"] = False
-        data["data"]["data"]["detected_items"] = ["jailbreak"]
-        result = validator.validate(data, "golden_sec_injection_001")
-        assert not result.passed
-        assert any("injection" in error and "detected" in error for error in result.errors)
+        result = baseline_manager.validate_against_baseline(
+            "golden_sec_injection_001", data
+        )
+        assert result["passed"] is False, "Should fail when detected is False but expected True"
+        assert any("Detected" in error for error in result["errors"])
 
 
-class TestConvergenceScore:
-    @pytest.mark.parametrize("matched,total,expected", [
-        (10, 12, 0.8333),
-        (100, 100, 1.0),
-        (0, 100, 0.0),
-        (0, 0, 0.0),
-    ])
-    def test_convergence_score(self, validator, matched, total, expected):
-        result = ValidationResult()
-        result.matched_fields = matched
-        result.total_fields = total
-        score = validator.calculate_convergence_score(result)
-        assert score == pytest.approx(expected, 0.0001)
+class TestValidateAgainstBaselineQAHighQuality:
+    def test_qa_high_quality_valid_output(self, baseline_manager, qa_high_quality_data):
+        result = baseline_manager.validate_against_baseline(
+            "golden_qa_high_quality_001", qa_high_quality_data
+        )
+        assert result["passed"] is True, f"Validation failed: {result['errors']}"
+        assert len(result["errors"]) == 0
+
+    def test_qa_high_quality_score_below_minimum(self, baseline_manager, qa_high_quality_data):
+        data = copy.deepcopy(qa_high_quality_data)
+        data["data"]["score"] = 0.75
+        result = baseline_manager.validate_against_baseline(
+            "golden_qa_high_quality_001", data
+        )
+        assert result["passed"] is False, "Should fail when score below minimum"
+        assert any("below minimum" in error for error in result["errors"])
+
+    def test_qa_high_quality_confidence_level_invalid(self, baseline_manager, qa_high_quality_data):
+        data = copy.deepcopy(qa_high_quality_data)
+        data["data"]["confidence_level"] = "invalid_level"
+        result = baseline_manager.validate_against_baseline(
+            "golden_qa_high_quality_001", data
+        )
+        assert result["passed"] is False, "Should fail when confidence level is invalid"
+        assert any("Confidence level" in error for error in result["errors"])
 
 
-class TestTypeConstraints:
-    def test_type_string_validation(self, validator, security_injection_base):
-        data = copy.deepcopy(security_injection_base)
-        data["data"]["text"] = "valid string"
-        data["data"]["data"]["detected_items"] = []
-        result = validator.validate(data, "golden_sec_injection_001")
-        assert result.passed, f"Validation failed: {result.errors}"
+class TestValidateAgainstBaselineNotFound:
+    def test_baseline_not_found_returns_failed(self, baseline_manager):
+        result = baseline_manager.validate_against_baseline("nonexistent_id", {})
+        assert result["passed"] is False, "Should fail when baseline not found"
+        assert "Baseline not found" in result["errors"]
 
-    def test_type_array_validation(self, validator, security_injection_base):
-        result = validator.validate(security_injection_base, "golden_sec_injection_001")
-        assert result.passed, f"Validation failed: {result.errors}"
 
-    def test_type_object_validation(self, validator, qa_high_quality_base):
-        data = copy.deepcopy(qa_high_quality_base)
-        data["routing"] = {"type": "eval_platform"}
-        result = validator.validate(data, "golden_qa_high_quality_001")
-        assert result.passed, f"Validation failed: {result.errors}"
+class TestCalculateConvergenceScore:
+    def test_convergence_score_passed_returns_1(self, baseline_manager, security_normal_data):
+        score = baseline_manager.calculate_convergence_score(
+            security_normal_data, "golden_sec_normal_001"
+        )
+        assert score == 1.0, "Convergence score should be 1.0 when validation passes"
+
+    def test_convergence_score_single_error_returns_08(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["score"] = 0.85
+        score = baseline_manager.calculate_convergence_score(
+            data, "golden_sec_normal_001"
+        )
+        assert score == 0.8, f"Convergence score should be 0.8 with 1 error, got {score}"
+
+    def test_convergence_score_multiple_errors_decreases_score(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["score"] = 0.85
+        data["data"]["data"]["risk_level"] = "medium"
+        score = baseline_manager.calculate_convergence_score(
+            data, "golden_sec_normal_001"
+        )
+        assert score == 0.6, f"Convergence score should be 0.6 with 2 errors, got {score}"
+
+    def test_convergence_score_baseline_not_found_returns_08(self, baseline_manager):
+        score = baseline_manager.calculate_convergence_score({}, "nonexistent_id")
+        assert score == 0.8, f"Convergence score should be 0.8 when baseline not found (1 error), got {score}"
+
+    def test_convergence_score_never_negative(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["score"] = 0.1
+        data["data"]["data"]["risk_level"] = "high"
+        data["data"]["data"]["security_tests"]["injection"]["detected"] = True
+        score = baseline_manager.calculate_convergence_score(
+            data, "golden_sec_normal_001"
+        )
+        assert score >= 0.0, "Convergence score should never be negative"
+
+
+class TestBaselineRecord:
+    def test_baseline_record_creation(self):
+        record = BaselineRecord(
+            record_id="test_001",
+            baseline_type="security",
+            data={"key": "value"},
+        )
+        assert record.record_id == "test_001"
+        assert record.baseline_type == "security"
+        assert record.data == {"key": "value"}
+        assert record.created_at is not None
+
+    def test_baseline_record_to_dict(self):
+        record = BaselineRecord(
+            record_id="test_001",
+            baseline_type="security",
+            data={"key": "value"},
+        )
+        record_dict = record.to_dict()
+        assert record_dict["record_id"] == "test_001"
+        assert record_dict["baseline_type"] == "security"
+        assert record_dict["data"] == {"key": "value"}
+        assert "created_at" in record_dict
+
+
+class TestAddBaseline:
+    def test_add_baseline_stores_record(self, baseline_manager):
+        new_record = BaselineRecord(
+            record_id="test_dynamic_001",
+            baseline_type="test",
+            data={"test": "data"},
+        )
+        baseline_manager.add_baseline(new_record)
+        retrieved = baseline_manager.get_baseline("test_dynamic_001")
+        assert retrieved is not None
+        assert retrieved.record_id == "test_dynamic_001"

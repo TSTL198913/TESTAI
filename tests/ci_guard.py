@@ -9,6 +9,7 @@ CI 自动守卫 - 防止测试体系退化
 
 如果检测到反模式，CI 失败。
 """
+
 import os
 import subprocess
 import sys
@@ -17,25 +18,25 @@ import sys
 def scan_for_weak_assertions(directory: str, exclude_files: list = None) -> list:
     violations = []
     exclude_files = exclude_files or []
-    
+
     for root, dirs, files in os.walk(directory):
         for filename in files:
             if not filename.endswith(".py"):
                 continue
             if filename in exclude_files:
                 continue
-            
+
             filepath = os.path.join(root, filename)
             with open(filepath, "r", encoding="utf-8") as f:
                 in_docstring = False
                 docstring_char = None
                 for line_num, line in enumerate(f, 1):
                     stripped = line.strip()
-                    
+
                     # 跳过空行
                     if not stripped:
                         continue
-                    
+
                     # 检测 docstring 边界
                     if stripped.startswith('"""') or stripped.startswith("'''"):
                         if not in_docstring:
@@ -48,44 +49,47 @@ def scan_for_weak_assertions(directory: str, exclude_files: list = None) -> list
                             in_docstring = False
                             docstring_char = None
                         continue
-                    
+
                     # 如果在 docstring 中，跳过
                     if in_docstring:
                         continue
-                    
+
                     # 跳过注释行
                     if stripped.startswith("#"):
                         continue
-                    
+
                     # 检测弱断言（排除注释中的内容）
                     code_part = line.split("#")[0]
-                    if "assert hasattr(" in code_part and "CircuitBreaker" not in code_part:
+                    if (
+                        "assert hasattr(" in code_part
+                        and "CircuitBreaker" not in code_part
+                    ):
                         violations.append(f"{filepath}:{line_num}: {line.strip()}")
-    
+
     return violations
 
 
 def scan_for_pytest_skip(directory: str, exclude_files: list = None) -> list:
     violations = []
     exclude_files = exclude_files or []
-    
+
     for root, dirs, files in os.walk(directory):
         for filename in files:
             if not filename.endswith(".py"):
                 continue
             if filename in exclude_files:
                 continue
-            
+
             filepath = os.path.join(root, filename)
             with open(filepath, "r", encoding="utf-8") as f:
                 in_docstring = False
                 docstring_char = None
                 for line_num, line in enumerate(f, 1):
                     stripped = line.strip()
-                    
+
                     if not stripped:
                         continue
-                    
+
                     if stripped.startswith('"""') or stripped.startswith("'''"):
                         if not in_docstring:
                             in_docstring = True
@@ -97,31 +101,31 @@ def scan_for_pytest_skip(directory: str, exclude_files: list = None) -> list:
                             in_docstring = False
                             docstring_char = None
                         continue
-                    
+
                     if in_docstring:
                         continue
-                    
+
                     if stripped.startswith("#"):
                         continue
-                    
+
                     code_part = line.split("#")[0]
                     if "pytest.skip(" in code_part:
                         violations.append(f"{filepath}:{line_num}: {line.strip()}")
-    
+
     return violations
 
 
 def scan_for_exception_pass(directory: str, exclude_files: list = None) -> list:
     violations = []
     exclude_files = exclude_files or []
-    
+
     for root, dirs, files in os.walk(directory):
         for filename in files:
             if not filename.endswith(".py"):
                 continue
             if filename in exclude_files:
                 continue
-            
+
             filepath = os.path.join(root, filename)
             with open(filepath, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -131,8 +135,10 @@ def scan_for_exception_pass(directory: str, exclude_files: list = None) -> list:
                         if line_num < len(lines):
                             next_line = lines[line_num].strip()
                             if next_line == "pass":
-                                violations.append(f"{filepath}:{line_num}: {line.strip()}")
-    
+                                violations.append(
+                                    f"{filepath}:{line_num}: {line.strip()}"
+                                )
+
     return violations
 
 
@@ -143,13 +149,15 @@ def run():
         this_file,
         "test_strict_validation.py",
     ]
-    
+
     print("[SCAN] 扫描 CI 守卫规则...")
-    
+
     violations = []
-    
+
     print("\n1. 扫描 assert hasattr(...) 弱断言...")
-    hasattr_violations = scan_for_weak_assertions(tests_dir, exclude_files=exclude_files)
+    hasattr_violations = scan_for_weak_assertions(
+        tests_dir, exclude_files=exclude_files
+    )
     if hasattr_violations:
         print(f"   [FAIL] 发现 {len(hasattr_violations)} 处违反：")
         for v in hasattr_violations:
@@ -157,7 +165,7 @@ def run():
         violations.extend(hasattr_violations)
     else:
         print("   [PASS] 未发现违反")
-    
+
     print("\n2. 扫描 pytest.skip(...) 失败跳过...")
     skip_violations = scan_for_pytest_skip(tests_dir, exclude_files=exclude_files)
     if skip_violations:
@@ -167,9 +175,11 @@ def run():
         violations.extend(skip_violations)
     else:
         print("   [PASS] 未发现违反")
-    
+
     print("\n3. 扫描 except Exception: pass 异常吞没...")
-    exception_violations = scan_for_exception_pass(tests_dir, exclude_files=exclude_files)
+    exception_violations = scan_for_exception_pass(
+        tests_dir, exclude_files=exclude_files
+    )
     if exception_violations:
         print(f"   [FAIL] 发现 {len(exception_violations)} 处违反：")
         for v in exception_violations:
@@ -177,13 +187,21 @@ def run():
         violations.extend(exception_violations)
     else:
         print("   [PASS] 未发现违反")
-    
+
     # 运行测试有效性门控
     print("\n4. 运行测试有效性门控...")
     result = subprocess.run(
-        ["python", "-m", "pytest", "tests/governance/test_effectiveness_gate.py", "-v", "--tb=short", "--no-header"],
+        [
+            "python",
+            "-m",
+            "pytest",
+            "tests/governance/test_effectiveness_gate.py",
+            "-v",
+            "--tb=short",
+            "--no-header",
+        ],
         capture_output=True,
-        text=True
+        text=True,
     )
     if result.returncode != 0:
         print("   [FAIL] 测试有效性门控失败")
@@ -192,9 +210,9 @@ def run():
         violations.append("TEST_EFFECTIVENESS_GATE_FAILED")
     else:
         print("   [PASS] 测试有效性门控通过")
-    
-    print("\n" + "="*60)
-    
+
+    print("\n" + "=" * 60)
+
     if violations:
         print(f"[FAIL] CI 守卫失败：发现 {len(violations)} 处违反")
         sys.exit(1)

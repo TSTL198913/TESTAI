@@ -11,7 +11,9 @@ class BaseGovernanceTransformer(cst.CSTTransformer, ABC):
     强制统一构造函数签名，彻底解决 'unexpected keyword argument' 问题
     """
 
-    def __init__(self, target_function: str, new_body: str, required_imports: List[str] = None):
+    def __init__(
+        self, target_function: str, new_body: str, required_imports: List[str] = None
+    ):
         super().__init__()
         self.target_function = target_function
         self.required_imports = required_imports or []
@@ -23,7 +25,9 @@ class BaseGovernanceTransformer(cst.CSTTransformer, ABC):
 class FunctionTransformer(BaseGovernanceTransformer):
     """精确代码注入器：负责重写函数体"""
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ):
         if original_node.name.value == self.target_function:
             self.patched = True
             return updated_node.with_changes(
@@ -37,21 +41,40 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
 
     # 【生产级加固】：引入 Keyword-Only Arguments (*, ...)
     # 强制所有调用者必须使用 target_class=... 这种形式
-    def __init__(self, *, target_function: str, new_body: str, target_class: str = None, required_imports: List[str] = None):
-        super().__init__(target_function=target_function, new_body=new_body, required_imports=required_imports)
+    def __init__(
+        self,
+        *,
+        target_function: str,
+        new_body: str,
+        target_class: str = None,
+        required_imports: List[str] = None,
+    ):
+        super().__init__(
+            target_function=target_function,
+            new_body=new_body,
+            required_imports=required_imports,
+        )
         self.target_class = target_class
         self.current_class = None
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
-        name_match = (original_node.name.value == self.target_function)
-        class_match = (self.target_class is None or self.current_class == self.target_class)
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ):
+        name_match = original_node.name.value == self.target_function
+        class_match = (
+            self.target_class is None or self.current_class == self.target_class
+        )
 
         if name_match and class_match:
             self.patched = True
-            return updated_node.with_changes(body=cst.IndentedBlock(body=self.new_body_nodes))
+            return updated_node.with_changes(
+                body=cst.IndentedBlock(body=self.new_body_nodes)
+            )
 
         if name_match and self.target_class and self.current_class != self.target_class:
-            print(f"[DEBUG] Class mismatch: Expected {self.target_class}, found {self.current_class}")
+            print(
+                f"[DEBUG] Class mismatch: Expected {self.target_class}, found {self.current_class}"
+            )
 
         return updated_node
 
@@ -68,7 +91,9 @@ class ImportApplier(cst.CSTTransformer):
         super().__init__()
         self.new_import_nodes = [cst.parse_statement(imp) for imp in required_imports]
 
-    def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    def leave_Module(
+        self, original_node: cst.Module, updated_node: cst.Module
+    ) -> cst.Module:
         if not self.new_import_nodes:
             return updated_node
 

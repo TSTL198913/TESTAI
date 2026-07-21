@@ -26,7 +26,10 @@ class ExecutionPipeline:
             last_exception = None
 
             for processor in self.processors:
-                is_governance_processor = processor.__class__.__name__ == "GovernanceProcessor"
+# [MUTATION] wrong processor name
+                is_governance_processor = (
+                    processor.__class__.__name__ == "GovernanceProcessor"
+                )
 
                 if is_failed and not is_governance_processor:
                     continue
@@ -34,7 +37,9 @@ class ExecutionPipeline:
                 try:
                     step = await processor.process(context, step, client)
                 except Exception as e:
-                    logger.error(f"[Pipeline] Step {step.step_id} failed in {processor.__class__.__name__}: {str(e)}")
+                    logger.error(
+                        f"[Pipeline] Step {step.step_id} failed in {processor.__class__.__name__}: {str(e)}"
+                    )
                     result = context.results.get(step.step_id, {})
                     result["status"] = "FAILED"
                     result["error"] = e

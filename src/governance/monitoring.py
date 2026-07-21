@@ -16,8 +16,15 @@ class AlertLevel:
 
 
 class AlertRecord:
-    def __init__(self, alert_id: str, level: str, message: str, component: str,
-                 trace_id: Optional[str] = None, details: Optional[Dict] = None):
+    def __init__(
+        self,
+        alert_id: str,
+        level: str,
+        message: str,
+        component: str,
+        trace_id: Optional[str] = None,
+        details: Optional[Dict] = None,
+    ):
         self.alert_id = alert_id
         self.level = level
         self.message = message
@@ -36,7 +43,7 @@ class AlertRecord:
             "trace_id": self.trace_id,
             "details": self.details,
             "created_at": self.created_at.isoformat(),
-            "acknowledged": self.acknowledged
+            "acknowledged": self.acknowledged,
         }
 
 
@@ -51,7 +58,7 @@ class StructuredLogger:
         return cls._instance
 
     def __init__(self):
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
         self.logger = logging.getLogger("GovernanceMonitor")
         self.logger.setLevel(getattr(logging, GovernanceConfig.LOG_LEVEL))
@@ -62,7 +69,7 @@ class StructuredLogger:
             "timestamp": datetime.now().isoformat(),
             "level": level,
             "message": message,
-            **kwargs
+            **kwargs,
         }
         log_line = json.dumps(log_record, ensure_ascii=False)
 
@@ -91,7 +98,7 @@ class AlertManager:
         return cls._instance
 
     def __init__(self):
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
         self._alerts: List[AlertRecord] = []
         self._alert_callbacks: List[Callable] = []
@@ -109,8 +116,14 @@ class AlertManager:
             except Exception:
                 pass
 
-    def create_alert(self, level: str, message: str, component: str,
-                     trace_id: Optional[str] = None, details: Optional[Dict] = None) -> AlertRecord:
+    def create_alert(
+        self,
+        level: str,
+        message: str,
+        component: str,
+        trace_id: Optional[str] = None,
+        details: Optional[Dict] = None,
+    ) -> AlertRecord:
         alert_id = f"alert-{int(time.time())}-{len(self._alerts) + 1}"
         alert = AlertRecord(
             alert_id=alert_id,
@@ -118,13 +131,15 @@ class AlertManager:
             message=message,
             component=component,
             trace_id=trace_id,
-            details=details
+            details=details,
         )
 
         with self._lock:
             self._alerts.append(alert)
 
-        self._logger.log(level, message, component=component, trace_id=trace_id, details=details)
+        self._logger.log(
+            level, message, component=component, trace_id=trace_id, details=details
+        )
         self._notify_callbacks(alert)
 
         if GovernanceConfig.is_alert_configured():
@@ -134,11 +149,10 @@ class AlertManager:
 
     def _send_webhook(self, alert: AlertRecord):
         import requests
+
         try:
             requests.post(
-                GovernanceConfig.ALERT_WEBHOOK_URL,
-                json=alert.to_dict(),
-                timeout=5
+                GovernanceConfig.ALERT_WEBHOOK_URL, json=alert.to_dict(), timeout=5
             )
         except Exception:
             pass
@@ -152,7 +166,9 @@ class AlertManager:
                     return True
         return False
 
-    def get_alerts(self, level: Optional[str] = None, acknowledged: Optional[bool] = None) -> List[AlertRecord]:
+    def get_alerts(
+        self, level: Optional[str] = None, acknowledged: Optional[bool] = None
+    ) -> List[AlertRecord]:
         with self._lock:
             alerts = self._alerts.copy()
             if level:
@@ -172,7 +188,7 @@ class AlertManager:
             "error_alerts": self.get_alert_count(AlertLevel.ERROR),
             "warning_alerts": self.get_alert_count(AlertLevel.WARNING),
             "info_alerts": self.get_alert_count(AlertLevel.INFO),
-            "unacknowledged_alerts": len(self.get_alerts(acknowledged=False))
+            "unacknowledged_alerts": len(self.get_alerts(acknowledged=False)),
         }
 
 
@@ -189,7 +205,7 @@ class HealthMonitor:
             "approvals_granted": 0,
             "approvals_rejected": 0,
             "circuit_breaker_tripped": 0,
-            "convergence_achieved": 0
+            "convergence_achieved": 0,
         }
         self._lock = threading.Lock()
         self._alert_manager = AlertManager()
@@ -210,7 +226,7 @@ class HealthMonitor:
                 self._alert_manager.create_alert(
                     AlertLevel.WARNING,
                     f"High failure rate detected: {self._metrics['failed_diagnoses']} failed diagnoses",
-                    "diagnosis"
+                    "diagnosis",
                 )
 
     def record_patch(self, success: bool):
@@ -220,9 +236,7 @@ class HealthMonitor:
         else:
             self.increment_metric("failed_patches")
             self._alert_manager.create_alert(
-                AlertLevel.ERROR,
-                "Patch application failed",
-                "executor"
+                AlertLevel.ERROR, "Patch application failed", "executor"
             )
 
     def record_approval(self, approved: bool):
@@ -237,7 +251,7 @@ class HealthMonitor:
         self._alert_manager.create_alert(
             AlertLevel.CRITICAL,
             "Circuit breaker tripped - governance service unavailable",
-            "resilience"
+            "resilience",
         )
 
     def record_convergence(self):
@@ -252,7 +266,9 @@ class HealthMonitor:
         metrics = self.get_metrics()
         total_diagnoses = metrics["total_diagnosis_requests"]
         diagnosis_success_rate = (
-            metrics["successful_diagnoses"] / total_diagnoses if total_diagnoses > 0 else 1.0
+            metrics["successful_diagnoses"] / total_diagnoses
+            if total_diagnoses > 0
+            else 1.0
         )
         total_patches = metrics["total_patch_applications"]
         patch_success_rate = (
@@ -270,5 +286,5 @@ class HealthMonitor:
             "diagnosis_success_rate": round(diagnosis_success_rate, 2),
             "patch_success_rate": round(patch_success_rate, 2),
             "metrics": metrics,
-            "alerts": self._alert_manager.get_summary()
+            "alerts": self._alert_manager.get_summary(),
         }

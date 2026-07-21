@@ -40,6 +40,8 @@ return json.dumps(data)
     assert "json.dumps(data)" in result
     assert "Old logic" not in result
 
+    assert transformer.patched is True, "FunctionTransformer 补丁标记应设为True"
+
     print("\n[Test Passed] Transformer logic is correct!")
 
 

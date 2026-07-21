@@ -1,11 +1,15 @@
 """
 Transformer模块测试 - Trae编写标准示例
 """
+
 import libcst as cst
 import pytest
 
-from src.governance.transformer import (ContextAwareTransformer,
-                                        FunctionTransformer, ImportApplier)
+from src.governance.transformer import (
+    ContextAwareTransformer,
+    FunctionTransformer,
+    ImportApplier,
+)
 
 
 class TestContextAwareTransformer:
@@ -20,11 +24,11 @@ class MyClass:
         transformer = ContextAwareTransformer(
             target_function="target_method",
             new_body='return "patched"',
-            target_class="MyClass"
+            target_class="MyClass",
         )
-        
+
         tree = tree.visit(transformer)
-        
+
         assert transformer.patched is True, "补丁标记应设为True"
         assert 'return "patched"' in tree.code, "代码应被替换"
         assert 'return "original"' not in tree.code, "原代码应被移除"
@@ -43,11 +47,11 @@ class AnotherClass:
         transformer = ContextAwareTransformer(
             target_function="target_method",
             new_body='return "patched"',
-            target_class="AnotherClass"
+            target_class="AnotherClass",
         )
-        
+
         tree = tree.visit(transformer)
-        
+
         assert transformer.patched is True, "AnotherClass 中的方法应被匹配"
         assert 'return "patched"' in tree.code, "AnotherClass 中的代码应被替换"
         assert 'return "original"' in tree.code, "MyClass 中的代码应保持不变"
@@ -60,18 +64,16 @@ class MyClass:
 """
         tree = cst.parse_module(source_code)
         transformer = ContextAwareTransformer(
-            target_function="target_method",
-            new_body="",
-            target_class="MyClass"
+            target_function="target_method", new_body="", target_class="MyClass"
         )
-        
+
         tree = tree.visit(transformer)
-        
+
         assert transformer.patched is True, "补丁标记应设为True"
 
     def test_raises_error_on_invalid_syntax(self):
         source_code = "def invalid("
-        
+
         with pytest.raises(cst.ParserSyntaxError):
             cst.parse_module(source_code)
 
@@ -82,12 +84,11 @@ def standalone_func():
 """
         tree = cst.parse_module(source_code)
         transformer = ContextAwareTransformer(
-            target_function="standalone_func",
-            new_body='return "patched"'
+            target_function="standalone_func", new_body='return "patched"'
         )
-        
+
         tree = tree.visit(transformer)
-        
+
         assert transformer.patched is True, "补丁标记应设为True"
         assert 'return "patched"' in tree.code, "代码应被替换"
         assert 'return "original"' not in tree.code, "原代码应被移除"
@@ -102,12 +103,11 @@ def my_function():
 """
         tree = cst.parse_module(source_code)
         transformer = FunctionTransformer(
-            target_function="my_function",
-            new_body="return 2"
+            target_function="my_function", new_body="return 2"
         )
-        
+
         tree = tree.visit(transformer)
-        
+
         assert transformer.patched is True, "补丁标记应设为True"
         assert "return 2" in tree.code, "代码应被替换"
         assert "return 1" not in tree.code, "原代码应被移除"
@@ -119,12 +119,11 @@ def other_function():
 """
         tree = cst.parse_module(source_code)
         transformer = FunctionTransformer(
-            target_function="my_function",
-            new_body="return 2"
+            target_function="my_function", new_body="return 2"
         )
-        
+
         tree = tree.visit(transformer)
-        
+
         assert transformer.patched is False, "补丁标记应保持False"
         assert "return 1" in tree.code, "代码应保持不变"
 
@@ -140,9 +139,9 @@ def func():
 """
         tree = cst.parse_module(source_code)
         applier = ImportApplier(["import sys"])
-        
+
         tree = tree.visit(applier)
-        
+
         lines = tree.code.strip().split("\n")
         assert "import sys" in lines[:3], "import应添加在文件开头"
 
@@ -153,9 +152,9 @@ def func():
 """
         tree = cst.parse_module(source_code)
         applier = ImportApplier(["import sys"])
-        
+
         tree = tree.visit(applier)
-        
+
         assert tree.code.strip().startswith("import sys"), "import应添加在文件最开头"
 
     def test_handles_empty_imports_list(self):
@@ -164,8 +163,8 @@ import os
 """
         tree = cst.parse_module(source_code)
         applier = ImportApplier([])
-        
+
         tree = tree.visit(applier)
-        
+
         assert tree is not None, "应正常返回"
         assert "import os" in tree.code, "原代码应保持不变"

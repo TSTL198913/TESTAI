@@ -12,6 +12,7 @@ class PromptManager:
 
     def _load_all_prompts(self):
         import logging
+
         logger = logging.getLogger(__name__)
         if not os.path.exists(self.prompts_dir):
             logger.warning(f"Prompts directory not found: {self.prompts_dir}")
@@ -22,8 +23,8 @@ class PromptManager:
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:
                         data = yaml.safe_load(f)
-                        if data:
-                            self.templates.update(data)
+                    if data:
+                        self.templates.update(data)
                 except (yaml.YAMLError, IOError) as e:
                     logger.error(f"Failed to load prompt file {filename}: {e}")
 
@@ -32,4 +33,4 @@ class PromptManager:
         template = self.templates.get(template_name)
         if not template:
             raise ValueError(f"Prompt template {template_name} not found")
-        return template.format(**kwargs) # 支持 Python 字符串格式化注入
+        return template.format(**kwargs)  # 支持 Python 字符串格式化注入

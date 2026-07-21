@@ -5,12 +5,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ContextKeys:
-    LAST_RESPONSE = "last_response"     
+    LAST_RESPONSE = "last_response"
+
 
 class ExecutionContext(BaseModel):
     """
     测试执行的上下文环境，作为流水线中传递的唯一数据载体。
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # 【关键修复】：添加 case_id，并将其设为必填项
@@ -29,4 +31,6 @@ class ExecutionContext(BaseModel):
     current_step_id: Optional[str] = None
 
     # 扩展建议
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="执行任务的元数据，用于审计")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict, description="执行任务的元数据，用于审计"
+    )

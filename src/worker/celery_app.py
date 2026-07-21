@@ -13,7 +13,7 @@ celery_app = Celery(
     "test_ai_worker",
     broker=broker_url,
     backend=backend_url,
-    include=["src.worker.tasks"]
+    include=["src.worker.tasks"],
 )
 
 celery_app.conf.update(

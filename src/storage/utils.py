@@ -16,6 +16,6 @@ def sanitize_for_mongo(data):
             "headers": dict(data.headers),
             "elapsed_seconds": data.elapsed.total_seconds(),
             # 如果需要 Body，请注意处理大小限制
-            "text": data.text[:1000] if len(data.text) > 1000 else data.text
+            "text": data.text[:1000] if len(data.text) > 1000 else data.text,
         }
     return data

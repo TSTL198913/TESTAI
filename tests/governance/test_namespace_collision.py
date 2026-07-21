@@ -19,9 +19,7 @@ class ClassB:
 
     # 初始化 Transformer，明确指定 target_class
     transformer = ContextAwareTransformer(
-        target_function="run",
-        target_class="ClassA",
-        new_body=new_logic
+        target_function="run", target_class="ClassA", new_body=new_logic
     )
 
     # 执行转换
@@ -36,10 +34,16 @@ class ClassB:
     # 或者直接查找 'return "Legacy B"' 是否在 ClassB 定义的范围内
 
     # 更稳妥的办法：直接检查 ClassB 的结构
-    class_b_code = [n for n in tree_result.body if isinstance(n, cst.ClassDef) and n.name.value == "ClassB"][0]
+    class_b_code = [
+        n
+        for n in tree_result.body
+        if isinstance(n, cst.ClassDef) and n.name.value == "ClassB"
+    ][0]
 
     assert "Legacy B" in cst.Module(body=[class_b_code]).code
     assert "Patched A" not in cst.Module(body=[class_b_code]).code
+
+    assert transformer.patched is True, "ContextAwareTransformer 补丁标记应设为True"
 
     print("\n✅ [Namespace Isolation Passed] 结构化验证通过：ClassB 逻辑未被侵染！")
 
@@ -58,9 +62,7 @@ class ClassB:
     new_logic = 'return "Patched A"'
     # 【修复后】：使用关键字参数，确保代码意图清晰且不会出现参数位置偏移
     transformer = ContextAwareTransformer(
-        target_function="run",
-        target_class="ClassA",
-        new_body=new_logic
+        target_function="run", target_class="ClassA", new_body=new_logic
     )
 
     # 转换
@@ -75,6 +77,8 @@ class ClassB:
     assert "Patched A" in modified_tree.code
     assert "Legacy A" not in modified_tree.code
     assert "Legacy B" in modified_tree.code
+    assert transformer.patched is True, "ContextAwareTransformer 补丁标记应设为True"
+
     print("✅ 验证确认：ClassA 已变异，ClassB 保持原始逻辑。")
 
 

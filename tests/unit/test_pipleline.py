@@ -19,18 +19,20 @@ async def test_pipeline_execution_order():
         description="测试流水线编排",
         url="https://api.test.com",
         method="GET",
-        params={"target": "${user}"}
+        params={"target": "${user}"},
     )
 
-    pipeline = ExecutionPipeline(processors=[
-        EnvironmentProcessor({"base": "https://api.test.com"}),
-        DataProcessor()
-    ])
+    pipeline = ExecutionPipeline(
+        processors=[
+            EnvironmentProcessor({"base": "https://api.test.com"}),
+            DataProcessor(),
+        ]
+    )
 
     raw_step = {"protocol": "http", "http": step.model_dump()}
 
     # 这里假设 pipeline.run 的逻辑是将 step 传递下去并返回最终结果
-    with patch.object(HTTPProcessor, 'process', return_value=step):
+    with patch.object(HTTPProcessor, "process", return_value=step):
         # 接收 pipeline 的运行结果
         final_steps = await pipeline.run(context, [raw_step], client=None)
 

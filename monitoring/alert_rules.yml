@@ -1,0 +1,137 @@
+groups:
+  - name: testai-alerts
+    rules:
+      - alert: APIHighErrorRate
+        expr: sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API 错误率超过 10%"
+          description: "API 错误率 {{ $value }}%，超过阈值 10%"
+
+      - alert: APILatencyHigh
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API P95 延迟超过 2s"
+          description: "API P95 延迟 {{ $value }}s，超过阈值 2s"
+
+      - alert: APILatencyCritical
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API P95 延迟超过 5s"
+          description: "API P95 延迟 {{ $value }}s，超过阈值 5s"
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务 {{ $labels.job }} 不可用"
+          description: "服务 {{ $labels.job }} 在 {{ $labels.instance }} 上已停止响应"
+
+      - alert: MemoryHigh
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "内存使用率超过 80%"
+          description: "内存可用率 {{ $value }}%，低于阈值 20%"
+
+      - alert: CPUHigh
+        expr: 1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU 使用率超过 80%"
+          description: "CPU 使用率 {{ $value }}%，超过阈值 80%"
+
+      - alert: DiskHigh
+        expr: (node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "磁盘使用率超过 85%"
+          description: "磁盘使用率 {{ $value }}%，超过阈值 85%"
+
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis 服务不可用"
+          description: "Redis 在 {{ $labels.instance }} 上已停止响应"
+
+      - alert: MongoDown
+        expr: mongo_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB 服务不可用"
+          description: "MongoDB 在 {{ $labels.instance }} 上已停止响应"
+
+      - alert: CeleryTaskFailure
+        expr: rate(celery_tasks_failed_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Celery 任务失败"
+          description: "Celery 任务失败率 {{ $value }}/s"
+
+      - alert: TestFailureRateHigh
+        expr: test_failure_rate > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "测试失败率超过 10%"
+          description: "测试失败率 {{ $value }}%，超过阈值 10%"
+
+      - alert: KillRateLow
+        expr: mutation_kill_rate < 80
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "变异测试 Kill Rate 低于 80%"
+          description: "变异测试 Kill Rate {{ $value }}%，低于阈值 80%"
+
+      - alert: CoverageLow
+        expr: test_coverage < 80
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "测试覆盖率低于 80%"
+          description: "测试覆盖率 {{ $value }}%，低于阈值 80%"
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_open == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "熔断触发"
+          description: "服务熔断已触发，请检查下游依赖"
+
+      - alert: RequestRateLimit
+        expr: rate(http_requests_total[1m]) > 1000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "请求速率超过限制"
+          description: "请求速率 {{ $value }}/s，超过阈值 1000/s"

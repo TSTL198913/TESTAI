@@ -62,7 +62,7 @@ class GovernanceTracker:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tracking_events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     trace_id TEXT NOT NULL,
@@ -76,7 +76,7 @@ class GovernanceTracker:
                     message TEXT,
                     metadata_json TEXT
                 )
-            ''')
+            """)
 
             conn.commit()
             conn.close()
@@ -85,11 +85,22 @@ class GovernanceTracker:
         with self._db_lock:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM tracking_events ORDER BY id')
+            cursor.execute("SELECT * FROM tracking_events ORDER BY id")
 
             for row in cursor.fetchall():
-                _, trace_id, action_type, timestamp, component, \
-                step_id, tx_id, patch_type, status, message, metadata_json = row
+                (
+                    _,
+                    trace_id,
+                    action_type,
+                    timestamp,
+                    component,
+                    step_id,
+                    tx_id,
+                    patch_type,
+                    status,
+                    message,
+                    metadata_json,
+                ) = row
 
                 event = TrackingEvent(
                     trace_id=trace_id,
@@ -101,7 +112,7 @@ class GovernanceTracker:
                     patch_type=patch_type,
                     status=status,
                     message=message,
-                    metadata=json.loads(metadata_json) if metadata_json else {}
+                    metadata=json.loads(metadata_json) if metadata_json else {},
                 )
 
                 self._events.append(event)
@@ -113,23 +124,26 @@ class GovernanceTracker:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO tracking_events
                 (trace_id, action_type, timestamp, component, step_id,
                  tx_id, patch_type, status, message, metadata_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                event.trace_id,
-                event.action_type.value,
-                event.timestamp.isoformat(),
-                event.component,
-                event.step_id,
-                event.tx_id,
-                event.patch_type,
-                event.status,
-                event.message,
-                json.dumps(event.metadata)
-            ))
+            """,
+                (
+                    event.trace_id,
+                    event.action_type.value,
+                    event.timestamp.isoformat(),
+                    event.component,
+                    event.step_id,
+                    event.tx_id,
+                    event.patch_type,
+                    event.status,
+                    event.message,
+                    json.dumps(event.metadata),
+                ),
+            )
 
             conn.commit()
             conn.close()
@@ -144,7 +158,7 @@ class GovernanceTracker:
         patch_type: Optional[PatchType] = None,
         status: Optional[str] = None,
         message: Optional[str] = None,
-        **metadata
+        **metadata,
     ):
         event = TrackingEvent(
             trace_id=trace_id,
@@ -155,14 +169,16 @@ class GovernanceTracker:
             patch_type=patch_type.value if patch_type else None,
             status=status,
             message=message,
-            metadata=metadata
+            metadata=metadata,
         )
 
         with self._lock:
             self._events.append(event)
 
         self._save_to_db(event)
-        logging.info(f"[TRACKER] {action_type.value} | trace={trace_id} | component={component} | status={status}")
+        logging.info(
+            f"[TRACKER] {action_type.value} | trace={trace_id} | component={component} | status={status}"
+        )
 
     def get_events_by_trace(self, trace_id: str) -> List[TrackingEvent]:
         with self._lock:
@@ -173,17 +189,14 @@ class GovernanceTracker:
             return [e for e in self._events if e.component == component]
 
     def get_events_by_time_range(
-        self,
-        start_time: datetime,
-        end_time: datetime
+        self, start_time: datetime, end_time: datetime
     ) -> List[TrackingEvent]:
         with self._lock:
-            return [
-                e for e in self._events
-                if start_time <= e.timestamp <= end_time
-            ]
+            return [e for e in self._events if start_time <= e.timestamp <= end_time]
 
-    def get_events_by_action(self, action_type: GovernanceActionType) -> List[TrackingEvent]:
+    def get_events_by_action(
+        self, action_type: GovernanceActionType
+    ) -> List[TrackingEvent]:
         with self._lock:
             return [e for e in self._events if e.action_type == action_type]
 
@@ -193,7 +206,9 @@ class GovernanceTracker:
 
     def get_summary(self, trace_id: str = None) -> Dict:
         with self._lock:
-            events = self._events if trace_id is None else self.get_events_by_trace(trace_id)
+            events = (
+                self._events if trace_id is None else self.get_events_by_trace(trace_id)
+            )
 
         stats = {
             "total_events": len(events),
@@ -202,7 +217,7 @@ class GovernanceTracker:
             "by_status": {},
             "converged_count": 0,
             "diverged_count": 0,
-            "failed_count": 0
+            "failed_count": 0,
         }
 
         for action in GovernanceActionType:
@@ -212,10 +227,14 @@ class GovernanceTracker:
             stats["by_action"][event.action_type.value] += 1
 
             if event.component:
-                stats["by_component"][event.component] = stats["by_component"].get(event.component, 0) + 1
+                stats["by_component"][event.component] = (
+                    stats["by_component"].get(event.component, 0) + 1
+                )
 
             if event.status:
-                stats["by_status"][event.status] = stats["by_status"].get(event.status, 0) + 1
+                stats["by_status"][event.status] = (
+                    stats["by_status"].get(event.status, 0) + 1
+                )
 
             if event.action_type == GovernanceActionType.CONVERGED:
                 stats["converged_count"] += 1
@@ -233,13 +252,15 @@ class GovernanceTracker:
         with self._db_lock:
             conn = sqlite3.connect(str(self._db_path))
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM tracking_events')
+            cursor.execute("DELETE FROM tracking_events")
             conn.commit()
             conn.close()
 
     def export_events(self, trace_id: str = None) -> List[Dict]:
         with self._lock:
-            events = self._events if trace_id is None else self.get_events_by_trace(trace_id)
+            events = (
+                self._events if trace_id is None else self.get_events_by_trace(trace_id)
+            )
 
         return [
             {
@@ -252,7 +273,7 @@ class GovernanceTracker:
                 "patch_type": e.patch_type,
                 "status": e.status,
                 "message": e.message,
-                "metadata": e.metadata
+                "metadata": e.metadata,
             }
             for e in events
         ]

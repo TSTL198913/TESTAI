@@ -14,14 +14,17 @@ class Settings(BaseSettings):
 
     # 性能调优配置
     HTTP_TIMEOUT: float = Field(10.0, json_schema_extra={"env": "HTTP_TIMEOUT"})
-    HTTP_MAX_CONNECTIONS: int = Field(100, json_schema_extra={"env": "HTTP_MAX_CONNECTIONS"})
-
-    model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env"),
-        env_file_encoding='utf-8',
-        extra='ignore'
+    HTTP_MAX_CONNECTIONS: int = Field(
+        100, json_schema_extra={"env": "HTTP_MAX_CONNECTIONS"}
     )
 
+    model_config = SettingsConfigDict(
+        env_file=os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env"
+        ),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @field_validator("MONGO_URI")
     @classmethod

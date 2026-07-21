@@ -12,7 +12,9 @@ class AssertionProcessor(BaseProcessor):
         # 1. 安全获取数据并转换为模型
         result_dict = context.results.get(step.step_id)
         if result_dict is None:
-            raise RuntimeError(f"Pipeline State Error: No result found for step_id: {step.step_id}")
+            raise RuntimeError(
+                f"Pipeline State Error: No result found for step_id: {step.step_id}"
+            )
 
         result = StepResult(**result_dict)
 
@@ -26,11 +28,11 @@ class AssertionProcessor(BaseProcessor):
                 # 校验逻辑分发
                 if assertion.check == "status_code":
                     actual = result.status_code
-                    passed = (actual == assertion.expected)
+                    passed = actual == assertion.expected
 
                 elif assertion.check == "body_contains":
                     body_str = str(result.body or "")
-                    passed = (str(assertion.expected) in body_str)
+                    passed = str(assertion.expected) in body_str
                     actual = "Found" if passed else "Not Found"
 
                 elif assertion.check == "jsonpath":
@@ -40,7 +42,7 @@ class AssertionProcessor(BaseProcessor):
                     expr = parse(assertion.path)
                     matches = expr.find(result.body)
                     actual = matches[0].value if matches else "NOT_FOUND"
-                    passed = (actual == assertion.expected)
+                    passed = actual == assertion.expected
 
             except Exception as e:
                 passed = False
@@ -53,7 +55,15 @@ class AssertionProcessor(BaseProcessor):
                 expected=assertion.expected,
                 actual=actual,
                 passed=passed,
-                message=msg if msg else (None if passed else f"Expected {assertion.expected}, got {actual}")
+                message=(
+                    msg
+                    if msg
+                    else (
+                        None
+                        if passed
+                        else f"Expected {assertion.expected}, got {actual}"
+                    )
+                ),
             )
             # 关键修正：调用 .model_dump() 将模型实例转化为字典
             result.assertions_history.append(record.model_dump())
@@ -63,7 +73,9 @@ class AssertionProcessor(BaseProcessor):
                 result.status = "FAILED"
                 result.error = record.message
                 context.results[step.step_id] = result.model_dump()
-                self._raise_failure(step.step_id, assertion.check, assertion.expected, actual)
+                self._raise_failure(
+                    step.step_id, assertion.check, assertion.expected, actual
+                )
 
         # 5. 全部成功，更新上下文
         result.status = "PASSED"

@@ -8,7 +8,13 @@ from src.governance.config import GovernanceConfig
 
 
 class BaselineRecord:
-    def __init__(self, record_id: str, baseline_type: str, data: Dict, created_at: Optional[datetime] = None):
+    def __init__(
+        self,
+        record_id: str,
+        baseline_type: str,
+        data: Dict,
+        created_at: Optional[datetime] = None,
+    ):
         self.record_id = record_id
         self.baseline_type = baseline_type
         self.data = data
@@ -19,7 +25,7 @@ class BaselineRecord:
             "record_id": self.record_id,
             "baseline_type": self.baseline_type,
             "data": self.data,
-            "created_at": self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
         }
 
 
@@ -34,12 +40,12 @@ class GoldenBaselineManager:
         return cls._instance
 
     def __init__(self):
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
         self._baselines: Dict[str, BaselineRecord] = {}
         self._baseline_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            "../../data/golden_baseline.json"
+            "../../data/golden_baseline.json",
         )
         self._load_baselines()
         self._initialized = True
@@ -47,7 +53,7 @@ class GoldenBaselineManager:
     def _load_baselines(self):
         if os.path.exists(self._baseline_file):
             try:
-                with open(self._baseline_file, 'r', encoding='utf-8') as f:
+                with open(self._baseline_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     for scenario in data.get("scenarios", []):
                         record_id = scenario.get("id", "")
@@ -55,7 +61,7 @@ class GoldenBaselineManager:
                         self._baselines[record_id] = BaselineRecord(
                             record_id=record_id,
                             baseline_type=baseline_type,
-                            data=scenario
+                            data=scenario,
                         )
             except Exception as e:
                 pass
@@ -69,7 +75,7 @@ class GoldenBaselineManager:
                 "name": "Security Evaluator - Normal Input",
                 "expected_score_min": 0.9,
                 "expected_risk_level": "low",
-                "expected_detected": False
+                "expected_detected": False,
             },
             {
                 "id": "golden_sec_injection_001",
@@ -77,15 +83,15 @@ class GoldenBaselineManager:
                 "name": "Security Evaluator - Injection Attack",
                 "expected_score_max": 0.4,
                 "expected_risk_level": "high",
-                "expected_detected": True
+                "expected_detected": True,
             },
             {
                 "id": "golden_qa_high_quality_001",
                 "type": "qa",
                 "name": "QA Evaluator - High Quality Output",
                 "expected_score_min": 0.8,
-                "expected_confidence_level": ["high", "good"]
-            }
+                "expected_confidence_level": ["high", "good"],
+            },
         ]
 
         for baseline in default_baselines:
@@ -93,7 +99,7 @@ class GoldenBaselineManager:
                 self._baselines[baseline["id"]] = BaselineRecord(
                     record_id=baseline["id"],
                     baseline_type=baseline["type"],
-                    data=baseline
+                    data=baseline,
                 )
 
     def get_baseline(self, record_id: str) -> Optional[BaselineRecord]:
@@ -116,26 +122,43 @@ class GoldenBaselineManager:
         actual_score = actual_data.get("data", {}).get("score", 0)
 
         if "expected_score_min" in data and actual_score < data["expected_score_min"]:
-            errors.append(f"Score {actual_score} below minimum {data['expected_score_min']}")
+            errors.append(
+                f"Score {actual_score} below minimum {data['expected_score_min']}"
+            )
 
         if "expected_score_max" in data and actual_score > data["expected_score_max"]:
-            errors.append(f"Score {actual_score} exceeds maximum {data['expected_score_max']}")
+            errors.append(
+                f"Score {actual_score} exceeds maximum {data['expected_score_max']}"
+            )
 
         if "expected_risk_level" in data:
-            actual_risk = actual_data.get("data", {}).get("data", {}).get("risk_level", "")
+            actual_risk = (
+                actual_data.get("data", {}).get("data", {}).get("risk_level", "")
+            )
             if actual_risk != data["expected_risk_level"]:
-                errors.append(f"Risk level {actual_risk} != expected {data['expected_risk_level']}")
+                errors.append(
+                    f"Risk level {actual_risk} != expected {data['expected_risk_level']}"
+                )
 
         if "expected_detected" in data:
-            detected = actual_data.get("data", {}).get("data", {}).get("security_tests", {}).get(
-                "injection", {}).get("detected", False)
+            detected = (
+                actual_data.get("data", {})
+                .get("data", {})
+                .get("security_tests", {})
+                .get("injection", {})
+                .get("detected", False)
+            )
             if detected != data["expected_detected"]:
-                errors.append(f"Detected {detected} != expected {data['expected_detected']}")
+                errors.append(
+                    f"Detected {detected} != expected {data['expected_detected']}"
+                )
 
         if "expected_confidence_level" in data:
             confidence = actual_data.get("data", {}).get("confidence_level", "")
             if confidence not in data["expected_confidence_level"]:
-                errors.append(f"Confidence level {confidence} not in {data['expected_confidence_level']}")
+                errors.append(
+f"Confidence level {confidence} in {data['expected_confidence_level']}"
+                )
 
         return {"passed": len(errors) == 0, "errors": errors, "baseline_id": record_id}
 

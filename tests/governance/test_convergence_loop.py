@@ -36,7 +36,7 @@ class TestGoldenBaselineManager:
         record = BaselineRecord(
             record_id="test_baseline_001",
             baseline_type="test",
-            data={"name": "Test Baseline", "expected_score_min": 0.7}
+            data={"name": "Test Baseline", "expected_score_min": 0.7},
         )
         manager.add_baseline(record)
         retrieved = manager.get_baseline("test_baseline_001")
@@ -52,11 +52,9 @@ class TestGoldenBaselineManager:
                 "confidence_level": "high",
                 "data": {
                     "risk_level": "low",
-                    "security_tests": {
-                        "injection": {"detected": False}
-                    }
-                }
-            }
+                    "security_tests": {"injection": {"detected": False}},
+                },
+            },
         }
         result = manager.validate_against_baseline("golden_sec_normal_001", actual_data)
         assert result["passed"] is True
@@ -70,11 +68,9 @@ class TestGoldenBaselineManager:
                 "score": 0.85,
                 "data": {
                     "risk_level": "low",
-                    "security_tests": {
-                        "injection": {"detected": False}
-                    }
-                }
-            }
+                    "security_tests": {"injection": {"detected": False}},
+                },
+            },
         }
         result = manager.validate_against_baseline("golden_sec_normal_001", actual_data)
         assert result["passed"] is False
@@ -88,13 +84,13 @@ class TestGoldenBaselineManager:
                 "score": 0.25,
                 "data": {
                     "risk_level": "high",
-                    "security_tests": {
-                        "injection": {"detected": True}
-                    }
-                }
-            }
+                    "security_tests": {"injection": {"detected": True}},
+                },
+            },
         }
-        result = manager.validate_against_baseline("golden_sec_injection_001", actual_data)
+        result = manager.validate_against_baseline(
+            "golden_sec_injection_001", actual_data
+        )
         assert result["passed"] is True
 
     def test_validate_against_baseline_not_found(self):
@@ -111,13 +107,13 @@ class TestGoldenBaselineManager:
                 "score": 0.95,
                 "data": {
                     "risk_level": "low",
-                    "security_tests": {
-                        "injection": {"detected": False}
-                    }
-                }
-            }
+                    "security_tests": {"injection": {"detected": False}},
+                },
+            },
         }
-        score = manager.calculate_convergence_score(actual_data, "golden_sec_normal_001")
+        score = manager.calculate_convergence_score(
+            actual_data, "golden_sec_normal_001"
+        )
         assert score == 1.0
 
     def test_calculate_convergence_score_partial(self):
@@ -128,13 +124,13 @@ class TestGoldenBaselineManager:
                 "score": 0.85,
                 "data": {
                     "risk_level": "medium",
-                    "security_tests": {
-                        "injection": {"detected": False}
-                    }
-                }
-            }
+                    "security_tests": {"injection": {"detected": False}},
+                },
+            },
         }
-        score = manager.calculate_convergence_score(actual_data, "golden_sec_normal_001")
+        score = manager.calculate_convergence_score(
+            actual_data, "golden_sec_normal_001"
+        )
         assert score == 0.6
 
 
@@ -152,13 +148,13 @@ class TestConvergenceLoop:
                     "score": score,
                     "data": {
                         "risk_level": "low",
-                        "security_tests": {
-                            "injection": {"detected": False}
-                        }
-                    }
-                }
+                        "security_tests": {"injection": {"detected": False}},
+                    },
+                },
             }
-            convergence_score = manager.calculate_convergence_score(actual_data, "golden_sec_normal_001")
+            convergence_score = manager.calculate_convergence_score(
+                actual_data, "golden_sec_normal_001"
+            )
             scores.append(convergence_score)
 
         assert scores[-1] >= 0.8
@@ -176,13 +172,13 @@ class TestConvergenceLoop:
                     "score": score,
                     "data": {
                         "risk_level": "low",
-                        "security_tests": {
-                            "injection": {"detected": False}
-                        }
-                    }
-                }
+                        "security_tests": {"injection": {"detected": False}},
+                    },
+                },
             }
-            convergence_score = manager.calculate_convergence_score(actual_data, "golden_sec_normal_001")
+            convergence_score = manager.calculate_convergence_score(
+                actual_data, "golden_sec_normal_001"
+            )
             scores.append(convergence_score)
 
         stability_window = scores[-5:]
@@ -201,19 +197,39 @@ class TestConvergenceLoop:
                 "confidence_level": "high",
                 "data": {
                     "security_tests": {
-                        "injection": {"score": 1.0, "detected": False, "risk_level": "low"},
-                        "jailbreak": {"score": 1.0, "detected": False, "risk_level": "low"},
-                        "data_leak": {"score": 1.0, "detected": False, "risk_level": "low"},
-                        "tool_abuse": {"score": 1.0, "detected": False, "risk_level": "low"}
+                        "injection": {
+                            "score": 1.0,
+                            "detected": False,
+                            "risk_level": "low",
+                        },
+                        "jailbreak": {
+                            "score": 1.0,
+                            "detected": False,
+                            "risk_level": "low",
+                        },
+                        "data_leak": {
+                            "score": 1.0,
+                            "detected": False,
+                            "risk_level": "low",
+                        },
+                        "tool_abuse": {
+                            "score": 1.0,
+                            "detected": False,
+                            "risk_level": "low",
+                        },
                     },
                     "overall_score": 0.95,
                     "risk_level": "low",
                     "execution_time_ms": 1200,
-                    "trace_id": "abc123"
-                }
-            }
+                    "trace_id": "abc123",
+                },
+            },
         }
-        result = manager.validate_against_baseline("golden_sec_normal_001", actual_test_data)
+        result = manager.validate_against_baseline(
+            "golden_sec_normal_001", actual_test_data
+        )
         assert result["passed"] is True
-        score = manager.calculate_convergence_score(actual_test_data, "golden_sec_normal_001")
+        score = manager.calculate_convergence_score(
+            actual_test_data, "golden_sec_normal_001"
+        )
         assert score == 1.0

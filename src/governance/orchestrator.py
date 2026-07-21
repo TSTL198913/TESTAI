@@ -7,16 +7,19 @@ from src.governance.agent import AIGovernanceAgent
 from src.governance.approval import ApprovalManager, ApprovalStatus
 from src.governance.executor import GovernanceExecutor
 from src.governance.git_manager import GitTransactionManager
-from src.governance.models import (DiagnosticContext, GovernanceAction,
-                                   PatchProposal)
+from src.governance.models import DiagnosticContext, GovernanceAction, PatchProposal
 from src.governance.tracker import GovernanceActionType, GovernanceTracker
 
 
 @contextmanager
-def governance_transaction(git_mgr: GitTransactionManager, tx_id: str, proposal: PatchProposal):
+def governance_transaction(
+    git_mgr: GitTransactionManager, tx_id: str, proposal: PatchProposal
+):
     logger = logging.getLogger("GovernanceTransaction")
     try:
-        logger.info(f"[AUDIT_PRE] Starting transaction {tx_id} for function: {proposal.target_function}")
+        logger.info(
+            f"[AUDIT_PRE] Starting transaction {tx_id} for function: {proposal.target_function}"
+        )
         git_mgr.start_transaction(tx_id)
 
         yield
@@ -24,7 +27,9 @@ def governance_transaction(git_mgr: GitTransactionManager, tx_id: str, proposal:
         git_mgr.commit(f"[TestAI-Governance][{tx_id}] Fixed {proposal.target_function}")
         logger.info(f"[AUDIT_POST] Transaction {tx_id} committed successfully.")
     except Exception as e:
-        logger.error(f"[AUDIT_FAILURE] Transaction {tx_id} failed: {str(e)}. Rolling back.")
+        logger.error(
+            f"[AUDIT_FAILURE] Transaction {tx_id} failed: {str(e)}. Rolling back."
+        )
         git_mgr.rollback(tx_id)
         raise e
 
@@ -44,7 +49,7 @@ class GovernanceOrchestrator:
             trace_id=trace_id,
             action_type=GovernanceActionType.DIAGNOSE_START,
             component=context.component_name,
-            step_id=context.step_id
+            step_id=context.step_id,
         )
 
         action = self._classify_exception(context)
@@ -55,14 +60,14 @@ class GovernanceOrchestrator:
                 component=context.component_name,
                 step_id=context.step_id,
                 status="SKIPPED",
-                message="Non-governable action"
+                message="Non-governable action",
             )
             return {
                 "status": "SKIPPED",
                 "reason": "Non-governable",
                 "confidence_score": 0.0,
                 "reasoning": "Non-governable action",
-                "suggested_fix": None
+                "suggested_fix": None,
             }
 
         diagnosis = await self.agent.analyze_with_context(context)
@@ -72,7 +77,11 @@ class GovernanceOrchestrator:
             "reason": diagnosis.reasoning,
             "confidence_score": diagnosis.confidence_score,
             "reasoning": diagnosis.reasoning,
-            "suggested_fix": diagnosis.patch_proposal.suggested_code if diagnosis.patch_proposal else None
+            "suggested_fix": (
+                diagnosis.patch_proposal.suggested_code
+                if diagnosis.patch_proposal
+                else None
+            ),
         }
 
         self.tracker.record_event(
@@ -81,7 +90,7 @@ class GovernanceOrchestrator:
             component=context.component_name,
             step_id=context.step_id,
             status="DIAGNOSED",
-            confidence_score=diagnosis.confidence_score
+            confidence_score=diagnosis.confidence_score,
         )
 
         if not diagnosis.is_fixable or not diagnosis.patch_proposal:
@@ -92,7 +101,7 @@ class GovernanceOrchestrator:
                 component=context.component_name,
                 step_id=context.step_id,
                 status="SKIPPED",
-                message="Not fixable"
+                message="Not fixable",
             )
             return result
 
@@ -105,7 +114,7 @@ class GovernanceOrchestrator:
             component=context.component_name,
             step_id=context.step_id,
             tx_id=tx_id,
-            patch_type=proposal.patch_type
+            patch_type=proposal.patch_type,
         )
 
         self.approval_mgr.create_approval(tx_id, proposal, context)
@@ -122,9 +131,11 @@ class GovernanceOrchestrator:
                 step_id=context.step_id,
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
-                status="PENDING_APPROVAL"
+                status="PENDING_APPROVAL",
             )
-            self.logger.info(f"[GOVERNANCE] Approval required for {tx_id} ({proposal.patch_type.value})")
+            self.logger.info(
+                f"[GOVERNANCE] Approval required for {tx_id} ({proposal.patch_type.value})"
+            )
             return result
 
         try:
@@ -143,7 +154,7 @@ class GovernanceOrchestrator:
                     target_function=target_function,
                     target_class=target_class,
                     suggested_code=proposal.suggested_code,
-                    required_imports=proposal.required_imports
+                    required_imports=proposal.required_imports,
                 )
 
                 if not success:
@@ -157,7 +168,7 @@ class GovernanceOrchestrator:
                 step_id=context.step_id,
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
-                status="FIXED"
+                status="FIXED",
             )
             return result
 
@@ -173,7 +184,7 @@ class GovernanceOrchestrator:
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
                 status="FAILED",
-                message=str(e)
+                message=str(e),
             )
             return result
 
@@ -184,7 +195,9 @@ class GovernanceOrchestrator:
         mapping = {"EvalPlatformProcessor": "extensions/eval_platform/processor.py"}
         return mapping.get(component_name, f"src/components/{component_name}.py")
 
-    async def approve_and_apply(self, tx_id: str, approver: str, reason: Optional[str] = None):
+    async def approve_and_apply(
+        self, tx_id: str, approver: str, reason: Optional[str] = None
+    ):
         record = self.approval_mgr.get_approval(tx_id)
         if not record:
             return {"status": "FAILED", "reason": "Approval record not found"}
@@ -201,7 +214,7 @@ class GovernanceOrchestrator:
                 patch_type=record.proposal.patch_type,
                 status="REJECTED",
                 message="Approval failed",
-                approver=approver
+                approver=approver,
             )
             return {"status": "FAILED", "reason": "Approval failed"}
 
@@ -213,7 +226,7 @@ class GovernanceOrchestrator:
             patch_type=record.proposal.patch_type,
             status="APPROVED",
             approver=approver,
-            reason=reason
+            reason=reason,
         )
 
         proposal = record.proposal
@@ -234,7 +247,7 @@ class GovernanceOrchestrator:
                     target_function=target_function,
                     target_class=target_class,
                     suggested_code=proposal.suggested_code,
-                    required_imports=proposal.required_imports
+                    required_imports=proposal.required_imports,
                 )
 
                 if not success:
@@ -247,7 +260,7 @@ class GovernanceOrchestrator:
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
                 status="FIXED",
-                approver=approver
+                approver=approver,
             )
 
             return {
@@ -255,7 +268,7 @@ class GovernanceOrchestrator:
                 "tx_id": tx_id,
                 "approved_by": approver,
                 "reason": reason,
-                "patch_type": proposal.patch_type.value
+                "patch_type": proposal.patch_type.value,
             }
 
         except Exception as e:
@@ -268,6 +281,6 @@ class GovernanceOrchestrator:
                 patch_type=proposal.patch_type,
                 status="FAILED",
                 message=str(e),
-                approver=approver
+                approver=approver,
             )
             return {"status": "FAILED", "reason": str(e)}

@@ -15,7 +15,8 @@ class GitTransactionManager:
             try:
                 result = subprocess.run(
                     ["git", "show-ref", "--verify", f"refs/heads/{branch}"],
-                    cwd=self.repo_path, capture_output=True
+                    cwd=self.repo_path,
+                    capture_output=True,
                 )
                 if result.returncode == 0:
                     return branch
@@ -26,9 +27,13 @@ class GitTransactionManager:
     def _run(self, cmd: list[str]):
         """封装带有检查的执行器"""
         try:
-            subprocess.run(cmd, cwd=self.repo_path, check=True, capture_output=True, text=True)
+            subprocess.run(
+                cmd, cwd=self.repo_path, check=True, capture_output=True, text=True
+            )
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Git Command Failed: {' '.join(cmd)} | Error: {e.stderr}")
+            self.logger.error(
+                f"Git Command Failed: {' '.join(cmd)} | Error: {e.stderr}"
+            )
             raise e
 
     def start_transaction(self, tx_id: str):
@@ -37,12 +42,15 @@ class GitTransactionManager:
         try:
             result = subprocess.run(
                 ["git", "show-ref", "--verify", f"refs/heads/{branch_name}"],
-                cwd=self.repo_path, capture_output=True
+                cwd=self.repo_path,
+                capture_output=True,
             )
             if result.returncode == 0:
                 self._run(["git", "branch", "-D", branch_name])
         except Exception as e:
-            self.logger.warning(f"Failed to check/clean existing branch {branch_name}: {e}")
+            self.logger.warning(
+                f"Failed to check/clean existing branch {branch_name}: {e}"
+            )
         self._run(["git", "checkout", "-b", branch_name])
 
     def commit(self, message: str):

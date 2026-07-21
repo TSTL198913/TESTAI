@@ -15,4 +15,5 @@ class Registry:
         with self._lock:
             return dict(self._results)
 
+
 registry = Registry()

@@ -9,6 +9,7 @@ def bootstrap_governance():
     # 如果有新的 Transformer，只需在这里添加一行
     # GovernanceRegistry.register(PatchType.SECURITY, SecurityTransformer)
 
+
 bootstrap_governance()
 
 from .orchestrator import GovernanceOrchestrator

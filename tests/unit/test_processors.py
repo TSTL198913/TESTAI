@@ -25,7 +25,7 @@ async def test_pipeline_flow_integration():
             # 注意：如果模型本身有 url 字段，params 里就不一定需要 request_url 了
             # 我们将具体的参数放入 payload 中，params 依然保留给 DataProcessor 进行渲染
             "payload": {"id": "${user_id}", "type": "admin"}
-        }
+        },
     )
 
     data_processor = DataProcessor()

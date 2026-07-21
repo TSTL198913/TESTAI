@@ -47,7 +47,7 @@ class ConcurrentFileWriter:
             return False, f"File is locked: {file_path}"
 
         try:
-            with open(file_path, 'a', encoding='utf-8') as f:
+            with open(file_path, "a", encoding="utf-8") as f:
                 f.write(content)
             return True, f"Write successful: {file_path}"
         except Exception as e:

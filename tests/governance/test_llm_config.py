@@ -42,11 +42,12 @@ class TestLLMAvailability:
             input_data={"test": "input"},
             actual_output={"test": "output"},
             expected_baseline={"test": "expected"},
-            exception_trace="TypeError: unsupported operand type(s) for +: 'int' and 'str'"
+            exception_trace="TypeError: unsupported operand type(s) for +: 'int' and 'str'",
         )
-        
+
         from unittest.mock import patch
-        with patch.object(agent.sdk, 'is_available', return_value=False):
+
+        with patch.object(agent.sdk, "is_available", return_value=False):
             result = await agent.analyze_with_context(context)
             assert result is not None
             assert result.is_fixable is True

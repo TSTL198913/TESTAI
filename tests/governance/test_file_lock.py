@@ -92,7 +92,7 @@ class TestConcurrentFileWriter:
             t.join(timeout=10)
 
         content = test_file.read_text()
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 15
 
     def test_write_fails_when_locked(self, tmp_path):

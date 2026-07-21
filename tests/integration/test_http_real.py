@@ -12,21 +12,26 @@ from src.models.contract import HttpRequest
 
 # ...
 
+
 @pytest.mark.asyncio
-@respx.mock # 添加装饰器
+@respx.mock  # 添加装饰器
 async def test_http_executor_real_traffic():
     # 拦截请求
-    respx.post("https://httpbin.org/anything").mock(return_value=httpx.Response(
-        200, json={"args": {"q": "python", "category": "test"},
-                   "headers": {"X-Engine-Name": "Gemini-Test-Platform"},
-                   "json": {"user_id": 12345, "action": "login"}}
-    ))
+    respx.post("https://httpbin.org/anything").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "args": {"q": "python", "category": "test"},
+                "headers": {"X-Engine-Name": "Gemini-Test-Platform"},
+                "json": {"user_id": 12345, "action": "login"},
+            },
+        )
+    )
     """
     真实流量测试：验证 HTTPProcessor 的参数映射准确性
     """
     context = ExecutionContext(
-        case_id="real_http_test",
-        env={"base_url": "https://httpbin.org"}
+        case_id="real_http_test", env={"base_url": "https://httpbin.org"}
     )
 
     test_params = {"q": "python", "category": "test"}
@@ -40,20 +45,24 @@ async def test_http_executor_real_traffic():
         method="POST",
         headers=test_headers,
         params=test_params,
-        body=test_body
+        body=test_body,
     )
 
     client = await ResourceContainer.get_client()
 
     # 【架构重构】：使用 DispatchProcessor 替代 ExecutorAdapter
-    pipeline = ExecutionPipeline(processors=[
-        EnvironmentProcessor({"base_url": "https://httpbin.org"}),
-        DataProcessor(),
-        DispatchProcessor()
-    ])
+    pipeline = ExecutionPipeline(
+        processors=[
+            EnvironmentProcessor({"base_url": "https://httpbin.org"}),
+            DataProcessor(),
+            DispatchProcessor(),
+        ]
+    )
 
     # 执行 (protocol="http" 触发 DispatchProcessor 路由至 HTTPProcessor)
-    await pipeline.run(context, [{"protocol": "http", "http": step.model_dump()}], client)
+    await pipeline.run(
+        context, [{"protocol": "http", "http": step.model_dump()}], client
+    )
 
     result = context.results.get("step_real_001")
     assert result is not None

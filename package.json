@@ -1,0 +1,25 @@
+{
+  "name": "testai-monorepo",
+  "version": "1.0.0",
+  "description": "AI 驱动的测试工具平台 - Monorepo 根目录",
+  "private": true,
+  "scripts": {
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:server": "cd apps/server && python -m uvicorn src.platform.api:app --reload --host 0.0.0.0 --port 8000",
+    "build:web": "cd apps/web && npm run build",
+    "build:server": "cd apps/server && python -m build",
+    "start:web": "cd apps/web && npm run start",
+    "start:server": "cd apps/server && python -m uvicorn src.platform.api:app --host 0.0.0.0 --port 8000",
+    "install:all": "npm run install:web && npm run install:server",
+    "install:web": "cd apps/web && npm install",
+    "install:server": "cd apps/server && pip install -e .",
+    "test:server": "cd apps/server && python -m pytest tests/ -v",
+    "test:mutation": "python tests/utils/custom_mutation_test.py",
+    "lint:web": "cd apps/web && npm run lint",
+    "lint:server": "cd apps/server && python -m flake8 src/",
+    "clean": "rm -rf apps/web/.next apps/web/node_modules apps/server/__pycache__"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
+}

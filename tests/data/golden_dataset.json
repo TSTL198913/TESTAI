@@ -1,0 +1,252 @@
+{
+  "version": "1.0",
+  "description": "TestAI黄金数据集 - 包含已知缺陷的测试用例，用于验证AI治理能力",
+  "created_at": "2026-07-21",
+  "baselines": {
+    "api_test_httpbin_post": {
+      "test_id": "golden_001",
+      "description": "HTTP POST请求测试基线",
+      "protocol": "http",
+      "method": "POST",
+      "url": "https://httpbin.org/anything",
+      "expected_status": 200,
+      "expected_headers": ["Content-Type"],
+      "expected_body_patterns": ["json", "args"],
+      "success_criteria": ["status_code == 200", "body contains 'json'"]
+    },
+    "api_test_httpbin_get": {
+      "test_id": "golden_002",
+      "description": "HTTP GET请求测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/get",
+      "expected_status": 200,
+      "expected_headers": ["Content-Type"],
+      "expected_body_patterns": ["args", "headers", "origin", "url"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_auth": {
+      "test_id": "golden_003",
+      "description": "Bearer认证测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/bearer",
+      "headers": {"Authorization": "Bearer test-token-123"},
+      "expected_status": 200,
+      "expected_body_patterns": ["authenticated", "token"],
+      "success_criteria": ["status_code == 200", "body.authenticated == true", "body.token == 'test-token-123'"]
+    },
+    "api_test_httpbin_status_200": {
+      "test_id": "golden_004",
+      "description": "200状态码测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/status/200",
+      "expected_status": 200,
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_headers": {
+      "test_id": "golden_005",
+      "description": "自定义Headers测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/headers",
+      "headers": {"X-TestAI-Platform": "v1.0", "X-Request-Id": "test-123"},
+      "expected_status": 200,
+      "expected_body_patterns": ["headers"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_json": {
+      "test_id": "golden_006",
+      "description": "JSON响应测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/json",
+      "expected_status": 200,
+      "expected_body_patterns": ["slideshow", "author", "title"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_ip": {
+      "test_id": "golden_007",
+      "description": "IP地址返回测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/ip",
+      "expected_status": 200,
+      "expected_body_patterns": ["origin"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_user_agent": {
+      "test_id": "golden_008",
+      "description": "User-Agent测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/user-agent",
+      "expected_status": 200,
+      "expected_body_patterns": ["user-agent"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_delay": {
+      "test_id": "golden_009",
+      "description": "延迟响应测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/delay/1",
+      "expected_status": 200,
+      "expected_response_time_ms": {"min": 1000, "max": 5000},
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_redirect": {
+      "test_id": "golden_010",
+      "description": "重定向测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/redirect/1",
+      "expected_status": 200,
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_cookies": {
+      "test_id": "golden_011",
+      "description": "Cookie测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/cookies",
+      "cookies": {"session": "abc123", "user": "test"},
+      "expected_status": 200,
+      "expected_body_patterns": ["cookies"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_stream": {
+      "test_id": "golden_012",
+      "description": "流响应测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/stream/3",
+      "expected_status": 200,
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_gzip": {
+      "test_id": "golden_013",
+      "description": "Gzip压缩测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/gzip",
+      "expected_status": 200,
+      "expected_body_patterns": ["gzipped", "data", "headers"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_deflate": {
+      "test_id": "golden_014",
+      "description": "Deflate压缩测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/deflate",
+      "expected_status": 200,
+      "expected_body_patterns": ["deflated", "data", "headers"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_cache": {
+      "test_id": "golden_015",
+      "description": "缓存控制测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/cache/60",
+      "expected_status": 200,
+      "expected_headers": ["Cache-Control"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_encoding": {
+      "test_id": "golden_016",
+      "description": "字符编码测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/encoding/utf8",
+      "expected_status": 200,
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_unicode": {
+      "test_id": "golden_017",
+      "description": "Unicode响应测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/unicode/utf8",
+      "expected_status": 200,
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_links": {
+      "test_id": "golden_018",
+      "description": "链接测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/links/5/0",
+      "expected_status": 200,
+      "expected_body_patterns": ["links", "url"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_uuid": {
+      "test_id": "golden_019",
+      "description": "UUID生成测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/uuid",
+      "expected_status": 200,
+      "expected_body_patterns": ["uuid"],
+      "success_criteria": ["status_code == 200"]
+    },
+    "api_test_httpbin_bytes": {
+      "test_id": "golden_020",
+      "description": "二进制数据测试基线",
+      "protocol": "http",
+      "method": "GET",
+      "url": "https://httpbin.org/bytes/100",
+      "expected_status": 200,
+      "success_criteria": ["status_code == 200"]
+    }
+  },
+  "defect_cases": {
+    "defect_division_by_zero": {
+      "defect_id": "defect_001",
+      "description": "除零错误缺陷",
+      "severity": "high",
+      "location": "vulnerable_app.py:86-93",
+      "expected_diagnosis": "除法运算中除数为零导致异常",
+      "expected_fix": "在除法前添加除数非零检查",
+      "test_input": {"a": 10, "b": 0},
+      "expected_output": "错误: 除数不能为零",
+      "convergence_criteria": ["不再抛出异常", "返回正确的错误提示"]
+    },
+    "defect_infinite_loop": {
+      "defect_id": "defect_002",
+      "description": "无限循环缺陷",
+      "severity": "critical",
+      "location": "vulnerable_app.py:130-132",
+      "expected_diagnosis": "缺少循环终止条件",
+      "expected_fix": "添加最大迭代次数限制或终止条件",
+      "test_input": {},
+      "expected_output": "循环已终止",
+      "convergence_criteria": ["函数能够正常返回", "执行时间在合理范围内"]
+    },
+    "defect_recursive_fibonacci": {
+      "defect_id": "defect_003",
+      "description": "递归斐波那契性能缺陷",
+      "severity": "medium",
+      "location": "vulnerable_app.py:70-75",
+      "expected_diagnosis": "递归实现导致指数级时间复杂度",
+      "expected_fix": "改用迭代实现或添加缓存",
+      "test_input": {"n": 30},
+      "expected_output": 832040,
+      "convergence_criteria": ["执行时间 < 1秒", "结果正确"]
+    },
+    "defect_hardcoded_secret": {
+      "defect_id": "defect_004",
+      "description": "硬编码密钥缺陷",
+      "severity": "critical",
+      "location": "vulnerable_app.py:9",
+      "expected_diagnosis": "密钥硬编码在源代码中",
+      "expected_fix": "通过环境变量或密钥管理服务注入",
+      "test_input": {},
+      "expected_output": "密钥已安全配置",
+      "convergence_criteria": ["源代码中不再包含硬编码密钥"]
+    }
+  }
+}

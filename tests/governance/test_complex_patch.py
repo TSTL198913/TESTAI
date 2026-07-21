@@ -43,6 +43,8 @@ class Processor:
     # 3. 完整性验证：其他方法是否受影响？
     assert "def cleanup(self):" in result
 
+    assert transformer.patched is True, "FunctionTransformer 补丁标记应设为True"
+
     print("\n✅ [Hard Mode Passed] 装饰器与类结构保持完整！")
 
 

@@ -5,8 +5,7 @@ import re
 from typing import Optional
 
 from src.governance.config import GovernanceConfig
-from src.governance.models import (AIGovernanceResult, DiagnosticContext,
-                                   PatchProposal)
+from src.governance.models import AIGovernanceResult, DiagnosticContext, PatchProposal
 from src.governance.registry import PatchType
 from src.governance.sdk import GovernanceClientSDK
 
@@ -18,13 +17,15 @@ class AIGovernanceAgent:
         self.max_retries = max_retries
 
     def _sanitize_response(self, content: str) -> str:
-        pattern = re.compile(r'```(?:json)?\s*(.*?)\s*```', re.DOTALL)
+        pattern = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL)
         match = pattern.search(content)
         if match:
             return match.group(1)
         return content.strip()
 
-    async def analyze_with_context(self, context: DiagnosticContext) -> AIGovernanceResult:
+    async def analyze_with_context(
+        self, context: DiagnosticContext
+    ) -> AIGovernanceResult:
         context_dict = context.model_dump()
         valid_patch_types = [t.value for t in PatchType]
 
@@ -43,11 +44,14 @@ class AIGovernanceAgent:
                         "target_function": {"type": "string"},
                         "target_class": {"type": "string"},
                         "suggested_code": {"type": "string"},
-                        "required_imports": {"type": "array", "items": {"type": "string"}},
-                        "patch_type": {"type": "string", "enum": valid_patch_types}
-                    }
-                }
-            }
+                        "required_imports": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                        "patch_type": {"type": "string", "enum": valid_patch_types},
+                    },
+                },
+            },
         }
 
         prompt = f"""
@@ -73,7 +77,9 @@ class AIGovernanceAgent:
 
         if not self.sdk.is_available():
             self.logger.info("LLM not configured, using mock diagnosis for testing")
-            mock_response = await self.sdk.get_mock_response([{"role": "user", "content": prompt}])
+            mock_response = await self.sdk.get_mock_response(
+                [{"role": "user", "content": prompt}]
+            )
             return AIGovernanceResult.model_validate_json(mock_response.content)
 
         last_error = None
@@ -81,8 +87,11 @@ class AIGovernanceAgent:
             try:
                 response = await self.sdk.chat_completion(
                     messages=[
-                        {"role": "system", "content": "你只输出合法的JSON格式数据。不要Markdown格式，不要任何解释文字。"},
-                        {"role": "user", "content": prompt}
+                        {
+                            "role": "system",
+                            "content": "你只输出合法的JSON格式数据。不要Markdown格式，不要任何解释文字。",
+                        },
+                        {"role": "user", "content": prompt},
                     ]
                 )
 
@@ -93,12 +102,16 @@ class AIGovernanceAgent:
 
             except Exception as e:
                 last_error = str(e)
-                self.logger.warning(f"Diagnosis attempt {attempt + 1} failed: {last_error}")
+                self.logger.warning(
+                    f"Diagnosis attempt {attempt + 1} failed: {last_error}"
+                )
                 await asyncio.sleep(0.5 * (attempt + 1))
 
-        self.logger.error(f"Deep Diagnosis failed after {self.max_retries + 1} attempts. Root Cause: {last_error}")
+        self.logger.error(
+            f"Deep Diagnosis failed after {self.max_retries + 1} attempts. Root Cause: {last_error}"
+        )
         return AIGovernanceResult(
             is_fixable=False,
             reasoning=f"Agent failed to produce valid JSON: {last_error}",
-            confidence_score=0.0
+            confidence_score=0.0,
         )

@@ -31,7 +31,7 @@ class EvaluationValidator:
             baseline_path = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
                 "data",
-                "golden_baseline.json"
+                "golden_baseline.json",
             )
         self.baseline_path = baseline_path
         self.baseline_data: Dict[str, Any] = {}
@@ -52,11 +52,14 @@ class EvaluationValidator:
 
     def get_scenarios_by_type(self, evaluator_type: str) -> List[Dict[str, Any]]:
         return [
-            scenario for scenario in self.baseline_data.get("scenarios", [])
+            scenario
+            for scenario in self.baseline_data.get("scenarios", [])
             if scenario.get("evaluator_type") == evaluator_type
         ]
 
-    def validate(self, actual_output: Dict[str, Any], scenario_id: str) -> ValidationResult:
+    def validate(
+        self, actual_output: Dict[str, Any], scenario_id: str
+    ) -> ValidationResult:
         scenario = self.get_scenario(scenario_id)
         if scenario is None:
             result = ValidationResult()
@@ -67,10 +70,7 @@ class EvaluationValidator:
         return self._validate_recursive(actual_output, expected_output, "")
 
     def _validate_recursive(
-        self,
-        actual: Any,
-        expected: Any,
-        current_path: str
+        self, actual: Any, expected: Any, current_path: str
     ) -> ValidationResult:
         result = ValidationResult()
         result.total_fields += 1
@@ -91,17 +91,23 @@ class EvaluationValidator:
                     result.matched_fields += 1
                     return result
                 else:
-                    result.add_error(f"Expected object at {current_path}, got {type(actual).__name__}")
+                    result.add_error(
+                        f"Expected object at {current_path}, got {type(actual).__name__}"
+                    )
                     return result
 
             if not isinstance(actual, dict):
-                result.add_error(f"Expected dict at {current_path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected dict at {current_path}, got {type(actual).__name__}"
+                )
                 return result
 
             for key, expected_value in expected.items():
                 actual_value = actual.get(key)
                 key_path = f"{current_path}.{key}" if current_path else key
-                sub_result = self._validate_recursive(actual_value, expected_value, key_path)
+                sub_result = self._validate_recursive(
+                    actual_value, expected_value, key_path
+                )
                 result.passed &= sub_result.passed
                 result.errors.extend(sub_result.errors)
                 result.warnings.extend(sub_result.warnings)
@@ -110,7 +116,9 @@ class EvaluationValidator:
 
         elif isinstance(expected, list):
             if not isinstance(actual, list):
-                result.add_error(f"Expected list at {current_path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected list at {current_path}, got {type(actual).__name__}"
+                )
                 return result
             result.matched_fields += 1
 
@@ -134,32 +142,44 @@ class EvaluationValidator:
             if isinstance(actual, str):
                 result.matched_fields += 1
             else:
-                result.add_error(f"Expected string at {path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected string at {path}, got {type(actual).__name__}"
+                )
         elif type_name == "number":
             if isinstance(actual, (int, float)):
                 result.matched_fields += 1
             else:
-                result.add_error(f"Expected number at {path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected number at {path}, got {type(actual).__name__}"
+                )
         elif type_name == "integer":
             if isinstance(actual, int):
                 result.matched_fields += 1
             else:
-                result.add_error(f"Expected integer at {path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected integer at {path}, got {type(actual).__name__}"
+                )
         elif type_name == "boolean":
             if isinstance(actual, bool):
                 result.matched_fields += 1
             else:
-                result.add_error(f"Expected boolean at {path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected boolean at {path}, got {type(actual).__name__}"
+                )
         elif type_name == "array":
             if isinstance(actual, list):
                 result.matched_fields += 1
             else:
-                result.add_error(f"Expected array at {path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected array at {path}, got {type(actual).__name__}"
+                )
         elif type_name == "object":
             if isinstance(actual, dict):
                 result.matched_fields += 1
             else:
-                result.add_error(f"Expected object at {path}, got {type(actual).__name__}")
+                result.add_error(
+                    f"Expected object at {path}, got {type(actual).__name__}"
+                )
         elif type_name == "null":
             if actual is None:
                 result.matched_fields += 1
@@ -179,9 +199,7 @@ class EvaluationValidator:
         if actual in options:
             result.matched_fields += 1
         else:
-            result.add_error(
-                f"Expected one of {options} at {path}, got {actual!r}"
-            )
+            result.add_error(f"Expected one of {options} at {path}, got {actual!r}")
 
         return result
 
@@ -193,17 +211,15 @@ class EvaluationValidator:
         max_val = expected["max"]
 
         if not isinstance(actual, (int, float)):
-            result.add_error(f"Expected numeric value at {path}, got {type(actual).__name__}")
+            result.add_error(
+                f"Expected numeric value at {path}, got {type(actual).__name__}"
+            )
             return result
 
         if min_val is not None and actual < min_val:
-            result.add_error(
-                f"Value {actual} at {path} is below minimum {min_val}"
-            )
+            result.add_error(f"Value {actual} at {path} is below minimum {min_val}")
         elif max_val is not None and actual > max_val:
-            result.add_error(
-                f"Value {actual} at {path} exceeds maximum {max_val}"
-            )
+            result.add_error(f"Value {actual} at {path} exceeds maximum {max_val}")
         else:
             result.matched_fields += 1
 

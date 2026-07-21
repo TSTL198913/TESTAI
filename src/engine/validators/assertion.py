@@ -32,7 +32,7 @@ class BodyContainsValidator(BaseValidator):
 class AssertionEngine:
     _validators: Dict[str, BaseValidator] = {
         "status_code": StatusValidator(),
-        "body_contains": BodyContainsValidator()
+        "body_contains": BodyContainsValidator(),
     }
 
     @classmethod
