@@ -170,3 +170,6 @@ f"Confidence level {confidence} in {data['expected_confidence_level']}"
 
     def get_all_baseline_ids(self) -> List[str]:
         return list(self._baselines.keys())
+
+    def get_all_baselines(self) -> List[BaselineRecord]:
+        return list(self._baselines.values())

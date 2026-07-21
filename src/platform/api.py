@@ -171,8 +171,8 @@ async def health_check():
 @app.post("/governance/execute")
 async def execute_governance(
     component_name: str,
-    step_id: str = None,
-    input_data: dict = None,
+    step_id: Optional[str] = None,
+    input_data: Optional[dict] = None,
     actual_output: str = "",
     expected_baseline: str = "",
     user: User = Depends(require_permission(Permission.EXECUTE_GOVERNANCE)),
@@ -205,7 +205,7 @@ async def list_approvals(
 async def approve_patch(
     tx_id: str,
     approver: str,
-    reason: str = None,
+    reason: Optional[str] = None,
     user: User = Depends(require_permission(Permission.APPROVE_PATCH)),
 ):
     result = await orchestrator.approve_and_apply(tx_id, approver, reason)
@@ -229,7 +229,7 @@ async def get_alerts(
     user: User = Depends(require_permission(Permission.VIEW_ALERTS)),
 ):
     if level:
-        alerts = alert_manager.get_alerts_by_level(level.upper())
+        alerts = alert_manager.get_alerts(level=level.upper())
     else:
         alerts = alert_manager.get_alerts()
     return {"count": len(alerts), "alerts": [a.to_dict() for a in alerts]}
@@ -263,7 +263,7 @@ async def define_workflow(
 @app.post("/workflow/{workflow_id}/execute")
 async def execute_workflow(
     workflow_id: str,
-    params: dict = None,
+    params: Optional[dict] = None,
     user: User = Depends(require_permission(Permission.EXECUTE_WORKFLOW)),
 ):
     result = await workflow_engine.execute_workflow(workflow_id, params or {})
@@ -593,7 +593,7 @@ async def get_tracker_events(
     limit: int = 100,
     user: User = Depends(require_permission(Permission.VIEW_GOVERNANCE)),
 ):
-    events = tracker.get_events_by_trace(trace_id) if trace_id else tracker._events
+    events = tracker.get_events_by_trace(trace_id) if trace_id else tracker.get_recent_events(limit)
     
     if event_type:
         event_type_enum = GovernanceActionType[event_type.upper()]
@@ -640,9 +640,9 @@ async def get_baselines(user: User = Depends(require_permission(Permission.VIEW_
         "count": len(baselines),
         "baselines": [
             {
-                "baseline_id": b["baseline_id"],
-                "name": b["name"],
-                "description": b["description"],
+                "baseline_id": b.record_id,
+                "name": b.data.get("name", ""),
+                "description": b.data.get("description", ""),
             }
             for b in baselines
         ],
@@ -686,6 +686,6 @@ async def get_baseline_convergence(
     
     return {
         "baseline_id": baseline_id,
-        "expected_output": baseline["expected_output"],
-        "tolerance": baseline["tolerance"],
+        "expected_output": baseline.data.get("expected_output"),
+        "tolerance": baseline.data.get("tolerance"),
     }

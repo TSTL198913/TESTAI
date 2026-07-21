@@ -5,7 +5,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 @dataclass
@@ -115,7 +115,7 @@ class CustomMutationTester:
         with open(file_path, "w", encoding="utf-8") as f:
             f.writelines(lines)
 
-    def _run_tests(self, test_dir: str, test_files: str = "all", mutated_file: str = None) -> Tuple[bool, str]:
+    def _run_tests(self, test_dir: str, test_files: str = "all", mutated_file: Optional[str] = None) -> Tuple[bool, str]:
         try:
             env = os.environ.copy()
             env["PYTHONPATH"] = test_dir
@@ -263,7 +263,7 @@ class CustomMutationTester:
             else 0
         )
 
-        report = {
+        report: dict = {
             "summary": {
                 "mutations_applied": self.mutations_applied,
                 "mutations_killed": self.mutations_killed,
