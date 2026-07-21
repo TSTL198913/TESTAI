@@ -164,6 +164,201 @@
       "acknowledged_at": "2026-07-21T16:30:12.836255",
       "resolved_by": "",
       "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000012",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T17:47:21.822057",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T17:47:21.823420",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000013",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T17:49:30.760261",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T17:49:30.761262",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000014",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:16:29.054408",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:16:29.057192",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000015",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:18:41.901796",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:18:41.904368",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000016",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:21:06.704030",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:21:06.705477",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000017",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:25:58.372990",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:25:58.374060",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000018",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:28:17.242108",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:28:17.244676",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000019",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:41:00.407228",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:41:00.408682",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000020",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:43:46.112490",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:43:46.114109",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000021",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T18:49:00.864128",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T18:49:00.865524",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000022",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T19:01:49.418675",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T19:01:49.421120",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000023",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T19:04:38.013127",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T19:04:38.014668",
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000024",
+      "level": "critical",
+      "alert_type": "system_error",
+      "title": "Test Error",
+      "message": "Error occurred",
+      "source": "test",
+      "details": {},
+      "timestamp": "2026-07-21T19:22:01.708141",
+      "status": "acknowledged",
+      "acknowledged_by": "admin",
+      "acknowledged_at": "2026-07-21T19:22:01.709660",
+      "resolved_by": "",
+      "resolved_at": null
     }
   ],
   "rules": [
@@ -176,7 +371,7 @@
       "threshold": 0.1,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.834319"
+      "created_at": "2026-07-21T19:22:01.707636"
     },
     {
       "rule_id": "rule_performance",
@@ -187,7 +382,7 @@
       "threshold": 2000,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.834319"
+      "created_at": "2026-07-21T19:22:01.708141"
     },
     {
       "rule_id": "rule_performance_critical",
@@ -198,7 +393,7 @@
       "threshold": 5000,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.834319"
+      "created_at": "2026-07-21T19:22:01.708141"
     },
     {
       "rule_id": "rule_kill_rate",
@@ -209,7 +404,7 @@
       "threshold": 80,
       "window_seconds": 0,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.834319"
+      "created_at": "2026-07-21T19:22:01.708141"
     },
     {
       "rule_id": "rule_coverage",
@@ -220,7 +415,7 @@
       "threshold": 80,
       "window_seconds": 0,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.834319"
+      "created_at": "2026-07-21T19:22:01.708141"
     }
   ]
 }

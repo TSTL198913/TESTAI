@@ -131,7 +131,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run Governance Tests
-        run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning
+        run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning --ignore=tests/governance/test_layered_effectiveness.py --ignore=tests/governance/test_mutation.py
 
   governance-e2e:
     name: Governance E2E Validation

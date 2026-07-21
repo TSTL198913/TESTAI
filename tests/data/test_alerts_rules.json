@@ -791,6 +791,942 @@
       "acknowledged_at": null,
       "resolved_by": "",
       "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000045",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:47:21.836777",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000046",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:47:21.846786",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000047",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:47:21.856801",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000048",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:47:21.866163",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000049",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:49:30.784772",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000050",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:49:30.795661",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000051",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:49:30.805582",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000052",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T17:49:30.816210",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000053",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:16:29.091554",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000054",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:16:29.107274",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000055",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:16:29.120901",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000056",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:16:29.135991",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000057",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:18:41.934346",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000058",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:18:41.950321",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000059",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:18:41.966679",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000060",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:18:41.980785",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000061",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:21:06.728495",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000062",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:21:06.738492",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000063",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:21:06.748470",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000064",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:21:06.757931",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000065",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:25:58.395274",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000066",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:25:58.405089",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000067",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:25:58.416686",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000068",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:25:58.426598",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000069",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:28:17.267852",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000070",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:28:17.278023",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000071",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:28:17.289414",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000072",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:28:17.300841",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000073",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:41:00.433216",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000074",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:41:00.443182",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000075",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:41:00.453736",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000076",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:41:00.474010",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000077",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:43:46.143248",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000078",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:43:46.153912",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000079",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:43:46.163635",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000080",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:43:46.174182",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000081",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:49:00.889628",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000082",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:49:00.901026",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000083",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:49:00.911251",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000084",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T18:49:00.925134",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000085",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:01:49.437184",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000086",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:01:49.447880",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000087",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:01:49.458816",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000088",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:01:49.469448",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000089",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:04:38.038540",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000090",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:04:38.051143",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000091",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:04:38.061935",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000092",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:04:38.072097",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000093",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:22:01.731262",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000094",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:22:01.741806",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000095",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "变异测试Kill Rate不足: 0%",
+      "message": "变异测试Kill Rate 0% 低于阈值 80%",
+      "source": "mutation_test",
+      "details": {
+        "kill_rate": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:22:01.752767",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
+    },
+    {
+      "alert_id": "alert_000096",
+      "level": "warning",
+      "alert_type": "test_failure",
+      "title": "测试覆盖率不足: 0%",
+      "message": "测试覆盖率 0% 低于阈值 80%",
+      "source": "coverage_report",
+      "details": {
+        "coverage": 0,
+        "threshold": 80
+      },
+      "timestamp": "2026-07-21T19:22:01.763664",
+      "status": "open",
+      "acknowledged_by": "",
+      "acknowledged_at": null,
+      "resolved_by": "",
+      "resolved_at": null
     }
   ],
   "rules": [
@@ -803,7 +1739,7 @@
       "threshold": 0.1,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.855238"
+      "created_at": "2026-07-21T19:22:01.728736"
     },
     {
       "rule_id": "rule_performance",
@@ -814,7 +1750,7 @@
       "threshold": 2000,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.855238"
+      "created_at": "2026-07-21T19:22:01.728736"
     },
     {
       "rule_id": "rule_performance_critical",
@@ -825,7 +1761,7 @@
       "threshold": 5000,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.855238"
+      "created_at": "2026-07-21T19:22:01.728736"
     },
     {
       "rule_id": "rule_kill_rate",
@@ -836,7 +1772,7 @@
       "threshold": 80,
       "window_seconds": 0,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.855238"
+      "created_at": "2026-07-21T19:22:01.728736"
     },
     {
       "rule_id": "rule_coverage",
@@ -847,7 +1783,7 @@
       "threshold": 80,
       "window_seconds": 0,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.855238"
+      "created_at": "2026-07-21T19:22:01.728736"
     },
     {
       "rule_id": "test_rule",
@@ -858,7 +1794,7 @@
       "threshold": 90,
       "window_seconds": 300,
       "enabled": true,
-      "created_at": "2026-07-21T16:30:12.855238"
+      "created_at": "2026-07-21T19:22:01.728736"
     }
   ]
 }

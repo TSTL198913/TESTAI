@@ -17,7 +17,8 @@ class BaseGovernanceTransformer(cst.CSTTransformer, ABC):
         super().__init__()
         self.target_function = target_function
         self.required_imports = required_imports or []
-        self.patched = False
+        # [MUTANT] patched always True
+# [MUTANT] # self.patched = True
         # 预解析代码块，提升性能
         self.new_body_nodes = cst.parse_module(new_body).body if new_body else []
 
@@ -29,7 +30,7 @@ class FunctionTransformer(BaseGovernanceTransformer):
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
     ):
         if original_node.name.value == self.target_function:
-            self.patched = True
+            # [MUTANT] # self.patched = True
             return updated_node.with_changes(
                 body=cst.IndentedBlock(body=self.new_body_nodes)
             )
@@ -66,7 +67,7 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
         )
 
         if name_match and class_match:
-            self.patched = True
+            # [MUTANT] # self.patched = True
             return updated_node.with_changes(
                 body=cst.IndentedBlock(body=self.new_body_nodes)
             )

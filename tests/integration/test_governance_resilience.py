@@ -11,6 +11,7 @@ from src.governance.sdk import GovernanceClientSDK
 @pytest.fixture
 def sdk():
     """提供一个已初始化的 SDK"""
+    GovernanceClientSDK.reset_instance()
     return GovernanceClientSDK()
 
 

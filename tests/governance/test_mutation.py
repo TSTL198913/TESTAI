@@ -43,12 +43,16 @@ class TestMutationCoverage:
             result = subprocess.run(
                 [
                     "python",
+                    "-B",
                     "-m",
                     "pytest",
                     "tests/governance/test_p0_exposure.py::TestContextAwareTransformerPatchedFlag",
                     "-v",
                     "--tb=short",
                     "--no-header",
+                    "--cache-clear",
+                    "-p",
+                    "no:cacheprovider",
                 ],
                 capture_output=True,
                 text=True,
@@ -77,12 +81,16 @@ class TestMutationCoverage:
             result = subprocess.run(
                 [
                     "python",
+                    "-B",
                     "-m",
                     "pytest",
                     "tests/governance/test_p0_exposure.py::TestGovernanceProcessorRegistration",
                     "-v",
                     "--tb=short",
                     "--no-header",
+                    "--cache-clear",
+                    "-p",
+                    "no:cacheprovider",
                 ],
                 capture_output=True,
                 text=True,
