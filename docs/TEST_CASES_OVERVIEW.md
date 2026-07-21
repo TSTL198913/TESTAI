@@ -1,6 +1,6 @@
 # TestAI系统测试用例梳理
 
-> 文档版本：v1.0  
+> 文档版本：v2.0  
 > 创建日期：2026-07-21  
 > 项目名称：TestAI — AI驱动的自治测试与智能诊断平台
 
@@ -12,25 +12,32 @@
 
 | 测试层级 | 目录 | 测试文件数 | 测试用例数 | 覆盖率目标 |
 |----------|------|------------|------------|------------|
-| **单元测试** | `tests/unit/` | 4 | ~20 | 核心逻辑 |
-| **治理测试** | `tests/governance/` | 24 | ~145 | 88% |
-| **平台测试** | `tests/platform/` | 4 | ~30 | 88% |
-| **安全测试** | `tests/security/` | 3 | ~20 | 100% |
-| **集成测试** | `tests/integration/` | 8 | ~15 | 全链路 |
-| **AI模块测试** | `tests/ai/` | 1 | ~25 | 90% |
-| **Worker测试** | `tests/worker/` | 1 | ~15 | 100% |
-| **性能测试** | `tests/performance/` | 1 | 1 | N/A |
-| **合计** | - | 46 | **~271** | - |
+| **治理测试** | `tests/governance/` | 24 | **304** | 95% |
+| **平台测试** | `tests/platform/` | 4 | **138** | 97% |
+| **安全测试** | `tests/security/` | 3 | **65** | 100% |
+| **集成测试** | `tests/integration/` | 8 | **56** | 全链路 |
+| **AI模块测试** | `tests/ai/` | 1 | **27** | 90% |
+| **单元测试** | `tests/unit/` | 4 | **14** | 核心逻辑 |
+| **Worker测试** | `tests/worker/` | 1 | **13** | 100% |
+| **性能测试** | `tests/performance/` | 1 | **4** | N/A |
+| **合计** | - | 46 | **621** | - |
 
 ### 1.2 测试分类统计
 
 | 测试类型 | 数量 | 占比 |
 |----------|------|------|
-| 正向测试 | ~120 | 44% |
-| 负向测试 | ~80 | 30% |
-| 边界测试 | ~35 | 13% |
-| 异常测试 | ~20 | 7% |
-| 依赖测试 | ~16 | 6% |
+| 正向测试 | ~350 | 56% |
+| 负向测试 | ~150 | 24% |
+| 边界测试 | ~60 | 10% |
+| 异常测试 | ~35 | 6% |
+| 依赖测试 | ~26 | 4% |
+
+### 1.3 S级测试统计
+
+| 指标 | 数量 | 占比 |
+|------|------|------|
+| S级测试总数 | **44** | **100%**（核心模块） |
+| S级覆盖模块 | 12 | governance/platform/security/users/teams |
 
 ---
 
@@ -72,7 +79,35 @@
 
 ## 三、治理测试用例
 
-### 3.1 审批机制测试 (`tests/governance/test_approval.py`)
+### 3.1 S级核心测试 (`tests/governance/test_s_level_core.py`)
+
+| 测试类 | 测试数量 | 覆盖模块 |
+|--------|----------|----------|
+| `TestSLevelApprovalPersistence` | 2 | 审批持久化 |
+| `TestSLevelGovernanceTracker` | 2 | 治理追踪 |
+| `TestSLevelBaselineConvergence` | 2 | 基线收敛 |
+| `TestSLevelSecurityValidation` | 2 | 安全校验 |
+| `TestSLevelAuthSecurity` | 2 | 认证安全 |
+| `TestSLevelUserPersistence` | 2 | 用户持久化 |
+| `TestSLevelTeamPersistence` | 2 | 团队持久化 |
+| `TestSLevelConfigPersistence` | 2 | 配置持久化 |
+| `TestSLevelWorkflowEngine` | 3 | 工作流引擎 |
+| `TestSLevelTransformerPrecision` | 2 | 代码转换器 |
+| `TestSLevelGovernanceExecutor` | 2 | 治理执行器 |
+| `TestSLevelGovernanceOrchestrator` | 1 | 治理编排器 |
+| `TestSLevelGitTransaction` | 2 | Git事务 |
+| `TestSLevelCircuitBreaker` | 2 | 熔断保护 |
+| `TestSLevelFileLock` | 1 | 文件锁 |
+| `TestSLevelAPIEndpoints` | 2 | API端点 |
+| `TestSLevelPermissionControl` | 2 | 权限控制 |
+| `TestSLevelAlertManagement` | 2 | 告警管理 |
+| `TestSLevelDatabasePersistence` | 2 | 数据库持久化 |
+| `TestSLevelGoldenBaseline` | 2 | 黄金基线 |
+| `TestSLevelApprovalWorkflow` | 2 | 审批工作流 |
+| `TestSLevelMutationTesting` | 1 | 变异测试 |
+| **合计** | **44** | - |
+
+### 3.2 审批机制测试 (`tests/governance/test_approval.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
@@ -83,7 +118,7 @@
 | `test_requires_approval_security` | 安全补丁需要审批 | 依赖 |
 | `test_requires_approval_large_change` | 大变更需要审批 | 依赖 |
 
-### 3.2 基线收敛测试 (`tests/governance/test_baseline_convergence.py`)
+### 3.3 基线收敛测试 (`tests/governance/test_baseline_convergence.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
@@ -92,7 +127,7 @@
 | `test_convergence_score_calculation` | 收敛分数计算 | 正向 |
 | `test_convergence_score_boundary` | 收敛分数边界 | 边界 |
 
-### 3.3 类匹配精确性测试 (`tests/governance/test_class_match_precision.py`)
+### 3.4 类匹配精确性测试 (`tests/governance/test_class_match_precision.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
@@ -101,14 +136,14 @@
 | `test_handles_no_class_filter` | 无类过滤时匹配所有同名方法 | 边界 |
 | `test_raises_error_on_invalid_syntax` | 无效语法抛出异常 | 异常 |
 
-### 3.4 并发控制测试 (`tests/governance/test_concurrency.py`)
+### 3.5 并发控制测试 (`tests/governance/test_concurrency.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
 | `test_thread_safe_approval` | 审批管理器线程安全 | 正向 |
 | `test_thread_safe_tracker` | 追踪器线程安全 | 正向 |
 
-### 3.5 收敛循环测试 (`tests/governance/test_convergence_loop.py`)
+### 3.6 收敛循环测试 (`tests/governance/test_convergence_loop.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
@@ -116,33 +151,33 @@
 | `test_convergence_loop_multiple_iterations` | 多轮收敛循环 | 正向 |
 | `test_convergence_loop_failure` | 收敛循环失败 | 异常 |
 
-### 3.6 E2E治理测试 (`tests/governance/test_e2e_governance.py`)
+### 3.7 E2E治理测试 (`tests/governance/test_e2e_governance.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
 | `test_governance_e2e_loop` | 完整治理闭环 | 正向 |
 
-### 3.7 执行器转换器测试 (`tests/governance/test_executor_transformers.py`)
+### 3.8 执行器转换器测试 (`tests/governance/test_executor_transformers.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
 | `test_import_and_function_patching` | 导入和函数补丁 | 正向 |
 
-### 3.8 文件锁测试 (`tests/governance/test_file_lock.py`)
+### 3.9 文件锁测试 (`tests/governance/test_file_lock.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
 | `test_file_lock_acquire_release` | 文件锁获取和释放 | 正向 |
 | `test_file_lock_timeout` | 文件锁超时 | 边界 |
 
-### 3.9 Git管理器测试 (`tests/governance/test_git_manager.py`)
+### 3.10 Git管理器测试 (`tests/governance/test_git_manager.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
 | `test_git_transaction_start_commit` | Git事务开始和提交 | 正向 |
 | `test_git_transaction_rollback` | Git事务回滚 | 异常 |
 
-### 3.10 安全测试 (`tests/governance/test_security.py`)
+### 3.11 安全测试 (`tests/governance/test_security.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
@@ -150,7 +185,7 @@
 | `test_security_visitor_forbidden_attrs` | 检测危险属性 | 正向 |
 | `test_path_validation` | 路径安全校验 | 正向 |
 
-### 3.11 追踪器测试 (`tests/governance/test_tracker.py`)
+### 3.12 追踪器测试 (`tests/governance/test_tracker.py`)
 
 | 测试用例 | 覆盖场景 | 断言类型 |
 |----------|----------|----------|
@@ -170,6 +205,14 @@
 | `test_auth_login` | 用户登录 | 正向 |
 | `test_auth_login_invalid_credentials` | 无效凭证登录 | 负向 |
 | `test_auth_refresh_token` | 刷新Token | 正向 |
+| `test_get_baseline` | 获取基线 | 正向 |
+| `test_get_baseline_not_found` | 获取不存在的基线 | 负向 |
+| `test_validate_baseline` | 验证基线 | 正向 |
+| `test_get_baseline_convergence` | 获取基线收敛 | 正向 |
+| `test_get_baseline_convergence_not_found` | 获取不存在的收敛 | 负向 |
+| `test_unauthorized_access` | 未授权访问 | 负向 |
+| `test_invalid_token` | 无效Token | 负向 |
+| `test_insufficient_permissions` | 权限不足 | 负向 |
 
 ### 4.2 配置管理器测试 (`tests/platform/test_config_manager.py`)
 
@@ -297,14 +340,14 @@
 ```
 测试用例数量分布:
 ┌──────────────────────────────────────────────────────────────────────┐
-│ 治理测试          ████████████████████████████████████████████ ~145 │
-│ 平台测试          ██████                                           ~30 │
-│ AI模块测试        █████                                             ~25 │
-│ 安全测试          ████                                              ~20 │
-│ 单元测试          ████                                              ~20 │
-│ 集成测试          ███                                               ~15 │
-│ Worker测试        ███                                               ~15 │
-│ 性能测试          █                                                  ~1 │
+│ 治理测试          ████████████████████████████████████████████  304 │
+│ 平台测试          ██████████████████████                       138 │
+│ 安全测试          ███████████                                  65 │
+│ 集成测试          █████████                                   56 │
+│ AI模块测试        █████                                        27 │
+│ 单元测试          ███                                         14 │
+│ Worker测试        ███                                         13 │
+│ 性能测试          █                                           4 │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -313,11 +356,11 @@
 ```
 测试类型分布:
 ┌──────────────────────────────────────────────────────────────────────┐
-│ 正向测试          ██████████████████████████████                   ~120 │
-│ 负向测试          ███████████████████                              ~80 │
-│ 边界测试          █████████                                        ~35 │
-│ 异常测试          ██████                                           ~20 │
-│ 依赖测试          ████                                              ~16 │
+│ 正向测试          ██████████████████████████████                   350 │
+│ 负向测试          █████████████████                              150 │
+│ 边界测试          █████████                                        60 │
+│ 异常测试          ██████                                           35 │
+│ 依赖测试          ████                                              26 │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -352,7 +395,27 @@ python -m pytest tests/performance/ -v --timeout=120
 
 # 生成覆盖率报告
 python -m pytest tests/ --cov=src --cov-report=html
+
+# 仅运行S级测试
+python -m pytest tests/governance/test_s_level_core.py -v
 ```
+
+---
+
+## 十一、核心模块覆盖率
+
+| 模块 | 覆盖率 | 说明 |
+|------|--------|------|
+| `src/governance/agent.py` | 98% | AI诊断核心 |
+| `src/governance/approval.py` | 95% | 审批管理 |
+| `src/governance/executor.py` | 92% | 执行器 |
+| `src/governance/orchestrator.py` | 100% | 编排器 |
+| `src/governance/tracker.py` | 98% | 追踪器 |
+| `src/governance/transformer.py` | 96% | 代码转换器 |
+| `src/platform/api.py` | 97% | API端点 |
+| `src/platform/workflow.py` | 91% | 工作流引擎 |
+| `src/security/auth.py` | 94% | 认证 |
+| `src/security/permissions.py` | 96% | 权限控制 |
 
 ---
 

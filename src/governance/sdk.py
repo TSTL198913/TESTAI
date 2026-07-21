@@ -1,6 +1,7 @@
 import threading
 from typing import Any, Optional
 
+from src.governance.api_error_recorder import APIErrorRecorder
 from src.governance.config import GovernanceConfig
 from src.governance.resilience import CircuitBreaker
 
@@ -42,7 +43,7 @@ class GovernanceClientSDK:
 
     @property
     def client(self):
-        if self._client is None and GovernanceConfig.is_llm_configured():
+        if self._client is None and GovernanceConfig.is_llm_configured() and not GovernanceConfig.USE_MOCK_LLM:
             from openai import AsyncOpenAI
 
             self._client = AsyncOpenAI(
@@ -53,18 +54,45 @@ class GovernanceClientSDK:
         return self._client
 
     def is_available(self) -> bool:
+        if GovernanceConfig.USE_MOCK_LLM:
+            return True
         return GovernanceConfig.is_llm_configured()
 
+    def get_api_key_status(self) -> dict:
+        return GovernanceConfig.validate_api_key()
+
     async def chat_completion(self, messages, model="deepseek-chat", temperature=0.2):
-        if not self.is_available():
+        if GovernanceConfig.USE_MOCK_LLM and not GovernanceConfig.TESTAI_RULE_13:
+            return await self.get_mock_response(messages)
+
+        if GovernanceConfig.TESTAI_RULE_13 and GovernanceConfig.USE_MOCK_LLM:
             raise RuntimeError(
-                "LLM service not configured. Set DEEPSEEK_API_KEY environment variable."
+                "[TESTAI@13] ERROR: USE_MOCK_LLM is enabled but TESTAI@13 requires real API KEY testing. "
+                "Set USE_MOCK_LLM=false to comply with TESTAI@13."
+            )
+
+        if not self.is_available():
+            validation = self.get_api_key_status()
+            error_msg = f"LLM service not configured. {validation['message']}"
+            APIErrorRecorder.record_error(
+                error_type="configuration_error",
+                error_message=error_msg,
+                api_key=GovernanceConfig.DEEPSEEK_API_KEY,
+                endpoint="/v1/chat/completions",
+            )
+            raise RuntimeError(
+                f"{error_msg}. Set DEEPSEEK_API_KEY environment variable."
             )
 
         if not self.breaker.can_execute():
-            raise RuntimeError(
-                "Circuit Breaker is OPEN: Governance service unavailable."
+            error_msg = "Circuit Breaker is OPEN: Governance service unavailable."
+            APIErrorRecorder.record_error(
+                error_type="circuit_breaker_open",
+                error_message=error_msg,
+                api_key=GovernanceConfig.DEEPSEEK_API_KEY,
+                endpoint="/v1/chat/completions",
             )
+            raise RuntimeError(error_msg)
 
         try:
             response = await self.client.chat.completions.create(
@@ -77,11 +105,59 @@ class GovernanceClientSDK:
 
             if response.choices and response.choices[0].message:
                 return response.choices[0].message
-            raise ValueError("Empty response from AI service")
+            error_msg = "Empty response from AI service"
+            APIErrorRecorder.record_error(
+                error_type="empty_response",
+                error_message=error_msg,
+                api_key=GovernanceConfig.DEEPSEEK_API_KEY,
+                endpoint="/v1/chat/completions",
+                additional_info={"model": model},
+            )
+            raise ValueError(error_msg)
 
         except Exception as e:
             self.breaker.record_failure()
-            raise e
+            error_msg = str(e)
+            
+            http_status = None
+            if "401" in error_msg or "Unauthorized" in error_msg:
+                http_status = 401
+                error_type = "authentication_failure"
+                detailed_msg = f"API authentication failed. Please check your DEEPSEEK_API_KEY. Error: {error_msg}"
+            elif "429" in error_msg or "rate limit" in error_msg.lower():
+                http_status = 429
+                error_type = "rate_limit_exceeded"
+                detailed_msg = f"API rate limit exceeded. Please try again later. Error: {error_msg}"
+            elif "connection" in error_msg.lower() or "timeout" in error_msg.lower():
+                http_status = 0
+                error_type = "connection_failure"
+                detailed_msg = f"Network connection failed. Please check your internet connection. Error: {error_msg}"
+            elif "500" in error_msg or "502" in error_msg or "503" in error_msg or "504" in error_msg:
+                http_status = int(error_msg[error_msg.find("5"):error_msg.find("5")+3]) if "5" in error_msg else 500
+                error_type = "server_error"
+                detailed_msg = f"Server error. Error: {error_msg}"
+            else:
+                http_status = None
+                error_type = "unknown_error"
+                detailed_msg = f"API call failed. Error: {error_msg}"
+
+            APIErrorRecorder.record_error(
+                error_type=error_type,
+                error_message=error_msg,
+                api_key=GovernanceConfig.DEEPSEEK_API_KEY,
+                endpoint="/v1/chat/completions",
+                http_status=http_status,
+                additional_info={"model": model, "messages_count": len(messages)},
+            )
+
+            if GovernanceConfig.TESTAI_RULE_13:
+                complaint_report = APIErrorRecorder.generate_complaint_report()
+                print("\n" + "=" * 80)
+                print("[TESTAI@13] COMPLAINT REPORT GENERATED")
+                print("=" * 80)
+                print(complaint_report)
+
+            raise RuntimeError(detailed_msg)
 
     async def get_mock_response(self, messages) -> MockLLMResponse:
         user_content = None
