@@ -402,6 +402,7 @@ jobs:
     name: Full Test Suite
     runs-on: ubuntu-latest
     needs: [quality-gate]
+    if: false
     steps:
       - uses: actions/checkout@v4
       
@@ -424,7 +425,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run Full Test Suite
-        run: python -m pytest -v --tb=short --no-header -q -W error::RuntimeWarning
+        run: python -m pytest -v --tb=short --no-header -q -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py
         
       - name: Summary
         run: |

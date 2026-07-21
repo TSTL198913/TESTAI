@@ -1059,5 +1059,516 @@
     },
     "testai_rule_13_compliant": true,
     "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:04:27.281759",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:04:27.289762",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:29.214325",
+    "error_type": "connection_failure",
+    "error_message": "Connection error.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": 0,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:31.134179",
+    "error_type": "connection_failure",
+    "error_message": "Connection error.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": 0,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:32.166237",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:33.756214",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:33.784192",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:33.799099",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:33.815119",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:47.654541",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:48.183318",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:05:49.203995",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:17:30.047765",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:17:30.074957",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:19:42.804248",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:19:42.828276",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:07.991686",
+    "error_type": "connection_failure",
+    "error_message": "Connection error.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": 0,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:09.786625",
+    "error_type": "connection_failure",
+    "error_message": "Connection error.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": 0,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:10.806893",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:12.411782",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:12.439146",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:12.457296",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:12.475057",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:52.209038",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:52.751372",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:21:53.774630",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:22:13.464884",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:22:13.489376",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:29.638947",
+    "error_type": "connection_failure",
+    "error_message": "Connection error.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": 0,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:31.376341",
+    "error_type": "connection_failure",
+    "error_message": "Connection error.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": 0,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:32.412519",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:34.012199",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:34.038942",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:34.057746",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 1
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:23:34.075339",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:24:11.870314",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:24:11.897087",
+    "error_type": "empty_response",
+    "error_message": "Empty response from AI service",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat"
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:24:18.822216",
+    "error_type": "unknown_error",
+    "error_message": "API Down",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:24:19.362963",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-21T21:24:20.386411",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
   }
 ]
