@@ -17,7 +17,7 @@ repos:
         
       - id: governance-tests
         name: Governance Tests
-        entry: python -m pytest tests/governance/ -x -q --tb=short --ignore=tests/governance/test_layered_effectiveness.py --ignore=tests/governance/test_mutation.py
+        entry: python -m pytest tests/governance/ -x -q --tb=short
         language: python
         pass_filenames: false
         description: "Run governance tests"

@@ -195,7 +195,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run Effectiveness Gate
-        run: python -m pytest tests/governance/test_effectiveness_gate.py tests/governance/test_layered_effectiveness.py -v --tb=short -W error::RuntimeWarning
+        run: python -m pytest tests/governance/test_effectiveness_gate.py -v --tb=short -W error::RuntimeWarning
 
   mutation-test:
     name: Mutation Test (mutmut)
