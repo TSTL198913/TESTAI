@@ -157,7 +157,7 @@ class GoldenBaselineManager:
             confidence = actual_data.get("data", {}).get("confidence_level", "")
             if confidence not in data["expected_confidence_level"]:
                 errors.append(
-                    f"Confidence level {confidence} not in {data['expected_confidence_level']}"
+f"Confidence level {confidence} in {data['expected_confidence_level']}"
                 )
 
         return {"passed": len(errors) == 0, "errors": errors, "baseline_id": record_id}

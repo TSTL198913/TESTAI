@@ -1,0 +1,69 @@
+{
+  "platform": {
+    "data": {
+      "name": "TestAI Platform",
+      "version": "1.0.0",
+      "debug": false,
+      "log_level": "INFO"
+    },
+    "description": "",
+    "readonly": false
+  },
+  "api": {
+    "data": {
+      "host": "0.0.0.0",
+      "port": 8080,
+      "cors_enabled": true,
+      "docs_enabled": true,
+      "test_key": "test_value"
+    },
+    "description": "",
+    "readonly": false
+  },
+  "workflow": {
+    "data": {
+      "max_concurrent_workflows": 10,
+      "task_timeout": 300,
+      "retry_attempts": 3
+    },
+    "description": "",
+    "readonly": false
+  },
+  "governance": {
+    "data": {
+      "auto_approve_threshold": 0.95,
+      "approval_required_for": [
+        "SECURITY",
+        "REFACTORING"
+      ],
+      "max_patch_size": 1000
+    },
+    "description": "",
+    "readonly": false
+  },
+  "mutation_test": {
+    "data": {
+      "enabled": true,
+      "target_dirs": [
+        "src/governance/"
+      ],
+      "kill_rate_threshold": 0.8
+    },
+    "description": "",
+    "readonly": false
+  },
+  "monitoring": {
+    "data": {
+      "alert_levels": [
+        "INFO",
+        "WARNING",
+        "ERROR",
+        "CRITICAL"
+      ],
+      "auto_acknowledge_timeout": 3600,
+      "health_check_interval": 60
+    },
+    "description": "",
+    "readonly": false
+  }
+}

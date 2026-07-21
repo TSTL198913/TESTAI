@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testai-api-staging
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=${MONGO_URI:-mongodb://mongo:27017}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-testai_staging}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-10.0}
+      - HTTP_MAX_CONNECTIONS=${HTTP_MAX_CONNECTIONS:-100}
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=DEBUG
+      - SECRET_KEY=${STAGING_SECRET_KEY}
+      - JWT_SECRET_KEY=${STAGING_JWT_SECRET_KEY}
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - testai-network
+    volumes:
+      - ./data/staging:/app/data
+      - ./reports/staging:/app/reports
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          cpus: "1.0"
+          memory: 2G
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testai-worker-staging
+    command: celery -A src.worker.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - MONGO_URI=${MONGO_URI:-mongodb://mongo:27017}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-testai_staging}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=DEBUG
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - testai-network
+    volumes:
+      - ./data/staging:/app/data
+      - ./reports/staging:/app/reports
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          cpus: "1.0"
+          memory: 2G
+
+  mongo:
+    image: mongo:6.0
+    container_name: testai-mongo-staging
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-testai_staging}
+    networks:
+      - testai-network
+    volumes:
+      - mongo-data-staging:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: testai-redis-staging
+    ports:
+      - "6380:6379"
+    networks:
+      - testai-network
+    volumes:
+      - redis-data-staging:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: testai-prometheus-staging
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data-staging:/prometheus
+    networks:
+      - testai-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: testai-grafana-staging
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data-staging:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    networks:
+      - testai-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+networks:
+  testai-network:
+    driver: bridge
+
+volumes:
+  mongo-data-staging:
+  redis-data-staging:
+  prometheus-data-staging:
+  grafana-data-staging:

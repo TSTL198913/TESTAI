@@ -161,7 +161,7 @@ class MutantGenerator:
                     )
                 )
 
-            if "return" in line and "True" in line:
+            if "return" in line and "True" in line and not line.strip().startswith("#"):
                 mutants.append(
                     MutationResult(
                         mutant_id=f"M-{line_num:04d}-B",
@@ -172,7 +172,7 @@ class MutantGenerator:
                     )
                 )
 
-            if "return" in line and "False" in line:
+            if "return" in line and "False" in line and not line.strip().startswith("#"):
                 mutants.append(
                     MutationResult(
                         mutant_id=f"M-{line_num:04d}-F",
@@ -293,6 +293,62 @@ class MutantGenerator:
                     )
                 )
 
+            if "success" in line and "=" in line and not line.strip().startswith("#"):
+                if "success=True" in line:
+                    mutants.append(
+                        MutationResult(
+                            mutant_id=f"M-{line_num:04d}-ST",
+                            file=os.path.basename(self.source_file),
+                            line=line_num,
+                            mutation_type="success_true",
+                            killed=False,
+                        )
+                    )
+                elif "success=False" in line:
+                    mutants.append(
+                        MutationResult(
+                            mutant_id=f"M-{line_num:04d}-SF",
+                            file=os.path.basename(self.source_file),
+                            line=line_num,
+                            mutation_type="success_false",
+                            killed=False,
+                        )
+                    )
+
+            if "use_fallback" in line and "=" in line and not line.strip().startswith("#"):
+                mutants.append(
+                    MutationResult(
+                        mutant_id=f"M-{line_num:04d}-UF",
+                        file=os.path.basename(self.source_file),
+                        line=line_num,
+                        mutation_type="use_fallback",
+                        killed=False,
+                    )
+                )
+
+            if "total_generated" in line and "=" in line and not line.strip().startswith("#"):
+                mutants.append(
+                    MutationResult(
+                        mutant_id=f"M-{line_num:04d}-TG",
+                        file=os.path.basename(self.source_file),
+                        line=line_num,
+                        mutation_type="total_generated",
+                        killed=False,
+                    )
+                )
+
+            if "fallback_used" in line and "=" in line and not line.strip().startswith("#"):
+                if "fallback_used=True" in line:
+                    mutants.append(
+                        MutationResult(
+                            mutant_id=f"M-{line_num:04d}-FB",
+                            file=os.path.basename(self.source_file),
+                            line=line_num,
+                            mutation_type="fallback_used",
+                            killed=False,
+                        )
+                    )
+
         return mutants
 
     def apply_mutant(self, mutant: MutationResult):
@@ -396,6 +452,36 @@ class MutantGenerator:
             lines[mutant.line - 1] = lines[mutant.line - 1].replace("==", "!=")
             content = "\n".join(lines)
 
+        elif mutant.mutation_type == "success_true":
+            lines[mutant.line - 1] = lines[mutant.line - 1].replace("success=True", "success=False")
+            content = "\n".join(lines)
+
+        elif mutant.mutation_type == "success_false":
+            lines[mutant.line - 1] = lines[mutant.line - 1].replace("success=False", "success=True")
+            content = "\n".join(lines)
+
+        elif mutant.mutation_type == "use_fallback":
+            lines[mutant.line - 1] = lines[mutant.line - 1].replace("use_fallback =", "# [MUTANT] use_fallback\nuse_fallback = ")
+            if "use_fallback = not" in lines[mutant.line - 1]:
+                lines[mutant.line - 1] = lines[mutant.line - 1].replace(
+                    "use_fallback = not self.llm_api_key", 
+                    "use_fallback = True"
+                )
+            content = "\n".join(lines)
+
+        elif mutant.mutation_type == "total_generated":
+            lines[mutant.line - 1] = lines[mutant.line - 1].replace("total_generated=", "# [MUTANT] total_generated\ntotal_generated=")
+            if "total_generated=len(" in lines[mutant.line - 1]:
+                lines[mutant.line - 1] = lines[mutant.line - 1].replace(
+                    "total_generated=len(test_cases)", 
+                    "total_generated=0"
+                )
+            content = "\n".join(lines)
+
+        elif mutant.mutation_type == "fallback_used":
+            lines[mutant.line - 1] = lines[mutant.line - 1].replace("fallback_used=True", "fallback_used=False")
+            content = "\n".join(lines)
+
         with open(self.source_file, "w", encoding="utf-8") as f:
             f.write(content)
 
@@ -442,6 +528,20 @@ class MutationGate:
         if test_name in test_to_source:
             return os.path.join("src", "governance", test_to_source[test_name])
         elif "engine" in test_dir:
+            return os.path.join("src", "engine", "pipeline.py")
+        elif "ai" in test_dir:
+            return os.path.join("src", "ai", "test_case_generator.py")
+        elif "api_test" in test_dir:
+            return os.path.join("src", "api_test", "test_runner.py")
+        elif "security" in test_dir:
+            return os.path.join("src", "security", "auth.py")
+        elif "platform" in test_dir:
+            return os.path.join("src", "platform", "api.py")
+        elif "worker" in test_dir:
+            return os.path.join("src", "engine", "pipeline.py")
+        elif "integration" in test_dir:
+            return os.path.join("src", "engine", "pipeline.py")
+        elif "unit" in test_dir:
             return os.path.join("src", "engine", "pipeline.py")
         return os.path.join("src", "governance", "transformer.py")
 

@@ -42,4 +42,4 @@ jobs:
       - name: Step 4 - Full Test Suite
         run: |
           echo "🧪 Running Full Test Suite..."
-          python -m pytest tests/ -q --tb=short
+          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning

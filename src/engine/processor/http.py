@@ -1,4 +1,5 @@
 # src/engine/processor/http.py
+import asyncio
 import logging
 
 import httpx
@@ -51,11 +52,12 @@ class HTTPProcessor(BaseProcessor):  # 修改类名
                 raise EngineError(f"Client error {response.status_code}")
 
             # 4. 解析与记录
-            body = (
-                response.json()
-                if "application/json" in response.headers.get("Content-Type", "")
-                else response.text
-            )
+            content_type = response.headers.get("Content-Type", "")
+            if "application/json" in content_type:
+                json_method = response.json()
+                body = await json_method if asyncio.iscoroutine(json_method) else json_method
+            else:
+                body = response.text
             context.results[step.step_id] = StepResult(
                 status="PASSED", status_code=response.status_code, body=body, error=None
             ).model_dump()

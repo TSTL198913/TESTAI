@@ -1,0 +1,2157 @@
+{
+  "summary": {
+    "mutations_applied": 215,
+    "mutations_killed": 162,
+    "mutations_survived": 53,
+    "kill_rate": "75.35%",
+    "kill_rate_numeric": 75.34883720930232
+  },
+  "results": [
+    {
+      "file": "src\\governance\\agent.py",
+      "line": 22,
+      "original": "if match:",
+      "mutated": "if False and match:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\agent.py",
+      "line": 78,
+      "original": "if not self.sdk.is_available():",
+      "mutated": "if False and not self.sdk.is_available():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\agent.py",
+      "line": 79,
+      "original": "self.logger.info(\"LLM not configured, using mock diagnosis for testing\")",
+      "mutated": "self.logger.info(\"LLM configured, using mock diagnosis for testing\")",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 37,
+      "original": "if self.proposal.patch_type.value in [\"security\", \"refactoring\"]:",
+      "mutated": "if False and self.proposal.patch_type.value in [\"security\", \"refactoring\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 38,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 39,
+      "original": "if self._is_large_change():",
+      "mutated": "if False and self._is_large_change():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 40,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 41,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 44,
+      "original": "code = self.proposal.suggested_code or \"\"",
+      "mutated": "code = self.proposal.suggested_code and \"\"",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 66,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 76,
+      "original": "if hasattr(self, \"_initialized\"):",
+      "mutated": "if False and hasattr(self, \"_initialized\"):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 185,
+      "original": "if record and record.is_expired:",
+      "mutated": "if record or record.is_expired:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 194,
+      "original": "if not record:",
+      "mutated": "if False and not record:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 195,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 196,
+      "original": "if record.status != ApprovalStatus.PENDING:",
+      "mutated": "if record.status == ApprovalStatus.PENDING:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 197,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 198,
+      "original": "if record.is_expired:",
+      "mutated": "if False and record.is_expired:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 201,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 211,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 216,
+      "original": "if not record:",
+      "mutated": "if False and not record:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 217,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 218,
+      "original": "if record.status != ApprovalStatus.PENDING:",
+      "mutated": "if record.status == ApprovalStatus.PENDING:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 219,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 229,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 233,
+      "original": "if not record:",
+      "mutated": "if False and not record:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 234,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 235,
+      "original": "if record.is_expired:",
+      "mutated": "if False and record.is_expired:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 236,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\approval.py",
+      "line": 248,
+      "original": "if r.status == ApprovalStatus.PENDING and not r.is_expired",
+      "mutated": "if r.status != ApprovalStatus.PENDING and not r.is_expired",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 21,
+      "original": "self.created_at = created_at or datetime.now()",
+      "mutated": "self.created_at = created_at and datetime.now()",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 38,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 43,
+      "original": "if hasattr(self, \"_initialized\"):",
+      "mutated": "if False and hasattr(self, \"_initialized\"):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 54,
+      "original": "if os.path.exists(self._baseline_file):",
+      "mutated": "if False and os.path.exists(self._baseline_file):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 98,
+      "original": "if baseline[\"id\"] not in self._baselines:",
+      "mutated": "if False and baseline[\"id\"] not in self._baselines:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 117,
+      "original": "if not baseline:",
+      "mutated": "if False and not baseline:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 124,
+      "original": "if \"expected_score_min\" in data and actual_score < data[\"expected_score_min\"]:",
+      "mutated": "if \"expected_score_min\" in data or actual_score < data[\"expected_score_min\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 129,
+      "original": "if \"expected_score_max\" in data and actual_score > data[\"expected_score_max\"]:",
+      "mutated": "if \"expected_score_max\" in data or actual_score > data[\"expected_score_max\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 134,
+      "original": "if \"expected_risk_level\" in data:",
+      "mutated": "if False and \"expected_risk_level\" in data:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 138,
+      "original": "if actual_risk != data[\"expected_risk_level\"]:",
+      "mutated": "if actual_risk == data[\"expected_risk_level\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 140,
+      "original": "f\"Risk level {actual_risk} != expected {data['expected_risk_level']}\"",
+      "mutated": "f\"Risk level {actual_risk} == expected {data['expected_risk_level']}\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 143,
+      "original": "if \"expected_detected\" in data:",
+      "mutated": "if False and \"expected_detected\" in data:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 151,
+      "original": "if detected != data[\"expected_detected\"]:",
+      "mutated": "if detected == data[\"expected_detected\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 153,
+      "original": "f\"Detected {detected} != expected {data['expected_detected']}\"",
+      "mutated": "f\"Detected {detected} == expected {data['expected_detected']}\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 156,
+      "original": "if \"expected_confidence_level\" in data:",
+      "mutated": "if False and \"expected_confidence_level\" in data:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 158,
+      "original": "if confidence not in data[\"expected_confidence_level\"]:",
+      "mutated": "if False and confidence not in data[\"expected_confidence_level\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 167,
+      "original": "if result[\"passed\"]:",
+      "mutated": "if False and result[\"passed\"]:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 22,
+      "original": "if (",
+      "mutated": "if False and (",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 30,
+      "original": "if (",
+      "mutated": "if False and (",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 45,
+      "original": "if not valid:",
+      "mutated": "if False and not valid:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 55,
+      "original": "if visitor.is_unsafe:",
+      "mutated": "if False and visitor.is_unsafe:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 57,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 58,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 61,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 73,
+      "original": "if not self.is_safe_patch(suggested_code):",
+      "mutated": "if False and not self.is_safe_patch(suggested_code):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 74,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 76,
+      "original": "if not self.validate_file_path(file_path):",
+      "mutated": "if False and not self.validate_file_path(file_path):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 78,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 83,
+      "original": "if not full_path.exists():",
+      "mutated": "if False and not full_path.exists():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 84,
+      "original": "self.logger.error(f\"File not found: {full_path}\")",
+      "mutated": "self.logger.error(f\"File found: {full_path}\")",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 85,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 87,
+      "original": "if not self._has_write_permission(full_path):",
+      "mutated": "if False and not self._has_write_permission(full_path):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 91,
+      "original": "if not self._grant_write_permission(full_path):",
+      "mutated": "if False and not self._grant_write_permission(full_path):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 93,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 99,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 107,
+      "original": "required_imports or [],",
+      "mutated": "required_imports and [],",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 111,
+      "original": "if backup_path.exists():",
+      "mutated": "if False and backup_path.exists():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 113,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 119,
+      "original": "if backup_path.exists():",
+      "mutated": "if False and backup_path.exists():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 121,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 124,
+      "original": "if backup_path.exists():",
+      "mutated": "if False and backup_path.exists():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 126,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 130,
+      "original": "if os.access(path, os.W_OK):",
+      "mutated": "if False and os.access(path, os.W_OK):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 131,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 134,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 136,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 142,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 154,
+      "original": "if result.returncode == 0:",
+      "mutated": "if result.returncode != 0:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 156,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 159,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 162,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 186,
+      "original": "if not getattr(transformer, \"patched\", False):",
+      "mutated": "if False and not getattr(transformer, \"patched\", False):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 188,
+      "original": "f\"Target '{target_class or ''}.{target_function}' not found.\"",
+      "mutated": "f\"Target '{target_class and ''}.{target_function}' not found.\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 15,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 17,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 25,
+      "original": "if normalized_path in self._active_locks:",
+      "mutated": "if False and normalized_path in self._active_locks:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 26,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 28,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 33,
+      "original": "if normalized_path in self._active_locks:",
+      "mutated": "if False and normalized_path in self._active_locks:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 35,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 36,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 56,
+      "original": "if not self._lock_manager.acquire(self._file_path, self._timeout):",
+      "mutated": "if False and not self._lock_manager.acquire(self._file_path, self._timeout):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 62,
+      "original": "if self._acquired:",
+      "mutated": "if False and self._acquired:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 64,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\git_manager.py",
+      "line": 21,
+      "original": "if result.returncode == 0:",
+      "mutated": "if result.returncode != 0:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\git_manager.py",
+      "line": 48,
+      "original": "if result.returncode == 0:",
+      "mutated": "if result.returncode != 0:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 33,
+      "original": "self.details = details or {}",
+      "mutated": "self.details = details and {}",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 56,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 61,
+      "original": "if hasattr(self, \"_initialized\"):",
+      "mutated": "if False and hasattr(self, \"_initialized\"):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 76,
+      "original": "if level == \"DEBUG\":",
+      "mutated": "if level != \"DEBUG\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 78,
+      "original": "elif level == \"INFO\":",
+      "mutated": "elif level != \"INFO\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 80,
+      "original": "elif level == \"WARNING\":",
+      "mutated": "elif level != \"WARNING\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 82,
+      "original": "elif level == \"ERROR\":",
+      "mutated": "elif level != \"ERROR\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 84,
+      "original": "elif level == \"CRITICAL\":",
+      "mutated": "elif level != \"CRITICAL\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 96,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 101,
+      "original": "if hasattr(self, \"_initialized\"):",
+      "mutated": "if False and hasattr(self, \"_initialized\"):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 145,
+      "original": "if GovernanceConfig.is_alert_configured():",
+      "mutated": "if False and GovernanceConfig.is_alert_configured():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 163,
+      "original": "if alert.alert_id == alert_id:",
+      "mutated": "if alert.alert_id != alert_id:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 166,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 167,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 174,
+      "original": "if level:",
+      "mutated": "if False and level:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 175,
+      "original": "alerts = [a for a in alerts if a.level == level]",
+      "mutated": "alerts = [a for a in alerts if a.level != level]",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 176,
+      "original": "if acknowledged is not None:",
+      "mutated": "if False and acknowledged is not None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 177,
+      "original": "alerts = [a for a in alerts if a.acknowledged == acknowledged]",
+      "mutated": "alerts = [a for a in alerts if a.acknowledged != acknowledged]",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 216,
+      "original": "if metric_name in self._metrics:",
+      "mutated": "if False and metric_name in self._metrics:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 221,
+      "original": "if success:",
+      "mutated": "if False and success:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 225,
+      "original": "if self._metrics[\"failed_diagnoses\"] % 5 == 0:",
+      "mutated": "if self._metrics[\"failed_diagnoses\"] % 5 != 0:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 234,
+      "original": "if success:",
+      "mutated": "if False and success:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 244,
+      "original": "if approved:",
+      "mutated": "if False and approved:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 270,
+      "original": "if total_diagnoses > 0",
+      "mutated": "if False and total_diagnoses > 0",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 279,
+      "original": "if diagnosis_success_rate < 0.7 or patch_success_rate < 0.7:",
+      "mutated": "if diagnosis_success_rate < 0.7 and patch_success_rate < 0.7:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\monitoring.py",
+      "line": 281,
+      "original": "if diagnosis_success_rate < 0.5 or patch_success_rate < 0.5:",
+      "mutated": "if diagnosis_success_rate < 0.5 and patch_success_rate < 0.5:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 47,
+      "original": "trace_id = context.step_id or \"unknown\"",
+      "mutated": "trace_id = context.step_id and \"unknown\"",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 56,
+      "original": "if action != GovernanceAction.AI_DIAGNOSE:",
+      "mutated": "if action == GovernanceAction.AI_DIAGNOSE:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 82,
+      "original": "if diagnosis.patch_proposal",
+      "mutated": "if False and diagnosis.patch_proposal",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 96,
+      "original": "if not diagnosis.is_fixable or not diagnosis.patch_proposal:",
+      "mutated": "if not diagnosis.is_fixable and not diagnosis.patch_proposal:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 122,
+      "original": "if self.approval_mgr.requires_approval(tx_id):",
+      "mutated": "if False and self.approval_mgr.requires_approval(tx_id):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 147,
+      "original": "if \".\" in target_function:",
+      "mutated": "if False and \".\" in target_function:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 160,
+      "original": "if not success:",
+      "mutated": "if False and not success:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 202,
+      "original": "if not record:",
+      "mutated": "if False and not record:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 205,
+      "original": "trace_id = record.context.step_id or tx_id",
+      "mutated": "trace_id = record.context.step_id and tx_id",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 208,
+      "original": "if not self.approval_mgr.approve(tx_id, approver, reason):",
+      "mutated": "if False and not self.approval_mgr.approve(tx_id, approver, reason):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 240,
+      "original": "if \".\" in target_function:",
+      "mutated": "if False and \".\" in target_function:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 253,
+      "original": "if not success:",
+      "mutated": "if False and not success:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 25,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 33,
+      "original": "if self._running:",
+      "mutated": "if False and self._running:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 43,
+      "original": "if self._monitor_thread:",
+      "mutated": "if False and self._monitor_thread:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 59,
+      "original": "if info.timeout and (now - info.start_time) > info.timeout:",
+      "mutated": "if info.timeout or (now - info.start_time) > info.timeout:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 68,
+      "original": "if not self._is_process_alive(pid):",
+      "mutated": "if False and not self._is_process_alive(pid):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 69,
+      "original": "if info.callback:",
+      "mutated": "if False and info.callback:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 80,
+      "original": "if os.name == \"nt\":",
+      "mutated": "if os.name != \"nt\":",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 89,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 91,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 111,
+      "original": "if os.name == \"nt\":",
+      "mutated": "if os.name != \"nt\":",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 118,
+      "original": "if self._is_process_alive(pid):",
+      "mutated": "if False and self._is_process_alive(pid):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 120,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 122,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 128,
+      "original": "if self.kill_process(pid):",
+      "mutated": "if False and self.kill_process(pid):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 17,
+      "original": "if not os.path.exists(self.prompts_dir):",
+      "mutated": "if False and not os.path.exists(self.prompts_dir):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 18,
+      "original": "logger.warning(f\"Prompts directory not found: {self.prompts_dir}\")",
+      "mutated": "logger.warning(f\"Prompts directory found: {self.prompts_dir}\")",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 21,
+      "original": "if filename.endswith(\".yaml\"):",
+      "mutated": "if False and filename.endswith(\".yaml\"):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 26,
+      "original": "if data:",
+      "mutated": "if False and data:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 34,
+      "original": "if not template:",
+      "mutated": "if False and not template:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 35,
+      "original": "raise ValueError(f\"Prompt template {template_name} not found\")",
+      "mutated": "raise ValueError(f\"Prompt template {template_name} found\")",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\registry.py",
+      "line": 34,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\registry.py",
+      "line": 41,
+      "original": "if not issubclass(transformer_cls, cst.CSTTransformer):",
+      "mutated": "if False and not issubclass(transformer_cls, cst.CSTTransformer):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\registry.py",
+      "line": 55,
+      "original": "if kwargs.get(\"target_class\"):",
+      "mutated": "if False and kwargs.get(\"target_class\"):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\resilience.py",
+      "line": 25,
+      "original": "if self.state == CircuitState.OPEN:",
+      "mutated": "if self.state != CircuitState.OPEN:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\resilience.py",
+      "line": 26,
+      "original": "if time.monotonic() - self.last_failure_time > self.recovery_timeout:",
+      "mutated": "if False and time.monotonic() - self.last_failure_time > self.recovery_timeout:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\resilience.py",
+      "line": 29,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\resilience.py",
+      "line": 30,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\resilience.py",
+      "line": 31,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\resilience.py",
+      "line": 36,
+      "original": "if self.failures >= self.threshold:",
+      "mutated": "if False and self.failures >= self.threshold:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 29,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 34,
+      "original": "if hasattr(self, \"_initialized\"):",
+      "mutated": "if False and hasattr(self, \"_initialized\"):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 45,
+      "original": "if self._client is None and GovernanceConfig.is_llm_configured():",
+      "mutated": "if self._client is None or GovernanceConfig.is_llm_configured():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 59,
+      "original": "if not self.is_available():",
+      "mutated": "if False and not self.is_available():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 61,
+      "original": "\"LLM service not configured. Set DEEPSEEK_API_KEY environment variable.\"",
+      "mutated": "\"LLM service configured. Set DEEPSEEK_API_KEY environment variable.\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 64,
+      "original": "if not self.breaker.can_execute():",
+      "mutated": "if False and not self.breaker.can_execute():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 78,
+      "original": "if response.choices and response.choices[0].message:",
+      "mutated": "if response.choices or response.choices[0].message:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 89,
+      "original": "if msg.get(\"role\") == \"user\":",
+      "mutated": "if msg.get(\"role\") != \"user\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 126,
+      "original": "if isinstance(parsed, dict):",
+      "mutated": "if False and isinstance(parsed, dict):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 132,
+      "original": "if json_match:",
+      "mutated": "if False and json_match:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 136,
+      "original": "if isinstance(parsed, dict):",
+      "mutated": "if False and isinstance(parsed, dict):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 146,
+      "original": "if \"target_function\" in parsed:",
+      "mutated": "if False and \"target_function\" in parsed:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 148,
+      "original": "if \"component_name\" in parsed:",
+      "mutated": "if False and \"component_name\" in parsed:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 150,
+      "original": "if \"exception_trace\" in parsed:",
+      "mutated": "if False and \"exception_trace\" in parsed:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 152,
+      "original": "if \"patched\" in error_text.lower():",
+      "mutated": "if False and \"patched\" in error_text.lower():",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 162,
+      "original": "if component == \"transformer\" and error_type == \"patched_missing\":",
+      "mutated": "if component != \"transformer\" and error_type != \"patched_missing\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 163,
+      "original": "suggested_code = \"\"\"name_match = (original_node.name.value == self.target_function)",
+      "mutated": "suggested_code = \"\"\"name_match = (original_node.name.value != self.target_function)",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 164,
+      "original": "class_match = (self.target_class is None or self.current_class == self.target_class)",
+      "mutated": "class_match = (self.target_class is None or self.current_class != self.target_class)",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 166,
+      "original": "if name_match and class_match:",
+      "mutated": "if name_match or class_match:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 170,
+      "original": "if name_match and self.target_class and self.current_class != self.target_class:",
+      "mutated": "if name_match and self.target_class and self.current_class == self.target_class:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 177,
+      "original": "elif component == \"transformer\":",
+      "mutated": "elif component != \"transformer\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 178,
+      "original": "suggested_code = \"\"\"if original_node.name.value == self.target_function:",
+      "mutated": "suggested_code = \"\"\"if original_node.name.value != self.target_function:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 185,
+      "original": "elif component == \"executor\":",
+      "mutated": "elif component != \"executor\":",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 186,
+      "original": "suggested_code = \"\"\"if not self.is_safe_patch(suggested_code):",
+      "mutated": "suggested_code = \"\"\"if self.is_safe_patch(suggested_code):",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 187,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 189,
+      "original": "if not self.validate_file_path(file_path):",
+      "mutated": "if False and not self.validate_file_path(file_path):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 191,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 195,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 15,
+      "original": "if not isinstance(target_path, str):",
+      "mutated": "if False and not isinstance(target_path, str):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 18,
+      "original": "if \"\\x00\" in target_path:",
+      "mutated": "if False and \"\\x00\" in target_path:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 21,
+      "original": "if len(target_path) > 255:",
+      "mutated": "if False and len(target_path) > 255:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 26,
+      "original": "if not path.is_absolute():",
+      "mutated": "if False and not path.is_absolute():",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 29,
+      "original": "if \"..\" in str(path):",
+      "mutated": "if False and \"..\" in str(path):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 35,
+      "original": "if parts[i] in self.ALLOWED_DIRS:",
+      "mutated": "if False and parts[i] in self.ALLOWED_DIRS:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 49,
+      "original": "if base_dir:",
+      "mutated": "if False and base_dir:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 56,
+      "original": "if target.is_absolute():",
+      "mutated": "if False and target.is_absolute():",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 61,
+      "original": "if not str(resolved).startswith(str(base_path)):",
+      "mutated": "if False and not str(resolved).startswith(str(base_path)):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 48,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 50,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 229,
+      "original": "if event.component:",
+      "mutated": "if False and event.component:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 234,
+      "original": "if event.status:",
+      "mutated": "if False and event.status:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 239,
+      "original": "if event.action_type == GovernanceActionType.CONVERGED:",
+      "mutated": "if event.action_type != GovernanceActionType.CONVERGED:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 241,
+      "original": "elif event.action_type == GovernanceActionType.DIVERGED:",
+      "mutated": "elif event.action_type != GovernanceActionType.DIVERGED:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\tracker.py",
+      "line": 243,
+      "original": "elif event.action_type == GovernanceActionType.PATCH_FAILED:",
+      "mutated": "elif event.action_type != GovernanceActionType.PATCH_FAILED:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 19,
+      "original": "self.required_imports = required_imports or []",
+      "mutated": "self.required_imports = required_imports and []",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 31,
+      "original": "if original_node.name.value == self.target_function:",
+      "mutated": "if original_node.name.value != self.target_function:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 63,
+      "original": "name_match = original_node.name.value == self.target_function",
+      "mutated": "name_match = original_node.name.value != self.target_function",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 65,
+      "original": "self.target_class is None or self.current_class == self.target_class",
+      "mutated": "self.target_class is None or self.current_class != self.target_class",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 68,
+      "original": "if name_match and class_match:",
+      "mutated": "if name_match or class_match:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 74,
+      "original": "if name_match and self.target_class and self.current_class != self.target_class:",
+      "mutated": "if name_match and self.target_class and self.current_class == self.target_class:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 97,
+      "original": "if not self.new_import_nodes:",
+      "mutated": "if False and not self.new_import_nodes:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 104,
+      "original": "if isinstance(node, (cst.Import, cst.ImportFrom)) and not inserted:",
+      "mutated": "if isinstance(node, (cst.Import, cst.ImportFrom)) or not inserted:",
+      "survived": false,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\transformer.py",
+      "line": 109,
+      "original": "if not inserted:",
+      "mutated": "if False and not inserted:",
+      "survived": false,
+      "error": ""
+    }
+  ],
+  "survived_mutations": [
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 140,
+      "original": "f\"Risk level {actual_risk} != expected {data['expected_risk_level']}\"",
+      "mutated": "f\"Risk level {actual_risk} == expected {data['expected_risk_level']}\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\baseline.py",
+      "line": 153,
+      "original": "f\"Detected {detected} != expected {data['expected_detected']}\"",
+      "mutated": "f\"Detected {detected} == expected {data['expected_detected']}\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 107,
+      "original": "required_imports or [],",
+      "mutated": "required_imports and [],",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\executor.py",
+      "line": 188,
+      "original": "f\"Target '{target_class or ''}.{target_function}' not found.\"",
+      "mutated": "f\"Target '{target_class and ''}.{target_function}' not found.\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 15,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 17,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 25,
+      "original": "if normalized_path in self._active_locks:",
+      "mutated": "if False and normalized_path in self._active_locks:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 26,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 28,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 33,
+      "original": "if normalized_path in self._active_locks:",
+      "mutated": "if False and normalized_path in self._active_locks:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 35,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 36,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 56,
+      "original": "if not self._lock_manager.acquire(self._file_path, self._timeout):",
+      "mutated": "if False and not self._lock_manager.acquire(self._file_path, self._timeout):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 62,
+      "original": "if self._acquired:",
+      "mutated": "if False and self._acquired:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\file_lock.py",
+      "line": 64,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\orchestrator.py",
+      "line": 82,
+      "original": "if diagnosis.patch_proposal",
+      "mutated": "if False and diagnosis.patch_proposal",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 25,
+      "original": "if cls._instance is None:",
+      "mutated": "if False and cls._instance is None:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 33,
+      "original": "if self._running:",
+      "mutated": "if False and self._running:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 43,
+      "original": "if self._monitor_thread:",
+      "mutated": "if False and self._monitor_thread:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 59,
+      "original": "if info.timeout and (now - info.start_time) > info.timeout:",
+      "mutated": "if info.timeout or (now - info.start_time) > info.timeout:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 68,
+      "original": "if not self._is_process_alive(pid):",
+      "mutated": "if False and not self._is_process_alive(pid):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 69,
+      "original": "if info.callback:",
+      "mutated": "if False and info.callback:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 80,
+      "original": "if os.name == \"nt\":",
+      "mutated": "if os.name != \"nt\":",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 89,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 91,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 111,
+      "original": "if os.name == \"nt\":",
+      "mutated": "if os.name != \"nt\":",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 118,
+      "original": "if self._is_process_alive(pid):",
+      "mutated": "if False and self._is_process_alive(pid):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 120,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 122,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\process_manager.py",
+      "line": 128,
+      "original": "if self.kill_process(pid):",
+      "mutated": "if False and self.kill_process(pid):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 17,
+      "original": "if not os.path.exists(self.prompts_dir):",
+      "mutated": "if False and not os.path.exists(self.prompts_dir):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 18,
+      "original": "logger.warning(f\"Prompts directory not found: {self.prompts_dir}\")",
+      "mutated": "logger.warning(f\"Prompts directory found: {self.prompts_dir}\")",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 21,
+      "original": "if filename.endswith(\".yaml\"):",
+      "mutated": "if False and filename.endswith(\".yaml\"):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 26,
+      "original": "if data:",
+      "mutated": "if False and data:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 34,
+      "original": "if not template:",
+      "mutated": "if False and not template:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\prompt_manager.py",
+      "line": 35,
+      "original": "raise ValueError(f\"Prompt template {template_name} not found\")",
+      "mutated": "raise ValueError(f\"Prompt template {template_name} found\")",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 61,
+      "original": "\"LLM service not configured. Set DEEPSEEK_API_KEY environment variable.\"",
+      "mutated": "\"LLM service configured. Set DEEPSEEK_API_KEY environment variable.\"",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 164,
+      "original": "class_match = (self.target_class is None or self.current_class == self.target_class)",
+      "mutated": "class_match = (self.target_class is None or self.current_class != self.target_class)",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 166,
+      "original": "if name_match and class_match:",
+      "mutated": "if name_match or class_match:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 170,
+      "original": "if name_match and self.target_class and self.current_class != self.target_class:",
+      "mutated": "if name_match and self.target_class and self.current_class == self.target_class:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 187,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 189,
+      "original": "if not self.validate_file_path(file_path):",
+      "mutated": "if False and not self.validate_file_path(file_path):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 191,
+      "original": "return False",
+      "mutated": "return True",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\sdk.py",
+      "line": 195,
+      "original": "return True",
+      "mutated": "return False",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 15,
+      "original": "if not isinstance(target_path, str):",
+      "mutated": "if False and not isinstance(target_path, str):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 18,
+      "original": "if \"\\x00\" in target_path:",
+      "mutated": "if False and \"\\x00\" in target_path:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 21,
+      "original": "if len(target_path) > 255:",
+      "mutated": "if False and len(target_path) > 255:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 26,
+      "original": "if not path.is_absolute():",
+      "mutated": "if False and not path.is_absolute():",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 29,
+      "original": "if \"..\" in str(path):",
+      "mutated": "if False and \"..\" in str(path):",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 35,
+      "original": "if parts[i] in self.ALLOWED_DIRS:",
+      "mutated": "if False and parts[i] in self.ALLOWED_DIRS:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 49,
+      "original": "if base_dir:",
+      "mutated": "if False and base_dir:",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 56,
+      "original": "if target.is_absolute():",
+      "mutated": "if False and target.is_absolute():",
+      "survived": true,
+      "error": ""
+    },
+    {
+      "file": "src\\governance\\security.py",
+      "line": 61,
+      "original": "if not str(resolved).startswith(str(base_path)):",
+      "mutated": "if False and not str(resolved).startswith(str(base_path)):",
+      "survived": true,
+      "error": ""
+    }
+  ]
+}

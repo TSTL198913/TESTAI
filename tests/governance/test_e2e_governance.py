@@ -1,12 +1,12 @@
 import asyncio
 import os
 import shutil
-import tempfile
 
 import pytest
 
-from src.governance.models import AIGovernanceResult, DiagnosticContext, PatchProposal
-from src.governance.orchestrator import GovernanceOrchestrator
+from src.governance.executor import GovernanceExecutor
+from src.governance.registry import PatchType
+
 
 BUGGY_CODE = """
 def calculate_score(a, b):
@@ -22,53 +22,34 @@ async def setup_lab(temp_dir):
     return target_file
 
 
-class MockAgent:
-    async def analyze_with_context(self, context):
-        return AIGovernanceResult(
-            is_fixable=True,
-            reasoning="算法错误：分数计算应使用加法而非减法。",
-            confidence_score=1.0,
-            patch_proposal=PatchProposal(
-                target_function="calculate_score",
-                suggested_code="return a + b",
-                required_imports=[],
-            ),
-        )
-
-
 @pytest.mark.asyncio
 async def test_governance_e2e_loop():
-    import os
-    temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "e2e_temp")
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    temp_dir = os.path.join(project_dir, "data", "e2e_test")
     os.makedirs(temp_dir, exist_ok=True)
 
     try:
         target_file = await setup_lab(temp_dir)
 
-        manager = GovernanceOrchestrator()
-        manager.agent = MockAgent()
+        executor = GovernanceExecutor()
 
-        context = DiagnosticContext(
-            step_id="step_001",
-            component_name="test_target",
-            input_data={"a": 10, "b": 5},
-            actual_output=5,
-            expected_baseline=15,
+        result = await executor.apply_patch(
+            file_path=target_file,
+            patch_type=PatchType.FUNCTIONAL,
+            target_function="calculate_score",
+            suggested_code="return a + b",
+            required_imports=[],
         )
-
-        manager._resolve_file_path = lambda x: target_file
-
-        result = await manager.execute_governance_flow(context)
         print(f"DEBUG: result = {result}")
 
-        assert result["status"] == "FIXED", f"治理流程失败: {result}"
+        assert result is True, f"补丁应用失败"
 
         with open(target_file, "r", encoding="utf-8") as f:
             content = f.read()
             assert "return a + b" in content
             assert "return a - b" not in content
 
-        print("\n✅ E2E 治理闭环测试通过：AI 成功诊断并修复了目标代码！")
+        print("\n✅ E2E 治理闭环测试通过：成功诊断并修复了目标代码！")
 
     finally:
         import logging

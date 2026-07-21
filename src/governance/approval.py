@@ -44,6 +44,18 @@ class ApprovalRecord:
         code = self.proposal.suggested_code or ""
         return len(code.splitlines()) > 20
 
+    def to_dict(self) -> dict:
+        return {
+            "tx_id": self.tx_id,
+            "status": self.status.value,
+            "patch_type": self.proposal.patch_type.value if self.proposal else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "approved_by": self.approved_by,
+            "approved_at": self.approved_at.isoformat() if self.approved_at else None,
+            "reason": self.reason,
+            "is_expired": self.is_expired,
+        }
+
 
 class ApprovalManager:
     _instance = None
@@ -182,11 +194,11 @@ class ApprovalManager:
             if not record:
                 return False
             if record.status != ApprovalStatus.PENDING:
-                return True
+                return False
             if record.is_expired:
                 record.status = ApprovalStatus.EXPIRED
                 self._save_to_db(record)
-                return True
+                return False
 
             record.status = ApprovalStatus.APPROVED
             record.approved_by = approver
@@ -204,7 +216,7 @@ class ApprovalManager:
             if not record:
                 return False
             if record.status != ApprovalStatus.PENDING:
-                return True
+                return False
 
             record.status = ApprovalStatus.REJECTED
             record.approved_by = approver

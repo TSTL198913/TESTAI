@@ -23,8 +23,8 @@ class PromptManager:
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:
                         data = yaml.safe_load(f)
-                        if data:
-                            self.templates.update(data)
+                    if data:
+                        self.templates.update(data)
                 except (yaml.YAMLError, IOError) as e:
                     logger.error(f"Failed to load prompt file {filename}: {e}")
 

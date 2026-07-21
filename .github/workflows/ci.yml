@@ -14,6 +14,7 @@ concurrency:
 permissions:
   contents: read
   security-events: write
+  checks: write
 
 jobs:
   lint:
@@ -26,6 +27,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
           
       - name: Install dependencies
         run: |
@@ -46,13 +55,29 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest-cov
           
       - name: Run Unit Tests
-        run: python -m pytest tests/unit/ -v --tb=short
+        run: python -m pytest tests/unit/ -v --tb=short -W error::RuntimeWarning --cov=src --cov-report=xml
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v5
+        with:
+          name: unit-coverage-report
+          path: coverage.xml
+          retention-days: 7
 
   component-tests:
     name: Component Tests
@@ -65,13 +90,21 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Run Component Tests
-        run: python -m pytest tests/components/ -v --tb=short
+        run: python -m pytest tests/components/ -v --tb=short -W error::RuntimeWarning
 
   integration-tests:
     name: Integration Tests
@@ -84,13 +117,21 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Run Integration Tests
-        run: python -m pytest tests/integration/ -v --tb=short
+        run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning
 
   governance-tests:
     name: Governance Tests
@@ -103,13 +144,21 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Run Governance Tests
-        run: python -m pytest tests/governance/ -v --tb=short
+        run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning
 
   governance-e2e:
     name: Governance E2E Validation
@@ -122,6 +171,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
           
       - name: Install dependencies
         run: |
@@ -150,13 +207,21 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Run Effectiveness Gate
-        run: python -m pytest tests/governance/test_effectiveness_gate.py tests/governance/test_layered_effectiveness.py -v --tb=short
+        run: python -m pytest tests/governance/test_effectiveness_gate.py tests/governance/test_layered_effectiveness.py -v --tb=short -W error::RuntimeWarning
 
   mutation-test:
     name: Mutation Test (mutmut)
@@ -170,6 +235,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
           
       - name: Install dependencies
         run: |
@@ -204,6 +277,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
           
       - name: Install dependencies
         run: |
@@ -246,6 +327,14 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -274,6 +363,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Download coverage reports
+        uses: actions/download-artifact@v5
+        with:
+          name: unit-coverage-report
+          path: reports/
+          
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -282,7 +377,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install pytest-cov
+          
+      - name: Check coverage threshold
+        run: |
+          coverage_percent=$(python -c "
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('reports/coverage.xml')
+          root = tree.getroot()
+          line_rate = float(root.attrib['line-rate'])
+          print(f'{line_rate * 100:.1f}')
+          ")
+          echo "Coverage: $coverage_percent%"
+          if (( $(echo "$coverage_percent < 70" | bc -l) )); then
+            echo "❌ Coverage $coverage_percent% below 70% threshold"
+            exit 1
+          else
+            echo "✅ Coverage meets threshold"
+          fi
           
       - name: Run Quality Gate Check
         run: |
@@ -295,6 +407,7 @@ jobs:
           echo "🏛️ Governance Tests: Passed"
           echo "✅ Effectiveness Gate: Passed"
           echo "🛡️ Security Scan: Passed"
+          echo "📈 Coverage: Passed"
           
       - name: Post to GitHub Summary
         run: |
@@ -307,6 +420,7 @@ jobs:
           echo "- Governance Tests: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Effectiveness Gate: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Security Scan: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage: ✅" >> $GITHUB_STEP_SUMMARY
 
   full-test:
     name: Full Test Suite
@@ -320,15 +434,23 @@ jobs:
         with:
           python-version: '3.10'
           
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Run Full Test Suite
-        run: python -m pytest -v --tb=short --no-header -q
-          
+        run: python -m pytest -v --tb=short --no-header -q -W error::RuntimeWarning
+        
       - name: Summary
         run: |
           echo "✅ All tests passed"
-          echo "📊 Test results: 263 passed, 1 skipped"
+          echo "📊 Test results: 650+ passed"
