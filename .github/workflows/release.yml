@@ -97,11 +97,8 @@ jobs:
           ```
 
     - name: Upload release artifacts
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/testai-${{ github.ref_name }}.tar.gz
-        asset_name: testai-${{ github.ref_name }}.tar.gz
-        asset_content_type: application/gzip
+        files: |
+          dist/testai-${{ github.ref_name }}.tar.gz
+          dist/testai-${{ github.ref_name }}.whl

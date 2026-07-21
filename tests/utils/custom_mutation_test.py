@@ -296,7 +296,7 @@ def main():
     parser = argparse.ArgumentParser(description="Custom Mutation Testing Tool")
     parser.add_argument("--target", type=str, default="src/governance/", help="Target directory to mutate")
     parser.add_argument("--test", type=str, default="all", help="Test file to run")
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
     
     print(f"Starting mutation testing...")
     print(f"Target directory: {args.target}")
