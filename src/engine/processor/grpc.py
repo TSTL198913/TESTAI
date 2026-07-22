@@ -1,4 +1,5 @@
 # src/engine/processor/grpc.py
+from typing import Any
 from src.core.exceptions import EngineError, InfrastructureError
 from src.engine.processor.base import BaseProcessor
 from src.models.contract import GrpcRequest
