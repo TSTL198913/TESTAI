@@ -90,6 +90,70 @@ class PlaywrightRunner:
         self.page = None
         self._playwright_available = self._check_playwright()
 
+    async def _execute_step(self, step: PlaywrightStep) -> Dict[str, Any]:
+        if not self.page:
+            return {"success": False, "error": "Page not initialized"}
+
+        try:
+            if step.action == PlaywrightAction.NAVIGATE:
+                url = step.value
+                if step.base_url and not url.startswith("http"):
+                    url = step.base_url + url
+                await self.page.goto(url, wait_until="domcontentloaded")
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.CLICK:
+                await self.page.click(step.selector)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.TYPE:
+                await self.page.type(step.selector, step.value)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.FILL:
+                await self.page.fill(step.selector, step.value)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.CLEAR:
+                await self.page.clear(step.selector)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.WAIT:
+                if step.wait_time_ms > 0:
+                    await self.page.wait_for_timeout(step.wait_time_ms)
+                else:
+                    await self.page.wait_for_load_state("networkidle")
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.SCROLL:
+                await self.page.evaluate(f"document.querySelector('{step.selector}')?.scrollIntoView()")
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.HOVER:
+                await self.page.hover(step.selector)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.SELECT:
+                await self.page.select_option(step.selector, step.value)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.CHECK:
+                await self.page.check(step.selector)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.UNCHECK:
+                await self.page.uncheck(step.selector)
+                return {"success": True}
+
+            elif step.action == PlaywrightAction.ASSERT:
+                return await self._execute_assertion(step)
+
+            else:
+                return {"success": False, "error": f"Unknown action: {step.action}"}
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def _check_playwright(self) -> bool:
         try:
             import playwright
@@ -326,7 +390,7 @@ class PlaywrightRunner:
             end_time=end_time,
         )
 
-    def generate_report(self, report: PlaywrightTestReport, output_path: str = None) -> str:
+    def generate_report(self, report: PlaywrightTestReport, output_path: Optional[str] = None) -> str:
         report_dict = {
             "summary": {
                 "total_tests": report.total_tests,

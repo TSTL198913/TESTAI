@@ -8,8 +8,7 @@ TASKLIST_PATH = shutil.which("tasklist") or "tasklist"
 TASKKILL_PATH = shutil.which("taskkill") or "taskkill"
 import time
 from dataclasses import dataclass
-from typing import List, Optional
-
+from typing import List, Optional, Callable
 
 @dataclass
 class ProcessInfo:
@@ -17,8 +16,10 @@ class ProcessInfo:
     command: str
     start_time: float
     timeout: Optional[float] = None
-    callback: Optional[callable] = None
+    callback: Optional[Callable] = None
 
+
+import logging
 
 class ProcessManager:
     _instance = None
@@ -26,6 +27,7 @@ class ProcessManager:
     _processes: dict = {}
     _monitor_thread: Optional[threading.Thread] = None
     _running: bool = False
+    logger = logging.getLogger("ProcessManager")
 
     def __new__(cls):
         with cls._lock:
@@ -102,7 +104,7 @@ class ProcessManager:
         pid: int,
         command: str,
         timeout: Optional[float] = None,
-        callback: Optional[callable] = None,
+        callback: Optional[Callable] = None,
     ):
         with self._lock:
             self._processes[pid] = ProcessInfo(

@@ -1,12 +1,13 @@
 import os
+from typing import Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # 强制必填项
-    MONGO_URI: str = Field(..., json_schema_extra={"env": "MONGO_URI"})
+    # 可选配置项
+    MONGO_URI: Optional[str] = Field(None, json_schema_extra={"env": "MONGO_URI"})
     MONGO_DB_NAME: str = Field("testai", json_schema_extra={"env": "MONGO_DB_NAME"})
 
     # 【新增】：将 API Key 纳入配置契约，强制必填

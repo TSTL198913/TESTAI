@@ -31,7 +31,7 @@ class DatabaseManager:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, database_url: str = None):
+    def __init__(self, database_url: Optional[str] = None):
         if hasattr(self, "_initialized"):
             return
         self.database_url = database_url or get_database_url()
@@ -205,7 +205,7 @@ class DatabaseManager:
                 return dict(row._mapping)
             return None
 
-    def select_all(self, table, where_clause=None, limit: int = None) -> List[Dict]:
+    def select_all(self, table, where_clause=None, limit: Optional[int] = None) -> List[Dict]:
         """查询多条记录"""
         with self.engine.connect() as conn:
             query = select(table)
@@ -223,7 +223,7 @@ class DatabaseManager:
             if where_clause is not None:
                 query = query.where(where_clause)
             result = conn.execute(query)
-            return result.scalar()
+            return result.scalar() or 0
 
     def reset(self):
         """重置数据库（仅用于测试）"""

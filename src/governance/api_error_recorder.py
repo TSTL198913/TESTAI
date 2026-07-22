@@ -18,10 +18,10 @@ class APIErrorRecorder:
         cls,
         error_type: str,
         error_message: str,
-        api_key: str = None,
-        endpoint: str = None,
+        api_key: Optional[str] = None,
+        endpoint: Optional[str] = None,
         http_status: Optional[int] = None,
-        additional_info: dict = None,
+        additional_info: Optional[dict] = None,
     ):
         cls._ensure_log_dir()
 

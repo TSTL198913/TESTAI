@@ -21,7 +21,7 @@ class AssertionProcessor(BaseProcessor):
         # 2. 循环断言并记录
         for assertion in step.assertions:
             passed = True
-            actual = None
+            actual: str | int | None = None
             msg = None
 
             try:

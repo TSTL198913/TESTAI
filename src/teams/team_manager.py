@@ -36,7 +36,7 @@ class Team:
 
 
 class TeamManager:
-    def __init__(self, storage_path: str = None, use_database: bool = None):
+    def __init__(self, storage_path: Optional[str] = None, use_database: Optional[bool] = None):
         self.storage_path = storage_path or os.environ.get(
             "TEAM_STORAGE_PATH", "data/teams.json"
         )

@@ -75,8 +75,8 @@ class PasswordHasher:
             parts = password_hash.split("$")
             if len(parts) != 4:
                 return False
-            _, iterations, salt, stored_hash = parts
-            iterations = int(iterations)
+            _, iterations_str, salt, stored_hash = parts
+            iterations = int(iterations_str)
             dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), iterations)
             return hmac.compare_digest(dk.hex(), stored_hash)
         return False
@@ -161,7 +161,7 @@ class TokenManager:
             return None
 
         username = payload.get("username")
-        user = self.users.get(username)
+        user = self.users.get(username) if isinstance(username, str) else None
 
         if user and user.is_active:
             user.last_login = datetime.now()
@@ -178,7 +178,7 @@ class TokenManager:
             return None
 
         username = payload.get("username")
-        user = self.users.get(username)
+        user = self.users.get(username) if isinstance(username, str) else None
 
         if user and user.is_active:
             return self.create_access_token(user)

@@ -54,8 +54,8 @@ class SystemConfig:
 class SystemOperations:
     def __init__(
         self,
-        audit_log_path: str = None,
-        config_path: str = None,
+        audit_log_path: Optional[str] = None,
+        config_path: Optional[str] = None,
     ):
         self.audit_log_path = audit_log_path or os.environ.get(
             "AUDIT_LOG_PATH", "data/audit_logs.json"
@@ -234,7 +234,7 @@ class SystemOperations:
         action: AuditAction,
         resource: AuditResource,
         resource_id: str = "",
-        details: Dict = None,
+        details: Optional[Dict] = None,
         success: bool = True,
         error_message: str = "",
     ):

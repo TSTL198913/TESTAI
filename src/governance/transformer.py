@@ -12,7 +12,7 @@ class BaseGovernanceTransformer(cst.CSTTransformer, ABC):
     """
 
     def __init__(
-        self, target_function: str, new_body: str, required_imports: List[str] = None
+        self, target_function: str, new_body: str, required_imports: Optional[List[str]] = None
     ):
         super().__init__()
         self.target_function = target_function
@@ -46,8 +46,8 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
         *,
         target_function: str,
         new_body: str,
-        target_class: str = None,
-        required_imports: List[str] = None,
+        target_class: Optional[str] = None,
+        required_imports: Optional[List[str]] = None,
     ):
         super().__init__(
             target_function=target_function,

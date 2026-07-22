@@ -87,7 +87,7 @@ class PermissionCheckResult:
     allowed: bool
     required_permission: Permission
     user_role: Role
-    missing_permissions: List[Permission] = None
+    missing_permissions: Optional[List[Permission]] = None
 
 
 class PermissionManager:

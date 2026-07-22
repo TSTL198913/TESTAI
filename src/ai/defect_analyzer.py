@@ -101,7 +101,10 @@ class DefectAnalyzer:
                 temperature=0.3,
             )
             
-            result = json.loads(response.choices[0].message.content)
+            content = response.choices[0].message.content
+            if content is None:
+                raise ValueError("LLM response content is None")
+            result = json.loads(content)
             return self._parse_llm_analysis(result)
             
         except Exception as e:
@@ -280,7 +283,10 @@ class DefectAnalyzer:
                 temperature=0.3,
             )
             
-            result = json.loads(response.choices[0].message.content)
+            content = response.choices[0].message.content
+            if content is None:
+                raise ValueError("LLM response content is None")
+            result = json.loads(content)
             return self._parse_llm_analysis(result)
             
         except Exception as e:

@@ -21,14 +21,9 @@ class DataProcessor(BaseProcessor):
         return {**context.env, **context.vars}
 
     # 【新增】：通用渲染工具，处理大部分“渲染 -> 更新”的场景
-    def _render_and_update(self, step, data_dict, field_name: str):
-        lookup = self._get_lookup_dict(
-            self.context_ref
-        )  # 稍微改动下获取方式，或直接传参
-        # 实际代码中可以直接通过参数传入 lookup_dict
-        return render_template(
-            data_dict, self._get_lookup_dict(self.context_ref), strict=self.strict
-        )
+    def _render_and_update(self, step, data_dict, field_name: str, context):
+        lookup = self._get_lookup_dict(context)
+        return render_template(data_dict, lookup, strict=self.strict)
 
     async def _run(self, context, step: TestStep, client) -> TestStep:
         # 不再赋值 self.context_ref = context

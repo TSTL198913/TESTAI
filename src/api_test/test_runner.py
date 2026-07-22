@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 from .client import APITestClient
 from .schema import APITestCase, APITestResult, APITestReport, AssertionType
@@ -70,7 +70,7 @@ class APITestRunner:
             )
             
             for assertion in test_case.assertions:
-                actual_value = None
+                actual_value: Any = None
                 
                 if assertion.type == AssertionType.STATUS_CODE:
                     actual_value = status_code
@@ -144,7 +144,7 @@ class APITestRunner:
             end_time=end_time,
         )
 
-    def generate_report(self, report: APITestReport, output_path: str = None) -> str:
+    def generate_report(self, report: APITestReport, output_path: Optional[str] = None) -> str:
         report_dict = {
             "summary": {
                 "total_tests": report.total_tests,

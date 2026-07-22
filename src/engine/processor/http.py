@@ -36,7 +36,7 @@ class HTTPProcessor(BaseProcessor):  # 修改类名
             "method": step.method,
             "url": str(step.url),
             "headers": step.headers,
-            "params": step.params,
+            "params": {k: v[0] if isinstance(v, (list, tuple)) else v for k, v in (step.params or {}).items()},
         }
         if step.body:
             request_kwargs["json"] = step.body

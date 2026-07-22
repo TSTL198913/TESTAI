@@ -58,7 +58,7 @@ class AlertRule:
 
 
 class AlertManager:
-    def __init__(self, storage_path: str = None):
+    def __init__(self, storage_path: Optional[str] = None):
         self.storage_path = storage_path or os.environ.get(
             "ALERT_STORAGE_PATH", "data/alerts.json"
         )
@@ -205,7 +205,7 @@ class AlertManager:
         title: str,
         message: str,
         source: str = "",
-        details: Dict = None,
+        details: Optional[Dict] = None,
     ) -> Alert:
         alert_id = f"alert_{len(self.alerts) + 1:06d}"
         alert = Alert(

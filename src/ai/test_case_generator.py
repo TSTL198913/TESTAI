@@ -75,7 +75,10 @@ class TestCaseGenerator:
                 temperature=0.7,
             )
             
-            result = json.loads(response.choices[0].message.content)
+            content = response.choices[0].message.content
+            if content is None:
+                raise ValueError("LLM response content is None")
+            result = json.loads(content)
             return self._parse_llm_result(result)
             
         except Exception as e:

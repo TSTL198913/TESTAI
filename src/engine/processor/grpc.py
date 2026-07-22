@@ -9,7 +9,7 @@ from src.models.result import StepResult
 
 
 class GrpcProcessor(BaseProcessor):  # 修改类名
-    _channels = {}
+    _channels: dict[tuple[str, int], Any] = {}
 
     @classmethod
     def _get_channel(cls, host: str, port: int):

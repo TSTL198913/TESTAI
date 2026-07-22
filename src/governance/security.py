@@ -1,6 +1,7 @@
 import os
 import threading
 from pathlib import Path
+from typing import Optional
 
 
 class SecurePathValidator:
@@ -44,7 +45,7 @@ class SecurePathValidator:
         valid, _ = self.validate_path(target_path)
         return valid
 
-    def sanitize_path(self, target_path: str, base_dir: str = None) -> str:
+    def sanitize_path(self, target_path: str, base_dir: Optional[str] = None) -> str:
         with self._lock:
             if base_dir:
                 base_path = Path(base_dir).resolve()

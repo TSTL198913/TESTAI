@@ -1,13 +1,14 @@
 import asyncio
 import logging
 import threading
+from typing import Optional
 
 logger = logging.getLogger("LoopManager")
 
 
 class AsyncLoopManager:
-    _loop: asyncio.AbstractEventLoop = None
-    _thread: threading.Thread = None
+    _loop: Optional[asyncio.AbstractEventLoop] = None
+    _thread: Optional[threading.Thread] = None
     _lock = threading.Lock()
 
     @classmethod
