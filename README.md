@@ -225,3 +225,4 @@ python -m pytest tests/ --ignore=tests/governance/test_tracker.py -v
 ## 许可证
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
+<!-- Auto-trigger CI -->
