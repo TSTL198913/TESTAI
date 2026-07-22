@@ -218,10 +218,10 @@ class GovernanceClientSDK:
                         parsed = json.loads(json_str)
                         if isinstance(parsed, dict):
                             self._extract_context_from_dict(parsed, context)
-                    except json.JSONDecodeError:
-                        pass
-        except Exception:
-            pass
+                    except json.JSONDecodeError as e:
+                        self._logger.debug(f"Failed to parse JSON from response: {e}")
+        except Exception as e:
+            self._logger.debug(f"Failed to extract context from response: {e}")
 
         return context
 

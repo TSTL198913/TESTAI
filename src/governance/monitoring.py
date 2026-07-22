@@ -113,8 +113,8 @@ class AlertManager:
         for callback in self._alert_callbacks:
             try:
                 callback(alert)
-            except Exception:
-                pass
+            except Exception as e:
+                self._logger.warning(f"Failed to notify callback for alert {alert.alert_id}: {e}")
 
     def create_alert(
         self,
@@ -154,8 +154,8 @@ class AlertManager:
             requests.post(
                 GovernanceConfig.ALERT_WEBHOOK_URL, json=alert.to_dict(), timeout=5
             )
-        except Exception:
-            pass
+        except Exception as e:
+            self._logger.warning(f"Failed to send webhook for alert {alert.alert_id}: {e}")
 
     def acknowledge_alert(self, alert_id: str) -> bool:
         with self._lock:

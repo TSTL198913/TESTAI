@@ -145,9 +145,11 @@ class GovernanceExecutor:
 
         try:
             import subprocess
+            import shutil
 
+            icacls_path = shutil.which("icacls") or "icacls"
             result = subprocess.run(
-                ["icacls", str(path), "/grant", "Users:F"],
+                [icacls_path, str(path), "/grant", "Users:F"],
                 capture_output=True,
                 text=True,
             )

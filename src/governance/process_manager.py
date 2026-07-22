@@ -2,6 +2,10 @@ import os
 import signal
 import subprocess
 import threading
+import shutil
+
+TASKLIST_PATH = shutil.which("tasklist") or "tasklist"
+TASKKILL_PATH = shutil.which("taskkill") or "taskkill"
 import time
 from dataclasses import dataclass
 from typing import List, Optional
@@ -51,8 +55,8 @@ class ProcessManager:
             try:
                 self._check_timeouts()
                 self._cleanup_zombies()
-            except Exception:
-                pass
+            except Exception as e:
+                self.logger.warning(f"Process monitor loop error: {e}")
             time.sleep(interval)
 
     def _check_timeouts(self):
@@ -72,8 +76,8 @@ class ProcessManager:
                 if info.callback:
                     try:
                         info.callback(pid)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        self.logger.warning(f"Failed to execute callback for pid {pid}: {e}")
                 to_remove.append(pid)
         for pid in to_remove:
             del self._processes[pid]
@@ -82,7 +86,7 @@ class ProcessManager:
         try:
             if os.name == "nt":
                 result = subprocess.run(
-                    ["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+                    [TASKLIST_PATH, "/FI", f"PID eq {pid}", "/NH"],
                     capture_output=True,
                     text=True,
                 )
@@ -113,7 +117,7 @@ class ProcessManager:
         try:
             if os.name == "nt":
                 subprocess.run(
-                    ["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True
+                    [TASKKILL_PATH, "/F", "/T", "/PID", str(pid)], capture_output=True
                 )
             else:
                 os.kill(pid, signal.SIGTERM)

@@ -1,7 +1,9 @@
 import os
+import subprocess
+import shlex
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
-SECRET_KEY = "hardcoded_key_12345"
+SECRET_KEY = os.environ.get("SECRET_KEY", "default_secret_key_should_be_set_in_env")
 
 
 def process_user_expression(expression):
@@ -14,8 +16,12 @@ def process_user_expression(expression):
 
 
 def run_system_command():
-    cmd = input("请输入命令: ")
-    os.system(cmd)
+    cmd_input = input("请输入命令: ")
+    cmd_args = shlex.split(cmd_input)
+    result = subprocess.run(cmd_args, capture_output=True, text=True)
+    print(result.stdout)
+    if result.returncode != 0:
+        print(f"命令执行失败: {result.stderr}")
 
 
 def main():

@@ -1,7 +1,10 @@
 # src/governance/git_manager.py
 import logging
 import subprocess
+import shutil
 from typing import Optional
+
+GIT_PATH = shutil.which("git") or "git"
 
 
 class GitTransactionManager:
@@ -14,19 +17,22 @@ class GitTransactionManager:
         for branch in ["main", "master"]:
             try:
                 result = subprocess.run(
-                    ["git", "show-ref", "--verify", f"refs/heads/{branch}"],
+                    [GIT_PATH, "show-ref", "--verify", f"refs/heads/{branch}"],
                     cwd=self.repo_path,
                     capture_output=True,
                 )
                 if result.returncode == 0:
                     return branch
-            except Exception:
+            except Exception as e:
+                self.logger.debug(f"Failed to check branch {branch}: {e}")
                 continue
         return "master"
 
     def _run(self, cmd: list[str]):
         """封装带有检查的执行器"""
         try:
+            if cmd[0] == "git":
+                cmd[0] = GIT_PATH
             subprocess.run(
                 cmd, cwd=self.repo_path, check=True, capture_output=True, text=True
             )
@@ -41,7 +47,7 @@ class GitTransactionManager:
         self._run(["git", "checkout", self.base_branch])
         try:
             result = subprocess.run(
-                ["git", "show-ref", "--verify", f"refs/heads/{branch_name}"],
+                [GIT_PATH, "show-ref", "--verify", f"refs/heads/{branch_name}"],
                 cwd=self.repo_path,
                 capture_output=True,
             )
@@ -63,8 +69,8 @@ class GitTransactionManager:
             self._run(["git", "checkout", self.base_branch])
             try:
                 self._run(["git", "branch", "-D", f"governance_{tx_id}"])
-            except Exception:
-                pass
+            except Exception as e:
+                self.logger.debug(f"Branch governance_{tx_id} does not exist or cannot be deleted: {e}")
             self.logger.info(f"Transaction {tx_id} rolled back successfully.")
         except Exception as e:
             self.logger.critical(f"FATAL: Rollback failed for {tx_id}: {e}")

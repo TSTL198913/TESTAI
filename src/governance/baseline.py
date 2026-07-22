@@ -64,7 +64,7 @@ class GoldenBaselineManager:
                             data=scenario,
                         )
             except Exception as e:
-                pass
+                self.logger.warning(f"Failed to load baseline record {record_id}: {e}")
         self._load_default_baselines()
 
     def _load_default_baselines(self):
