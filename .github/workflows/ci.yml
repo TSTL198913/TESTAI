@@ -78,14 +78,7 @@ jobs:
           pip install pytest-cov --no-cache-dir
           
       - name: Run Unit Tests
-        run: python -m pytest tests/unit/ -v --tb=short -W error::RuntimeWarning --cov=src --cov-report=xml
-      
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v5
-        with:
-          name: unit-coverage-report
-          path: coverage.xml
-          retention-days: 7
+        run: python -m pytest tests/unit/ -v --tb=short -W error::RuntimeWarning
 
   integration-tests:
     name: Integration Tests
@@ -139,9 +132,17 @@ jobs:
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
+          pip install pytest-cov --no-cache-dir
           
       - name: Run Governance Tests
-        run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning
+        run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning --cov=src/governance --cov-report=xml --cov-fail-under=70
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v5
+        with:
+          name: governance-coverage-report
+          path: coverage.xml
+          retention-days: 7
 
   security-scan:
     name: Security Scan
@@ -184,7 +185,7 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@v5
         with:
-          name: unit-coverage-report
+          name: governance-coverage-report
           path: reports/
           
       - name: Set up Python
