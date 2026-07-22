@@ -236,3 +236,5 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 <!-- CI gate test 20260722102844 -->
 
 <!-- CI gate test 20260722102900 -->
+
+<!-- Architecture upgrade 20260722104418 -->
