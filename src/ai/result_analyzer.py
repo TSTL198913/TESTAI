@@ -13,7 +13,7 @@ class TrendDirection(str, Enum):
 
 
 class MetricCategory(str, Enum):
-    PASS_RATE = "pass_rate"
+    PASS_RATE = "pass_rate"  # nosec B105
     COVERAGE = "coverage"
     RESPONSE_TIME = "response_time"
     DEFECT_DENSITY = "defect_density"

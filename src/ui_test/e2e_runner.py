@@ -209,7 +209,7 @@ class E2ERunner:
         username: str,
         password: str,
         username_selector: str = 'input[name="username"]',
-        password_selector: str = 'input[name="password"]',
+        password_selector: str = 'input[name="password"]',  # nosec B107
         submit_selector: str = 'button[type="submit"]',
         expected_selector: str = ".dashboard",
     ) -> E2EFlow:

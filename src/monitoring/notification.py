@@ -87,7 +87,7 @@ class DingTalkNotifier:
                 "at": {"isAtAll": False},
             }
 
-            response = requests.post(self.webhook_url, json=payload)
+            response = requests.post(self.webhook_url, json=payload, timeout=10)
             result = response.json()
             return result.get("errcode") == 0
         except Exception as e:
@@ -121,7 +121,7 @@ class FeishuNotifier:
                 },
             }
 
-            response = requests.post(self.webhook_url, json=payload)
+            response = requests.post(self.webhook_url, json=payload, timeout=10)
             result = response.json()
             return result.get("code") == 0
         except Exception as e:

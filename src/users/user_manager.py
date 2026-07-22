@@ -158,7 +158,7 @@ class UserManager:
         full_name: str = "",
         department: str = "",
         status: UserStatus = UserStatus.ACTIVE,
-        password: str = "",
+        password: str = "",  # nosec B107
     ) -> UserProfile:
         if username in [u.username for u in self.users.values()]:
             raise ValueError(f"Username '{username}' already exists")

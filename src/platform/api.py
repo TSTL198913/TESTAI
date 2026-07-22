@@ -143,7 +143,7 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(secu
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired refresh token",
         )
-    return {"access_token": new_access_token, "token_type": "bearer"}
+    return {"access_token": new_access_token, "token_type": "bearer"}  # nosec B105
 
 
 @app.get("/auth/me")

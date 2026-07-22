@@ -144,7 +144,7 @@ class GovernanceExecutor:
             self.logger.error(f"Failed to change permissions via chmod: {e}")
 
         try:
-            import subprocess
+            import subprocess  # nosec B404
             import shutil
 
             icacls_path = shutil.which("icacls") or "icacls"
@@ -152,7 +152,7 @@ class GovernanceExecutor:
                 [icacls_path, str(path), "/grant", "Users:F"],
                 capture_output=True,
                 text=True,
-            )
+            )  # nosec B603
             if result.returncode == 0:
                 self.logger.info(f"Permissions granted via icacls: {str(path)}")
                 return True

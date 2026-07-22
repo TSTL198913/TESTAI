@@ -41,7 +41,7 @@ class ConfigManager:
                 "log_level": "INFO",
             },
             "api": {
-                "host": "0.0.0.0",
+                "host": "0.0.0.0",  # nosec B104 - intentional for container deployment
                 "port": 8000,
                 "cors_enabled": True,
                 "docs_enabled": True,

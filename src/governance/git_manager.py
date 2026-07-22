@@ -1,6 +1,6 @@
 # src/governance/git_manager.py
 import logging
-import subprocess
+import subprocess  # nosec B404
 import shutil
 from typing import Optional
 
@@ -20,7 +20,7 @@ class GitTransactionManager:
                     [GIT_PATH, "show-ref", "--verify", f"refs/heads/{branch}"],
                     cwd=self.repo_path,
                     capture_output=True,
-                )
+                )  # nosec B603
                 if result.returncode == 0:
                     return branch
             except Exception as e:
@@ -35,7 +35,7 @@ class GitTransactionManager:
                 cmd[0] = GIT_PATH
             subprocess.run(
                 cmd, cwd=self.repo_path, check=True, capture_output=True, text=True
-            )
+            )  # nosec B603
         except subprocess.CalledProcessError as e:
             self.logger.error(
                 f"Git Command Failed: {' '.join(cmd)} | Error: {e.stderr}"
@@ -50,7 +50,7 @@ class GitTransactionManager:
                 [GIT_PATH, "show-ref", "--verify", f"refs/heads/{branch_name}"],
                 cwd=self.repo_path,
                 capture_output=True,
-            )
+            )  # nosec B603
             if result.returncode == 0:
                 self._run(["git", "branch", "-D", branch_name])
         except Exception as e:

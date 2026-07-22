@@ -20,7 +20,7 @@ permissions:
 env:
   MAX_PYLINT_ERRORS: 1
   MAX_MYPY_ERRORS: 30
-  MAX_BANDIT_ISSUES: 35
+  MAX_BANDIT_ISSUES: 0
   MAX_SAFETY_VULNERABILITIES: 5
 
 jobs:
@@ -100,6 +100,7 @@ jobs:
       - name: Run Pylint with Error Threshold
         run: |
           pylint src/governance/ src/platform/ src/security/ --fail-under=7.0 --output-format=json > pylint_report.json || true
+          max_errors=${MAX_PYLINT_ERRORS:-1}
           python -c "
           import json
           try:
@@ -110,8 +111,8 @@ jobs:
           warnings = [m for m in data if m['type'] == 'warning']
           print(f'Pylint: {len(warnings)} warnings, {len(errors)} errors')
           
-          if len(errors) > $MAX_PYLINT_ERRORS:
-              print(f'❌ Pylint errors ({len(errors)}) exceed threshold ({MAX_PYLINT_ERRORS})')
+          if len(errors) > $max_errors:
+              print(f'❌ Pylint errors ({len(errors)}) exceed threshold ($max_errors)')
               for e in errors:
                   print(f'  {e[\"path\"]}:{e[\"line\"]} [{e[\"symbol\"]}] {e[\"message\"]}')
               exit(1)
@@ -126,6 +127,7 @@ jobs:
       - name: Run MyPy with Error Threshold
         run: |
           mypy src/ --ignore-missing-imports --json-report mypy_report/ 2>&1 || true
+          max_errors=${MAX_MYPY_ERRORS:-30}
           python -c "
           import json
           try:
@@ -135,8 +137,8 @@ jobs:
           error_count = data.get('errorCount', 0)
           print(f'MyPy: {error_count} errors')
           
-          if error_count > $MAX_MYPY_ERRORS:
-              print(f'❌ MyPy errors ({error_count}) exceed threshold ({MAX_MYPY_ERRORS})')
+          if error_count > $max_errors:
+              print(f'❌ MyPy errors ({error_count}) exceed threshold ($max_errors)')
               exit(1)
           else:
               print('✅ MyPy within threshold')

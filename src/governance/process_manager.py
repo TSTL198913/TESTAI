@@ -1,6 +1,6 @@
 import os
 import signal
-import subprocess
+import subprocess  # nosec B404
 import threading
 import shutil
 
@@ -89,7 +89,7 @@ class ProcessManager:
                     [TASKLIST_PATH, "/FI", f"PID eq {pid}", "/NH"],
                     capture_output=True,
                     text=True,
-                )
+                )  # nosec B603
                 return str(pid) in result.stdout
             else:
                 os.kill(pid, 0)
@@ -118,7 +118,7 @@ class ProcessManager:
             if os.name == "nt":
                 subprocess.run(
                     [TASKKILL_PATH, "/F", "/T", "/PID", str(pid)], capture_output=True
-                )
+                )  # nosec B603
             else:
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(1)

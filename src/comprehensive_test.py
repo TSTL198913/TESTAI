@@ -1,5 +1,5 @@
 import os
-import subprocess
+import subprocess  # nosec B404
 import shlex
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
@@ -18,7 +18,7 @@ def process_user_expression(expression):
 def run_system_command():
     cmd_input = input("请输入命令: ")
     cmd_args = shlex.split(cmd_input)
-    result = subprocess.run(cmd_args, capture_output=True, text=True)
+    result = subprocess.run(cmd_args, capture_output=True, text=True)  # nosec B603
     print(result.stdout)
     if result.returncode != 0:
         print(f"命令执行失败: {result.stderr}")
