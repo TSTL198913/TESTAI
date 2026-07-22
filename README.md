@@ -228,3 +228,5 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 <!-- Auto-trigger CI -->
 
 <!-- DevOps checks updated -->
+
+<!-- DevOps gates updated 20260722102446 -->
