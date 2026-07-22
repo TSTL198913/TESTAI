@@ -266,15 +266,17 @@ jobs:
           bandit -r src/ -f json -o bandit_report.json || true
           python -c "
           import json
+          import os
           try:
               data = json.load(open('bandit_report.json'))
           except:
               data = {'results': []}
           issue_count = len(data.get('results', []))
+          max_issues = int(os.environ.get('MAX_BANDIT_ISSUES', '35'))
           print(f'Bandit: {issue_count} issues found')
           
-          if issue_count > $MAX_BANDIT_ISSUES:
-              print(f'❌ Bandit issues ({issue_count}) exceed threshold ({MAX_BANDIT_ISSUES})')
+          if issue_count > max_issues:
+              print(f'❌ Bandit issues ({issue_count}) exceed threshold ({max_issues})')
               exit(1)
           else:
               print('✅ Bandit within threshold')
@@ -288,15 +290,17 @@ jobs:
           safety check --json --output safety_report.json || true
           python -c "
           import json
+          import os
           try:
               data = json.load(open('safety_report.json'))
           except:
               data = {'vulnerabilities': []}
           vuln_count = len(data.get('vulnerabilities', []))
+          max_vuln = int(os.environ.get('MAX_SAFETY_VULNERABILITIES', '5'))
           print(f'Safety: {vuln_count} vulnerabilities found')
           
-          if vuln_count > $MAX_SAFETY_VULNERABILITIES:
-              print(f'❌ Safety vulnerabilities ({vuln_count}) exceed threshold ({MAX_SAFETY_VULNERABILITIES})')
+          if vuln_count > max_vuln:
+              print(f'❌ Safety vulnerabilities ({vuln_count}) exceed threshold ({max_vuln})')
               exit(1)
           else:
               print('✅ Safety within threshold')
@@ -405,10 +409,11 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
-      - name: Sign Docker Image with Cosign
+      - name: Sign Docker Image with Cosign (Local)
         run: |
-          cosign sign --yes testai:ci
-          echo "✅ Docker image signed with Cosign"
+          docker save testai:ci -o testai_ci.tar
+          cosign sign-blob --yes --output-signature docker_image.sig --output-certificate docker_image.crt testai_ci.tar
+          echo "✅ Docker image signed with Cosign (local tar)"
 
       - name: Upload Docker artifacts
         uses: actions/upload-artifact@v5
