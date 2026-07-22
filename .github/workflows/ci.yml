@@ -15,6 +15,13 @@ permissions:
   contents: read
   security-events: write
   checks: write
+  id-token: write
+
+env:
+  MAX_PYLINT_WARNINGS: 50
+  MAX_MYPY_ERRORS: 30
+  MAX_BANDIT_ISSUES: 10
+  MAX_SAFETY_VULNERABILITIES: 5
 
 jobs:
   config-validation:
@@ -65,6 +72,9 @@ jobs:
     name: Lint & CI Guard
     runs-on: ubuntu-latest
     needs: config-validation
+    outputs:
+      pylint_warnings: ${{ steps.pylint.outputs.warnings }}
+      mypy_errors: ${{ steps.mypy.outputs.errors }}
     steps:
       - uses: actions/checkout@v4
 
@@ -90,13 +100,46 @@ jobs:
       - name: Run Flake8
         run: flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
-      - name: Run Pylint
-        run: pylint src/governance/ src/platform/ src/security/ --fail-under=7.0
-        continue-on-error: true
+      - name: Run Pylint with Warning Threshold
+        id: pylint
+        run: |
+          pylint src/governance/ src/platform/ src/security/ --fail-under=7.0 --output-format=json > pylint_report.json || true
+          WARNINGS=$(python -c "import json; data=json.load(open('pylint_report.json')); print(len([m for m in data if m['type'] == 'warning']))")
+          ERRORS=$(python -c "import json; data=json.load(open('pylint_report.json')); print(len([m for m in data if m['type'] == 'error']))")
+          echo "pylint_warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "Pylint: $WARNINGS warnings, $ERRORS errors"
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Pylint errors detected: $ERRORS"
+            exit 1
+          fi
+          
+          if [ $WARNINGS -gt $MAX_PYLINT_WARNINGS ]; then
+            echo "❌ Pylint warnings ($WARNINGS) exceed threshold ($MAX_PYLINT_WARNINGS)"
+            exit 1
+          fi
 
-      - name: Run MyPy
-        run: mypy src/ --ignore-missing-imports
-        continue-on-error: true
+      - name: Run MyPy with Error Threshold
+        id: mypy
+        run: |
+          mypy src/ --ignore-missing-imports --json-report mypy_report/ 2>&1 || true
+          ERROR_COUNT=$(python -c "import json; data=json.load(open('mypy_report/index.json')); print(data.get('errorCount', 0))")
+          echo "mypy_errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
+          echo "MyPy: $ERROR_COUNT errors"
+          
+          if [ $ERROR_COUNT -gt $MAX_MYPY_ERRORS ]; then
+            echo "❌ MyPy errors ($ERROR_COUNT) exceed threshold ($MAX_MYPY_ERRORS)"
+            exit 1
+          fi
+
+      - name: Upload Lint Reports
+        uses: actions/upload-artifact@v5
+        with:
+          name: lint-reports
+          path: |
+            pylint_report.json
+            mypy_report/
+          retention-days: 7
 
   dependency-check:
     name: Dependency Health
@@ -118,15 +161,12 @@ jobs:
 
       - name: Check for missing dependencies
         run: pip-check-reqs --ignore-file=requirements.txt src/
-        continue-on-error: true
 
       - name: Check for unused dependencies
         run: pip-check-reqs --extra --ignore-file=requirements.txt src/
-        continue-on-error: true
 
       - name: Check dependency conflicts
         run: pipdeptree -f -w silence
-        continue-on-error: true
 
   unit-tests:
     name: Unit Tests
@@ -158,7 +198,7 @@ jobs:
         run: python -m pytest tests/unit/ -v --tb=short -W error::RuntimeWarning
 
   integration-tests:
-    name: Integration Tests
+    name: Integration Tests (Fast Track)
     runs-on: ubuntu-latest
     needs: lint
     steps:
@@ -182,7 +222,7 @@ jobs:
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
 
-      - name: Run Integration Tests
+      - name: Run Fast Track Integration Tests
         run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py
 
   governance-tests:
@@ -225,6 +265,9 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: lint
+    outputs:
+      bandit_issues: ${{ steps.bandit.outputs.issues }}
+      safety_vulnerabilities: ${{ steps.safety.outputs.vulnerabilities }}
     steps:
       - uses: actions/checkout@v4
 
@@ -238,30 +281,47 @@ jobs:
           pip install --upgrade pip --no-cache-dir
           pip install bandit pip-audit safety --no-cache-dir
 
-      - name: Run Bandit Security Scan
-        run: bandit -r src/ -f json -o security_scan.json
-        continue-on-error: true
+      - name: Run Bandit Security Scan with Threshold
+        id: bandit
+        run: |
+          bandit -r src/ -f json -o bandit_report.json || true
+          ISSUE_COUNT=$(python -c "import json; data=json.load(open('bandit_report.json')); print(len(data.get('results', [])))")
+          echo "bandit_issues=$ISSUE_COUNT" >> $GITHUB_OUTPUT
+          echo "Bandit: $ISSUE_COUNT issues found"
+          
+          if [ $ISSUE_COUNT -gt $MAX_BANDIT_ISSUES ]; then
+            echo "❌ Bandit issues ($ISSUE_COUNT) exceed threshold ($MAX_BANDIT_ISSUES)"
+            exit 1
+          fi
 
       - name: Run pip-audit Dependency Scan
-        run: pip-audit -f json -o dependency_scan.json
-        continue-on-error: true
+        run: pip-audit -f json -o pip_audit_report.json
 
-      - name: Run Safety Dependency Scan
-        run: safety check --json --output safety_scan.json
-        continue-on-error: true
+      - name: Run Safety Dependency Scan with Threshold
+        id: safety
+        run: |
+          safety check --json --output safety_report.json || true
+          VULN_COUNT=$(python -c "import json; data=json.load(open('safety_report.json')); print(len(data.get('vulnerabilities', [])))")
+          echo "safety_vulnerabilities=$VULN_COUNT" >> $GITHUB_OUTPUT
+          echo "Safety: $VULN_COUNT vulnerabilities found"
+          
+          if [ $VULN_COUNT -gt $MAX_SAFETY_VULNERABILITIES ]; then
+            echo "❌ Safety vulnerabilities ($VULN_COUNT) exceed threshold ($MAX_SAFETY_VULNERABILITIES)"
+            exit 1
+          fi
 
       - name: Upload Security Reports
         uses: actions/upload-artifact@v5
         with:
           name: security-reports
           path: |
-            security_scan.json
-            dependency_scan.json
-            safety_scan.json
+            bandit_report.json
+            pip_audit_report.json
+            safety_report.json
           retention-days: 7
 
   build-validation:
-    name: Build Validation
+    name: Build Validation with SBOM
     runs-on: ubuntu-latest
     needs: lint
     steps:
@@ -294,15 +354,37 @@ jobs:
           pip install --no-cache-dir dist/*.whl
           python -c "from src.governance import agent; print('✅ Package installed successfully')"
 
+      - name: Install Syft for SBOM
+        uses: anchore/sbom-action/download-syft@v0.16.0
+
+      - name: Generate SBOM for Wheel Package
+        run: |
+          syft dist/*.whl -o cyclonedx-json=sbom_wheel.json
+          syft dist/*.whl -o spdx-json=sbom_wheel_spdx.json
+          echo "✅ SBOM generated for wheel package"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Wheel Package with Cosign
+        run: |
+          cosign sign-blob --yes --output-signature wheel.sig --output-certificate wheel.crt dist/*.whl
+          echo "✅ Wheel package signed with Cosign"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
           name: build-artifacts
-          path: dist/
+          path: |
+            dist/
+            sbom_wheel.json
+            sbom_wheel_spdx.json
+            wheel.sig
+            wheel.crt
           retention-days: 7
 
   docker-build:
-    name: Docker Build
+    name: Docker Build with SBOM & Signing
     runs-on: ubuntu-latest
     needs: build-validation
     steps:
@@ -318,6 +400,32 @@ jobs:
         run: |
           docker image inspect testai:ci | grep -q "testai:ci"
           echo "✅ Docker image built successfully"
+
+      - name: Install Syft for SBOM
+        uses: anchore/sbom-action/download-syft@v0.16.0
+
+      - name: Generate SBOM for Docker Image
+        run: |
+          syft docker.io/library/testai:ci -o cyclonedx-json=sbom_docker.json
+          syft docker.io/library/testai:ci -o spdx-json=sbom_docker_spdx.json
+          echo "✅ SBOM generated for Docker image"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Docker Image with Cosign
+        run: |
+          cosign sign --yes testai:ci
+          echo "✅ Docker image signed with Cosign"
+
+      - name: Upload Docker artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: docker-artifacts
+          path: |
+            sbom_docker.json
+            sbom_docker_spdx.json
+          retention-days: 7
 
   environment-check:
     name: Environment Check
@@ -403,11 +511,11 @@ jobs:
           echo "📊 Lint: Passed"
           echo "🔗 Dependency Health: Passed"
           echo "🧪 Unit Tests: Passed"
-          echo "🔗 Integration Tests: Passed"
+          echo "🔗 Integration Tests (Fast Track): Passed"
           echo "🏛️ Governance Tests: Passed"
           echo "🛡️ Security Scan: Passed"
-          echo "📦 Build Validation: Passed"
-          echo "🐳 Docker Build: Passed"
+          echo "📦 Build Validation with SBOM: Passed"
+          echo "🐳 Docker Build with Signing: Passed"
           echo "🌐 Environment Check: Passed"
           echo "📈 Coverage: Passed"
 
@@ -419,10 +527,10 @@ jobs:
           echo "- Lint & CI Guard: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Dependency Health: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Unit Tests: ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Integration Tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests (Fast Track): ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Governance Tests: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Security Scan: ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Build Validation: ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Docker Build: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Validation with SBOM: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Docker Build with Signing: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Environment Check: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Coverage: ✅" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,214 @@
+name: TestAI Nightly Pipeline
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+  checks: write
+
+jobs:
+  real-network-tests:
+    name: Real Network Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest-cov pytest-timeout --no-cache-dir
+
+      - name: Run Real Network Extended Tests
+        run: python -m pytest tests/integration/test_real_network_extended.py -v --tb=short --timeout=120
+
+      - name: Run HTTP Real Tests
+        run: python -m pytest tests/integration/test_http_real.py -v --tb=short --timeout=120
+
+  e2e-business-tests:
+    name: E2E Business Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest-cov pytest-timeout --no-cache-dir
+
+      - name: Run Real E2E Business Tests
+        run: python -m pytest tests/integration/test_real_e2e_business.py -v --tb=short --timeout=300
+
+  full-regression-tests:
+    name: Full Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest-cov pytest-timeout --no-cache-dir
+
+      - name: Run Full Test Suite
+        run: python -m pytest tests/ -v --tb=short --timeout=60 --cov=src --cov-report=xml --cov-report=html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v5
+        with:
+          name: nightly-coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 7
+
+  mutation-testing:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest mutmut --no-cache-dir
+
+      - name: Run Mutation Testing
+        run: |
+          mutmut run --paths-to-mutate src/governance/ --runner "pytest tests/governance/" --output-format=json > mutmut_report.json
+          echo "✅ Mutation testing completed"
+
+      - name: Upload mutation report
+        uses: actions/upload-artifact@v5
+        with:
+          name: mutation-report
+          path: mutmut_report.json
+          retention-days: 7
+
+  nightly-quality-gate:
+    name: Nightly Quality Gate
+    runs-on: ubuntu-latest
+    needs: [real-network-tests, e2e-business-tests, full-regression-tests, mutation-testing]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v5
+        with:
+          name: nightly-coverage-report
+          path: reports/
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Check coverage threshold
+        run: |
+          if [ ! -f reports/coverage.xml ]; then
+            echo "❌ coverage.xml not found"
+            exit 1
+          fi
+          coverage_percent=$(python -c "
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('reports/coverage.xml')
+          root = tree.getroot()
+          line_rate = float(root.attrib['line-rate'])
+          print(f'{line_rate * 100:.1f}')
+          ")
+          echo "Nightly Coverage: $coverage_percent%"
+          python -c "
+          coverage_percent = float('$coverage_percent')
+          if coverage_percent < 80:
+              print(f'❌ Nightly Coverage {coverage_percent}% below 80% threshold')
+              exit(1)
+          else:
+              print('✅ Nightly Coverage meets threshold')
+          "
+
+      - name: Nightly Quality Gate Summary
+        run: |
+          echo "=== Nightly Quality Gate Summary ==="
+          echo "✅ All nightly tests passed"
+          echo "🔗 Real Network Tests: Passed"
+          echo "🏪 E2E Business Tests: Passed"
+          echo "🔄 Full Regression Tests: Passed"
+          echo "🧬 Mutation Testing: Passed"
+          echo "📈 Coverage: Passed"
+
+      - name: Post to GitHub Summary
+        run: |
+          echo "## TestAI Nightly Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **All nightly checks passed**" >> $GITHUB_STEP_SUMMARY
+          echo "- Real Network Tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- E2E Business Tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Full Regression Tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Mutation Testing: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage: ✅" >> $GITHUB_STEP_SUMMARY
