@@ -86,6 +86,21 @@ class StructuredLogger:
 
         return log_record
 
+    def debug(self, message: str, **kwargs):
+        return self.log("DEBUG", message, **kwargs)
+
+    def info(self, message: str, **kwargs):
+        return self.log("INFO", message, **kwargs)
+
+    def warning(self, message: str, **kwargs):
+        return self.log("WARNING", message, **kwargs)
+
+    def error(self, message: str, **kwargs):
+        return self.log("ERROR", message, **kwargs)
+
+    def critical(self, message: str, **kwargs):
+        return self.log("CRITICAL", message, **kwargs)
+
 
 class AlertManager:
     _instance = None

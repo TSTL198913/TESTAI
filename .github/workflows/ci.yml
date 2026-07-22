@@ -266,7 +266,7 @@ jobs:
       - name: Run Bandit Security Scan with Threshold
         run: |
           bandit -r src/ -f json -o bandit_report.json || true
-          max_issues=${MAX_BANDIT_ISSUES:-35}
+          max_issues=${MAX_BANDIT_ISSUES:-0}
           python -c "
           import json
           try:
@@ -403,8 +403,8 @@ jobs:
 
       - name: Generate SBOM for Docker Image
         run: |
-          syft docker.io/library/testai:ci -o cyclonedx-json=sbom_docker.json
-          syft docker.io/library/testai:ci -o spdx-json=sbom_docker_spdx.json
+          syft testai:ci -o cyclonedx-json=sbom_docker.json
+          syft testai:ci -o spdx-json=sbom_docker_spdx.json
           echo "✅ SBOM generated for Docker image"
 
       - name: Install Cosign

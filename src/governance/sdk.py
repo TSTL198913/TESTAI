@@ -1,3 +1,4 @@
+import logging
 import threading
 from typing import Any, Optional
 
@@ -35,6 +36,7 @@ class GovernanceClientSDK:
         if hasattr(self, "_initialized"):
             return
         self._client = None
+        self._logger = logging.getLogger("GovernanceClientSDK")
         self.breaker = CircuitBreaker(
             threshold=GovernanceConfig.CIRCUIT_BREAKER_THRESHOLD,
             recovery_timeout=GovernanceConfig.CIRCUIT_BREAKER_RECOVERY_TIMEOUT,
