@@ -244,3 +244,5 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 <!-- Pylint fix validation 20260722114539 -->
 
 <!-- Pylint fix validation 20260722114907 -->
+
+<!-- CI config fix 20260722120048 -->
