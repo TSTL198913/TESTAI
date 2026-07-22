@@ -18,11 +18,19 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
-          pip install pytest pytest-rerunfailures
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest pytest-rerunfailures pytest-cov --no-cache-dir
 
       - name: Step 1 - CI Guard Check
         run: |
@@ -34,12 +42,12 @@ jobs:
           echo "🧬 Running Mutation Gate..."
           python tests/utils/auto_mutation_gate.py --test tests/governance/test_transformer_new.py
 
-      - name: Step 3 - Layered Effectiveness
+      - name: Step 3 - Governance Effectiveness
         run: |
-          echo "📊 Running Layered Effectiveness..."
-          python -m pytest tests/governance/test_layered_effectiveness.py -v
+          echo "📊 Running Governance Effectiveness..."
+          python -m pytest tests/governance/test_effectiveness_gate.py -v --tb=short
 
       - name: Step 4 - Full Test Suite
         run: |
           echo "🧪 Running Full Test Suite..."
-          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning
+          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py --ignore=tests/fixtures/vulnerable_app.py --ignore=tests/fixtures/vulnerable_app_full.py

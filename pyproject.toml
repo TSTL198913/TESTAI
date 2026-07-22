@@ -34,6 +34,9 @@ dependencies = [
     "jsonpath-ng>=1.5.0",
     "tenacity>=8.0.0",
     "openai>=1.0.0",
+    "sqlalchemy>=2.0.0",
+    "pyjwt>=2.0.0",
+    "respx>=0.23.0",
 ]
 
 [project.optional-dependencies]
@@ -49,5 +52,7 @@ dev = [
     "isort>=5.12.0",
     "bandit>=1.7.0",
     "pip-audit>=2.0.0",
-    "httpx",
+    "safety>=2.0.0",
+    "pip-check-reqs>=2.0.0",
+    "pipdeptree>=2.0.0",
 ]

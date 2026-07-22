@@ -1,10 +1,10 @@
-name: TestAI CI
+name: TestAI CI/CD Pipeline
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -22,17 +22,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip --no-cache-dir
-          pip install pydantic --no-cache-dir
-          
+          pip install pydantic pydantic-settings --no-cache-dir
+
       - name: Validate config files
         run: |
           echo "=== Config Validation ==="
@@ -41,11 +41,25 @@ jobs:
           else
             echo "⚠️ No config.py found"
           fi
-          
+
       - name: Validate JSON schema
         run: |
           echo "=== JSON Schema Validation ==="
-          find tests/data -name "*.json" -exec python -c "import json; json.load(open('{}')); print(f'✅ Valid JSON: {}')" \;
+          python -c "
+          import json
+          import os
+          data_dir = 'tests/data'
+          for root, dirs, files in os.walk(data_dir):
+              for f in files:
+                  if f.endswith('.json'):
+                      path = os.path.join(root, f)
+                      try:
+                          json.load(open(path, encoding='utf-8'))
+                          print(f'✅ Valid JSON: {path}')
+                      except json.JSONDecodeError as e:
+                          print(f'❌ Invalid JSON: {path} - {e}')
+                          exit(1)
+          "
 
   lint:
     name: Lint & CI Guard
@@ -53,12 +67,12 @@ jobs:
     needs: config-validation
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -66,21 +80,21 @@ jobs:
           key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-python-
-          
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
           pip install flake8 pylint mypy --no-cache-dir
-          
+
       - name: Run Flake8
         run: flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        
+
       - name: Run Pylint
-        run: pylint src/governance/ src/platform/ src/security/ --fail-under=7.0 || true
-        
+        run: pylint src/governance/ src/platform/ src/security/ --fail-under=7.0
+
       - name: Run MyPy
-        run: mypy src/ --ignore-missing-imports || true
+        run: mypy src/ --ignore-missing-imports
 
   dependency-check:
     name: Dependency Health
@@ -88,25 +102,26 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Install tools
         run: |
           pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
           pip install pip-check-reqs pipdeptree --no-cache-dir
-          
+
       - name: Check for missing dependencies
-        run: pip-check-reqs --ignore-file=requirements.txt src/ || true
-        
+        run: pip-check-reqs --ignore-file=requirements.txt src/
+
       - name: Check for unused dependencies
-        run: pip-check-reqs --extra --ignore-file=requirements.txt src/ || true
-        
-      - name: Check dependency tree
-        run: pipdeptree -f -w silence 2>/dev/null || true
+        run: pip-check-reqs --extra --ignore-file=requirements.txt src/
+
+      - name: Check dependency conflicts
+        run: pipdeptree -f -w silence
 
   unit-tests:
     name: Unit Tests
@@ -114,12 +129,12 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -127,13 +142,13 @@ jobs:
           key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-python-
-          
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
           pip install pytest-cov --no-cache-dir
-          
+
       - name: Run Unit Tests
         run: python -m pytest tests/unit/ -v --tb=short -W error::RuntimeWarning
 
@@ -143,12 +158,12 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -156,12 +171,12 @@ jobs:
           key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-python-
-          
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
-          
+
       - name: Run Integration Tests
         run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py
 
@@ -171,12 +186,12 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -184,16 +199,16 @@ jobs:
           key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-python-
-          
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
           pip install pytest-cov --no-cache-dir
-          
+
       - name: Run Governance Tests
         run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning --cov=src/governance --cov-report=xml --cov-fail-under=70
-      
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v5
         with:
@@ -207,25 +222,26 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Install security tools
         run: |
-          pip install bandit pip-audit safety
-          
+          pip install --upgrade pip --no-cache-dir
+          pip install bandit pip-audit safety --no-cache-dir
+
       - name: Run Bandit Security Scan
-        run: bandit -r src/ -f json -o security_scan.json --exit-zero
-        
+        run: bandit -r src/ -f json -o security_scan.json
+
       - name: Run pip-audit Dependency Scan
-        run: pip-audit -f json -o dependency_scan.json || true
-        
+        run: pip-audit -f json -o dependency_scan.json
+
       - name: Run Safety Dependency Scan
-        run: safety check --json --output safety_scan.json || true
-        
+        run: safety check --json --output safety_scan.json
+
       - name: Upload Security Reports
         uses: actions/upload-artifact@v5
         with:
@@ -242,25 +258,34 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Install build tools
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install build --no-cache-dir
-          
+
       - name: Build package
         run: python -m build --sdist --wheel .
-        
+
       - name: Verify build artifacts
         run: |
           echo "=== Build Artifacts ==="
           ls -la dist/
-          
+          if [ -z "$(ls -A dist/)" ]; then
+            echo "❌ No build artifacts found"
+            exit 1
+          fi
+
+      - name: Install from built package
+        run: |
+          pip install --no-cache-dir dist/*.whl
+          python -c "import testai; print(f'✅ Package installed successfully: {testai.__name__}')"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
@@ -274,15 +299,17 @@ jobs:
     needs: build-validation
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Check Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t testai:ci .
+
+      - name: Verify Docker image
         run: |
-          if [ -f Dockerfile ]; then
-            echo "✅ Dockerfile found"
-            head -20 Dockerfile
-          else
-            echo "⚠️ No Dockerfile found, skipping Docker build"
-          fi
+          docker image inspect testai:ci | grep -q "testai:ci"
+          echo "✅ Docker image built successfully"
 
   environment-check:
     name: Environment Check
@@ -290,29 +317,34 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Check Python version
         run: |
           python --version
           python -c "import sys; print(f'Python version: {sys.version}')"
-          
+          if ! python -c "import sys; assert sys.version_info >= (3,10), 'Python version too old'" 2>/dev/null; then
+            echo "❌ Python version check failed"
+            exit 1
+          fi
+
       - name: Check environment variables
         run: |
           echo "=== Environment Variables ==="
           echo "CI: ${CI}"
           echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
           echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
-          
+
       - name: Verify network connectivity
         run: |
           echo "=== Network Connectivity ==="
           curl -s -o /dev/null -w "GitHub: %{http_code}\n" https://github.com
           curl -s -o /dev/null -w "PyPI: %{http_code}\n" https://pypi.org
+          curl -s -o /dev/null -w "DeepSeek: %{http_code}\n" https://api.deepseek.com
 
   quality-gate:
     name: Quality Gate
@@ -320,18 +352,18 @@ jobs:
     needs: [config-validation, lint, dependency-check, unit-tests, integration-tests, governance-tests, security-scan, build-validation, docker-build, environment-check]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Download coverage reports
         uses: actions/download-artifact@v5
         with:
           name: governance-coverage-report
           path: reports/
-          
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Check coverage threshold
         run: |
           if [ ! -f reports/coverage.xml ]; then
@@ -346,13 +378,15 @@ jobs:
           print(f'{line_rate * 100:.1f}')
           ")
           echo "Coverage: $coverage_percent%"
-          if (( $(echo "$coverage_percent < 70" | bc -l) )); then
-            echo "❌ Coverage $coverage_percent% below 70% threshold"
-            exit 1
-          else
-            echo "✅ Coverage meets threshold"
-          fi
-          
+          python -c "
+          coverage_percent = float('$coverage_percent')
+          if coverage_percent < 70:
+              print(f'❌ Coverage {coverage_percent}% below 70% threshold')
+              exit(1)
+          else:
+              print('✅ Coverage meets threshold')
+          "
+
       - name: Quality Gate Summary
         run: |
           echo "=== Quality Gate Summary ==="
@@ -368,7 +402,7 @@ jobs:
           echo "🐳 Docker Build: Passed"
           echo "🌐 Environment Check: Passed"
           echo "📈 Coverage: Passed"
-          
+
       - name: Post to GitHub Summary
         run: |
           echo "## TestAI Quality Gate Summary" >> $GITHUB_STEP_SUMMARY
