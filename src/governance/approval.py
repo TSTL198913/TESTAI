@@ -60,12 +60,16 @@ class ApprovalRecord:
 class ApprovalManager:
     _instance = None
     _lock = threading.RLock()
+    _approvals: Dict[str, ApprovalRecord] = {}
+    _db_path: Path = Path("data/governance.db")
+    _db_lock: threading.Lock = threading.Lock()
+    _logger = logging.getLogger("ApprovalManager")
 
     def __new__(cls, db_path: str = "data/governance.db"):
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
-                cls._instance._approvals: Dict[str, ApprovalRecord] = {}
+                cls._instance._approvals = {}
                 cls._instance._db_path = Path(db_path)
                 cls._instance._db_lock = threading.Lock()
                 cls._instance._init_db()
@@ -75,7 +79,6 @@ class ApprovalManager:
     def __init__(self, db_path: str = "data/governance.db"):
         if hasattr(self, "_initialized"):
             return
-        self._logger = logging.getLogger("ApprovalManager")
         self._initialized = True
 
     def _init_db(self):

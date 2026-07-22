@@ -32,7 +32,7 @@ class DashboardService:
         metrics = health_monitor.get_metrics()
 
         pending_approvals = approval_manager.list_pending()
-        unacknowledged_alerts = alert_manager.get_alerts_unacknowledged()
+        unacknowledged_alerts = alert_manager.get_alerts(acknowledged=False)
 
         recent_metrics = self._quality_metrics[-1] if self._quality_metrics else {}
 

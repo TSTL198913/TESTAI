@@ -10,6 +10,7 @@ import portalocker
 class FileLockManager:
     _instance = None
     _lock = threading.Lock()
+    _active_locks: dict = {}
 
     def __new__(cls):
         if cls._instance is None:

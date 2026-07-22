@@ -19,6 +19,9 @@ class ProcessInfo:
 class ProcessManager:
     _instance = None
     _lock = threading.RLock()
+    _processes: dict = {}
+    _monitor_thread: Optional[threading.Thread] = None
+    _running: bool = False
 
     def __new__(cls):
         with cls._lock:
@@ -116,7 +119,8 @@ class ProcessManager:
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(1)
                 if self._is_process_alive(pid):
-                    os.kill(pid, signal.SIGKILL)
+                    kill_signal = getattr(signal, "SIGKILL", signal.SIGTERM)
+                    os.kill(pid, kill_signal)
             return True
         except Exception:
             return False

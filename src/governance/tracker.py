@@ -43,6 +43,9 @@ class TrackingEvent:
 class GovernanceTracker:
     _instance = None
     _lock = threading.RLock()
+    _events: List[TrackingEvent] = []
+    _db_path: Path = Path("data/governance.db")
+    _db_lock: threading.Lock = threading.Lock()
 
     def __new__(cls, db_path: str = "data/governance.db"):
         if cls._instance is None:

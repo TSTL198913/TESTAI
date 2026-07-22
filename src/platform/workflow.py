@@ -322,7 +322,7 @@ class WorkflowEngine:
             status = health_monitor.get_health_status()
             return {"status": "completed", "health_status": status}
         elif action == "record_metrics":
-            health_monitor.record_diagnosis_success()
+            health_monitor.record_diagnosis(success=True)
             return {"status": "completed", "action": "metrics_recorded"}
         elif action == "create_alert":
             alert_manager.create_alert(
