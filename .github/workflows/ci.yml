@@ -264,19 +264,18 @@ jobs:
       - name: Run Bandit Security Scan with Threshold
         run: |
           bandit -r src/ -f json -o bandit_report.json || true
+          max_issues=${MAX_BANDIT_ISSUES:-35}
           python -c "
           import json
-          import os
           try:
               data = json.load(open('bandit_report.json'))
           except:
               data = {'results': []}
           issue_count = len(data.get('results', []))
-          max_issues = int(os.environ.get('MAX_BANDIT_ISSUES', '35'))
           print(f'Bandit: {issue_count} issues found')
           
-          if issue_count > max_issues:
-              print(f'❌ Bandit issues ({issue_count}) exceed threshold ({max_issues})')
+          if issue_count > $max_issues:
+              print(f'❌ Bandit issues ({issue_count}) exceed threshold ($max_issues)')
               exit(1)
           else:
               print('✅ Bandit within threshold')
