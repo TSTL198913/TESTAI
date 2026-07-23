@@ -352,7 +352,7 @@ jobs:
           python -c "from src.governance import agent; print('✅ Package installed successfully')"
 
       - name: Install Syft for SBOM
-        uses: anchore/sbom-action/download-syft@v0.16.0
+        uses: anchore/sbom-action/download-syft@v0.24.0
 
       - name: Generate SBOM for Wheel Package
         run: |
@@ -399,7 +399,7 @@ jobs:
           echo "✅ Docker image built successfully"
 
       - name: Install Syft for SBOM
-        uses: anchore/sbom-action/download-syft@v0.16.0
+        uses: anchore/sbom-action/download-syft@v0.24.0
 
       - name: Generate SBOM for Docker Image
         run: |
