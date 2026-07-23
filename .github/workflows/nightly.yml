@@ -160,7 +160,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: nightly-coverage-report
           path: reports/
