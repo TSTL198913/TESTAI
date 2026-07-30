@@ -1,3 +1,4 @@
+import ast
 import json
 import logging
 import os
@@ -5,6 +6,22 @@ from contextlib import contextmanager
 from typing import Optional, Dict, Any
 
 from src.governance.agent import AIGovernanceAgent
+
+
+class _ClassCollector(ast.NodeVisitor):
+    """AST visitor that collects class names from source code.
+    
+    Used for analyzing class structures during governance flow.
+    """
+
+    def __init__(self):
+        self.class_names = set()
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        self.class_names.add(node.name)
+        self.generic_visit(node)
+
+
 from src.governance.approval import ApprovalManager, ApprovalStatus
 from src.governance.executor import GovernanceExecutor
 from src.governance.git_manager import GitTransactionManager
