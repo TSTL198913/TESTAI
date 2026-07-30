@@ -68,5 +68,9 @@ apps/server/dist/
 apps/server/build/
 apps/server/*.egg-info/
 
+# Node.js dependencies (Root level)
+node_modules/
+node_modules/testai-web/node_modules/
+
 # Turborepo
 .turbo/
