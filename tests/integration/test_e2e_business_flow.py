@@ -70,8 +70,9 @@ class TestE2EWorkflowGovernanceFlow:
         response = client.get(f"/workflow/{instance_id}/status", headers=admin_headers)
         assert response.status_code == 200
         status_data = response.json()
-        assert status_data["instance_id"] == instance_id
-        assert status_data["workflow_id"] == workflow_id
+        status = status_data.get("data", status_data)
+        assert status["instance_id"] == instance_id
+        assert status["workflow_id"] == workflow_id
 
         response = client.post(
             "/governance/execute",
@@ -119,7 +120,16 @@ class TestE2EWorkflowGovernanceFlow:
         验证点：
         1. 同一工作流不应有多个RUNNING实例
         2. 重复执行应返回错误提示
+
+        说明：execute_workflow 当前为同步执行，单线程 TestClient 环境下无法产生
+        真正的并发调用。因此先执行一次工作流（同步完成），再手动将实例状态标记
+        为 RUNNING 以模拟"工作流正在执行中"的并发前置条件，然后验证幂等性守卫
+        正确拦截第二次执行请求。此测试验证的是 WorkflowEngine 中的 RUNNING 状态
+        检查逻辑，而非 HTTP 层的并发调度。
         """
+        from src.platform.api import workflow_engine
+        from src.platform.workflow import WorkflowStatus
+
         workflow_name = f"幂等性测试_{uuid.uuid4().hex[:8]}"
 
         response = client.post(
@@ -136,9 +146,18 @@ class TestE2EWorkflowGovernanceFlow:
         assert response.status_code == 200
         workflow_id = response.json()["data"]["workflow_id"]
 
+        # 第一次执行（同步完成）
         response = client.post(f"/workflow/{workflow_id}/execute", headers=admin_headers)
         assert response.status_code == 200
+        first_result = response.json()
+        assert first_result["success"] is True
+        instance_id = first_result["data"]["instance_id"]
 
+        # 手动将实例状态标记为 RUNNING，模拟工作流正在执行中的并发场景
+        with workflow_engine._lock:
+            workflow_engine.instances[instance_id].status = WorkflowStatus.RUNNING
+
+        # 再次执行应被幂等性守卫拦截
         response = client.post(f"/workflow/{workflow_id}/execute", headers=admin_headers)
         assert response.status_code == 200
         result = response.json()
@@ -355,7 +374,8 @@ class TestE2ETeamManagementFlow:
         assert len(members_data["data"]["members"]) > 0
         assert any(m["username"] == "admin" for m in members_data["data"]["members"])
 
-        response = client.delete(f"/teams/{team_id}/members/admin", headers=admin_headers)
+        # 删除成员端点路径参数为 user_id（"1"），而非 username（"admin"）
+        response = client.delete(f"/teams/{team_id}/members/1", headers=admin_headers)
         assert response.status_code == 200
 
         response = client.delete(f"/teams/{team_id}", headers=admin_headers)

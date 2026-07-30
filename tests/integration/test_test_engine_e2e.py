@@ -22,7 +22,8 @@ class TestTestEngineAPI:
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert "total_tests" in data
         assert "passed_tests" in data
         assert "failed_tests" in data
@@ -41,7 +42,8 @@ class TestTestEngineAPI:
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["total_tests"] == 0
         assert data["passed_tests"] == 0
         assert data["failed_tests"] == 0
@@ -59,7 +61,8 @@ class TestTestEngineAPI:
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["total_tests"] == 2
 
     def test_execute_test_cases_unauthorized(self, client):
@@ -80,7 +83,8 @@ class TestTestEngineAPI:
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["total_tests"] == 1
 
     def test_generate_test_cases(self, client, auth_headers):
@@ -93,8 +97,9 @@ class TestTestEngineAPI:
         }
         response = client.post("/test/generate", json=spec, headers=auth_headers)
         assert response.status_code == 200
-        data = response.json()
-        assert "success" in data
+        resp = response.json()
+        assert "success" in resp
+        data = resp.get("data", resp)
         assert "total_generated" in data
         assert "test_cases" in data
 
@@ -113,7 +118,8 @@ class TestDiagnoseAPI:
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["workflow_id"] == "wf-001"
         assert "issues" in data
         assert "insights" in data
@@ -136,7 +142,8 @@ class TestDiagnoseAPI:
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["workflow_id"] == "wf-001"
         assert len(data["issues"]) >= 0
 
@@ -153,7 +160,8 @@ def login(username, password):
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["workflow_id"] == "wf-001"
 
     def test_diagnose_workflow_with_code_and_results(self, client, auth_headers):
@@ -172,7 +180,8 @@ def process_data(data):
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         assert data["workflow_id"] == "wf-001"
         assert "issues" in data
 
@@ -187,7 +196,8 @@ def process_data(data):
             headers=auth_headers,
         )
         assert response.status_code == 200
-        data = response.json()
+        resp = response.json()
+        data = resp.get("data", resp)
         for insight in data.get("insights", []):
             assert "title" in insight
             assert "description" in insight
@@ -211,7 +221,8 @@ class TestTestEngineEndToEnd:
             headers=auth_headers,
         )
         assert execute_response.status_code == 200
-        execute_data = execute_response.json()
+        execute_resp = execute_response.json()
+        execute_data = execute_resp.get("data", execute_resp)
 
         test_results = {
             "failures": [
@@ -231,7 +242,8 @@ class TestTestEngineEndToEnd:
             headers=auth_headers,
         )
         assert diagnose_response.status_code == 200
-        diagnose_data = diagnose_response.json()
+        diagnose_resp = diagnose_response.json()
+        diagnose_data = diagnose_resp.get("data", diagnose_resp)
         assert diagnose_data["workflow_id"] == "wf-e2e-test"
 
     def test_generate_and_execute_flow(self, client, auth_headers):
@@ -244,7 +256,8 @@ class TestTestEngineEndToEnd:
         }
         generate_response = client.post("/test/generate", json=spec, headers=auth_headers)
         assert generate_response.status_code == 200
-        generate_data = generate_response.json()
+        generate_resp = generate_response.json()
+        generate_data = generate_resp.get("data", generate_resp)
 
         if generate_data["total_generated"] > 0:
             test_cases = [

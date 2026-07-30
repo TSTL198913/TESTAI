@@ -88,11 +88,11 @@ class TestMongoDBFallback:
     def test_sqlite_repository_implements_protocol(self):
         """验证 SQLiteResultRepository 实现了 RepositoryProtocol 接口。"""
         repo = SQLiteResultRepository.__new__(SQLiteResultRepository)
-        
-        # 验证实现了必要的接口方法
-        assert hasattr(repo, '__aenter__'), "Should implement __aenter__"
-        assert hasattr(repo, '__aexit__'), "Should implement __aexit__"
-        assert hasattr(repo, 'save_execution'), "Should implement save_execution"
+
+        # 验证实现了必要的接口方法且可调用
+        assert callable(getattr(repo, '__aenter__', None)), "Should implement __aenter__"
+        assert callable(getattr(repo, '__aexit__', None)), "Should implement __aexit__"
+        assert callable(getattr(repo, 'save_execution', None)), "Should implement save_execution"
     
     def test_fallback_is_thread_safe(self):
         """验证 fallback 机制在并发环境下是线程安全的。"""
@@ -167,11 +167,11 @@ class TestSQLiteResultRepositoryDirectly:
     def test_sqlite_repository_interface(self):
         """验证 SQLiteResultRepository 实现了必要的接口方法。"""
         repo = SQLiteResultRepository.__new__(SQLiteResultRepository)
-        
-        # 验证方法存在
-        assert hasattr(repo, '__aenter__'), "Should have __aenter__"
-        assert hasattr(repo, '__aexit__'), "Should have __aexit__"
-        assert hasattr(repo, 'save_execution'), "Should have save_execution"
+
+        # 验证方法存在且可调用
+        assert callable(getattr(repo, '__aenter__', None)), "Should have __aenter__"
+        assert callable(getattr(repo, '__aexit__', None)), "Should have __aexit__"
+        assert callable(getattr(repo, 'save_execution', None)), "Should have save_execution"
     
     def test_sqlite_repository_aenter_aexit_protocol(self):
         """验证 SQLiteResultRepository 的上下文管理器协议。"""
