@@ -13,9 +13,16 @@
     python tests/utils/auto_mutation_gate.py --test tests/governance/test_xxx.py
 """
 import argparse
+import io
 import os
+import shutil
 import sys
 import subprocess
+
+# Windows GBK 编码兼容:强制 stdout/stderr 使用 UTF-8
+# 否则 emoji 字符（✅❌⏭️）会触发 UnicodeEncodeError
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 
 # 不适合变异测试的目录（无直接对应源码）
@@ -38,9 +45,14 @@ def _normalize_path(path: str) -> str:
 def _should_skip(test_file: str) -> bool:
     """判断测试文件是否应跳过变异测试。"""
     normalized = _normalize_path(test_file)
+    # 跳过不适合变异测试的目录
     for skip_dir in SKIP_DIRS:
         if normalized.startswith(skip_dir):
             return True
+    # 跳过非测试文件（不以 test_ 开头的 Python 文件是工具脚本，不是测试）
+    basename = os.path.basename(test_file)
+    if not basename.startswith('test_'):
+        return True
     return False
 
 
@@ -49,6 +61,9 @@ def _verify_test_collectable(test_file: str) -> bool:
 
     如果测试文件有语法错误或导入错误，pytest 收集阶段就会失败，
     无需运行完整变异测试即可发现问题。
+
+    返回值: True=可收集(通过), False=收集失败(不通过)
+    "无测试收集"(exit 0 但 0 tests)视为跳过而非失败。
     """
     try:
         result = subprocess.run(
@@ -59,8 +74,13 @@ def _verify_test_collectable(test_file: str) -> bool:
             cwd=os.getcwd(),
         )
         if result.returncode == 0:
+            # 检查是否有实际收集到测试（避免工具脚本被误判）
+            stdout = result.stdout or ''
+            if 'no tests collected' in stdout:
+                print(f"⏭️  跳过: {test_file} (无测试用例，可能是工具脚本)")
+                return True  # 跳过而非失败
             return True
-        # 收集失败，输出错误信息
+        # 收集失败（语法错误/导入错误），输出错误信息
         print(f"❌ 测试收集失败: {test_file}")
         print(result.stderr[:500] if result.stderr else result.stdout[:500])
         return False
@@ -165,5 +185,4 @@ class AutoMutationGate:
 
 
 if __name__ == '__main__':
-    import shutil  # noqa: E402 - used by AutoMutationGate.restore_all
     main()
