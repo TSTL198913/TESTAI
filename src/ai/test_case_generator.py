@@ -157,11 +157,17 @@ class TestCaseGenerator:
         )
 
     def _generate_api_test_cases(self, endpoint: Dict[str, Any]) -> List[GeneratedTestCase]:
+        """P0-3 Fix: Add preconditions and data fields to generated API test cases."""
         cases = []
         method = endpoint.get("method", "GET")
         path = endpoint.get("path", "/")
         params = endpoint.get("params", [])
         body = endpoint.get("body", {})
+        
+        base_preconditions = [
+            f"API服务已启动并可访问",
+            f"接口 {method} {path} 已注册",
+        ]
         
         cases.append(GeneratedTestCase(
             id=f"api_{method.lower()}_{path.replace('/', '_')}_success",
@@ -181,6 +187,12 @@ class TestCaseGenerator:
             ],
             priority="high",
             tags=["api", "positive"],
+            preconditions=base_preconditions,
+            data={
+                "method": method,
+                "path": path,
+                "params": [p.get("name", "") for p in params],
+            },
         ))
         
         cases.append(GeneratedTestCase(
@@ -200,6 +212,12 @@ class TestCaseGenerator:
             ],
             priority="medium",
             tags=["api", "negative"],
+            preconditions=base_preconditions,
+            data={
+                "method": method,
+                "path": path,
+                "invalid_params": True,
+            },
         ))
         
         if params:
@@ -221,22 +239,32 @@ class TestCaseGenerator:
                     ],
                     priority="medium",
                     tags=["api", "negative"],
+                    preconditions=base_preconditions,
+                    data={
+                        "method": method,
+                        "path": path,
+                        "missing_param": param['name'],
+                    },
                 ))
         
         return cases
 
     def _generate_unit_test_cases(self, spec: Dict[str, Any]) -> List[GeneratedTestCase]:
+        """P0-3 Fix: Add preconditions and data fields to generated unit test cases."""
         cases = []
         functions = spec.get("functions", [])
         
         for func in functions:
+            func_name = func.get('name', '')
+            func_params = func.get('params', [])
+            
             cases.append(GeneratedTestCase(
-                id=f"unit_{func.get('name', '')}_normal",
-                name=f"{func.get('name', '')} - 正常参数",
+                id=f"unit_{func_name}_normal",
+                name=f"{func_name} - 正常参数",
                 type=TestCaseType.UNIT,
-                description=f"测试{func.get('name', '')}函数的正常参数",
+                description=f"测试{func_name}函数的正常参数",
                 steps=[
-                    f"调用{func.get('name', '')}函数",
+                    f"调用{func_name}函数",
                     "传入有效参数",
                     "验证返回值",
                 ],
@@ -246,15 +274,22 @@ class TestCaseGenerator:
                 ],
                 priority="high",
                 tags=["unit", "positive"],
+                preconditions=[
+                    f"函数{func_name}已定义且可访问",
+                    "依赖模块已正确导入",
+                ],
+                data={
+                    "params": [{"name": p, "type": "valid"} for p in func_params],
+                },
             ))
             
             cases.append(GeneratedTestCase(
-                id=f"unit_{func.get('name', '')}_invalid",
-                name=f"{func.get('name', '')} - 无效参数",
+                id=f"unit_{func_name}_invalid",
+                name=f"{func_name} - 无效参数",
                 type=TestCaseType.UNIT,
-                description=f"测试{func.get('name', '')}函数的无效参数",
+                description=f"测试{func_name}函数的无效参数",
                 steps=[
-                    f"调用{func.get('name', '')}函数",
+                    f"调用{func_name}函数",
                     "传入无效参数",
                     "验证错误处理",
                 ],
@@ -264,20 +299,29 @@ class TestCaseGenerator:
                 ],
                 priority="medium",
                 tags=["unit", "negative"],
+                preconditions=[
+                    f"函数{func_name}已定义且可访问",
+                    "依赖模块已正确导入",
+                ],
+                data={
+                    "params": [{"name": p, "type": "invalid"} for p in func_params],
+                },
             ))
         
         return cases
 
     def _generate_ui_test_cases(self, spec: Dict[str, Any]) -> List[GeneratedTestCase]:
+        """P0-3 Fix: Add preconditions and data fields to generated UI test cases."""
         cases = []
         pages = spec.get("pages", [])
         
         for page in pages:
+            page_name = page.get('name', 'UnknownPage')
             cases.append(GeneratedTestCase(
-                id=f"ui_{page.get('name', '')}_load",
-                name=f"{page.get('name', '')} - 页面加载",
+                id=f"ui_{page_name}_load",
+                name=f"{page_name} - 页面加载",
                 type=TestCaseType.UI,
-                description=f"测试{page.get('name', '')}页面加载",
+                description=f"测试{page_name}页面加载",
                 steps=[
                     "导航到页面",
                     "等待页面加载完成",
@@ -290,6 +334,15 @@ class TestCaseGenerator:
                 ],
                 priority="high",
                 tags=["ui", "positive"],
+                preconditions=[
+                    "浏览器已启动",
+                    f"应用已部署且可访问",
+                    f"用户已登录（如需）",
+                ],
+                data={
+                    "page_name": page_name,
+                    "url": f"/{page_name.lower()}",
+                },
             ))
         
         return cases
