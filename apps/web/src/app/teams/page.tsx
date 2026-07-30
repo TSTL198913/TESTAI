@@ -19,7 +19,8 @@ import Layout from '../../components/Layout';
 import { teamApi } from '../../lib/api';
 
 interface Team {
-  id: string;
+  team_id: string;
+  id?: string;
   name: string;
   description?: string;
   created_at?: string;
@@ -34,7 +35,6 @@ interface Member {
 }
 
 export default function TeamsPage() {
-  const [token, setToken] = useState<string>('');
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -54,24 +54,20 @@ export default function TeamsPage() {
   const [memberError, setMemberError] = useState('');
 
   useEffect(() => {
-    const stored = localStorage.getItem('token') || '';
-    setToken(stored);
-    if (!stored) {
+    const user = localStorage.getItem('user');
+    if (!user) {
       setError('未检测到登录凭证，请先登录');
       setLoading(false);
+      return;
     }
+    fetchTeams();
   }, []);
-
-  useEffect(() => {
-    if (token) fetchTeams();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
 
   const fetchTeams = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await teamApi.list(token);
+      const res = await teamApi.list();
       const list = res.data?.teams || res.data?.items || res.data || [];
       setTeams(Array.isArray(list) ? list : []);
     } catch (err: any) {
@@ -120,9 +116,9 @@ export default function TeamsPage() {
         description: teamForm.description.trim(),
       };
       if (editingTeam) {
-        await teamApi.update(token, editingTeam.id, payload);
+        await teamApi.update(editingTeam.team_id, payload);
       } else {
-        await teamApi.create(token, payload);
+        await teamApi.create(payload);
       }
       closeTeamModal();
       await fetchTeams();
@@ -138,7 +134,7 @@ export default function TeamsPage() {
   const handleDelete = async (team: Team) => {
     if (!confirm(`确认删除团队 ${team.name}？此操作不可恢复。`)) return;
     try {
-      await teamApi.delete(token, team.id);
+      await teamApi.delete(team.team_id);
       await fetchTeams();
     } catch (err: any) {
       const detail =
@@ -152,7 +148,7 @@ export default function TeamsPage() {
     setMembersModalOpen(true);
     setMemberForm({ user_id: '', role: 'member' });
     setMemberError('');
-    await fetchMembers(team.id);
+    await fetchMembers(team.team_id);
   };
 
   const closeMembersModal = () => {
@@ -166,7 +162,7 @@ export default function TeamsPage() {
     setMembersLoading(true);
     setMemberError('');
     try {
-      const res = await teamApi.getMembers(token, teamId);
+      const res = await teamApi.getMembers(teamId);
       const list = res.data?.members || res.data?.items || res.data || [];
       setMembers(Array.isArray(list) ? list : []);
     } catch (err: any) {
@@ -188,12 +184,13 @@ export default function TeamsPage() {
     }
     setMemberSubmitting(true);
     try {
-      await teamApi.addMember(token, currentTeam.id, {
+      await teamApi.addMember(currentTeam!.team_id, {
         user_id: memberForm.user_id.trim(),
+        username: '',
         role: memberForm.role,
       });
       setMemberForm({ user_id: '', role: 'member' });
-      await fetchMembers(currentTeam.id);
+      await fetchMembers(currentTeam!.team_id);
     } catch (err: any) {
       const detail =
         err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
@@ -207,8 +204,8 @@ export default function TeamsPage() {
     if (!currentTeam) return;
     if (!confirm(`确认将成员 ${member.username} 移出团队？`)) return;
     try {
-      await teamApi.removeMember(token, currentTeam.id, member.id);
-      await fetchMembers(currentTeam.id);
+      await teamApi.removeMember(currentTeam.team_id, member.id);
+      await fetchMembers(currentTeam.team_id);
     } catch (err: any) {
       const detail =
         err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
@@ -245,7 +242,7 @@ export default function TeamsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {teams.map((team) => (
               <div
-                key={team.id}
+                key={team.team_id}
                 className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col"
               >
                 <div className="flex items-start justify-between mb-4">

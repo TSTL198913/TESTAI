@@ -150,3 +150,144 @@ class TestTokenManager:
         
         viewer = manager.users["viewer"]
         assert viewer.role == Role.VIEWER
+
+
+# ============================================================================
+# P0-5/P0-7: 生产环境安全强化测试（新增）
+# ============================================================================
+
+import importlib
+import logging
+import sys
+
+
+def _reload_auth_module():
+    """重新加载 src.security.auth 模块以应用环境变量变更。"""
+    for mod in list(sys.modules.keys()):
+        if mod == "src.security.auth":
+            del sys.modules[mod]
+    return importlib.import_module("src.security.auth")
+
+
+# ============ P0-7: JWT 密钥生产强制 ============
+
+def test_secret_key_required_in_production(monkeypatch):
+    """生产环境无 SECRET_KEY 时 TokenManager 初始化必须抛 ValueError。"""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.delenv("JWT_SECRET_KEY", raising=False)
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+
+    with pytest.raises(ValueError, match="SECRET_KEY"):
+        TokenManager_cls()
+
+
+def test_secret_key_short_key_rejected(monkeypatch):
+    """短密钥(<32 字节)必须被拒绝。"""
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    short_key = "a" * 16  # 16 字节,低于 32 字节阈值
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+
+    with pytest.raises(ValueError, match="32 bytes"):
+        TokenManager_cls(secret_key=short_key)
+
+
+def test_secret_key_dev_fallback_allowed(monkeypatch, caplog):
+    """开发模式无 SECRET_KEY 时允许生成临时密钥 + 警告日志。"""
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.delenv("JWT_SECRET_KEY", raising=False)
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+
+    with caplog.at_level(logging.WARNING):
+        mgr = TokenManager_cls()
+    # 临时密钥应已生成(64 字符 hex = 32 字节)
+    assert len(mgr.secret_key) >= 64
+    # 必须有警告日志
+    assert any("SECRET_KEY" in record.message for record in caplog.records), (
+        "开发模式生成临时密钥时必须输出警告日志"
+    )
+
+
+def test_secret_key_from_env(monkeypatch):
+    """SECRET_KEY 环境变量正确读取。"""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    strong_key = "a" * 64  # 64 字节,超过 32 字节阈值
+    monkeypatch.setenv("SECRET_KEY", strong_key)
+    monkeypatch.setenv("DEFAULT_USER_PASSWORD", "ProdPass123!")
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+    mgr = TokenManager_cls()
+    assert mgr.secret_key == strong_key
+
+
+def test_jwt_secret_key_alias(monkeypatch):
+    """JWT_SECRET_KEY 作为 SECRET_KEY 的别名。"""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    strong_key = "b" * 64
+    monkeypatch.setenv("JWT_SECRET_KEY", strong_key)
+    monkeypatch.setenv("DEFAULT_USER_PASSWORD", "ProdPass123!")
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+    mgr = TokenManager_cls()
+    assert mgr.secret_key == strong_key
+
+
+# ============ P0-5: 默认密码生产强制 ============
+
+def test_default_password_required_in_production(monkeypatch):
+    """生产环境无 DEFAULT_USER_PASSWORD 时初始化必须抛 ValueError。"""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.delenv("DEFAULT_USER_PASSWORD", raising=False)
+    # 提供强 SECRET_KEY 以通过密钥校验
+    monkeypatch.setenv("SECRET_KEY", "a" * 64)
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+
+    with pytest.raises(ValueError, match="DEFAULT_USER_PASSWORD"):
+        TokenManager_cls()
+
+
+def test_default_password_from_env(monkeypatch):
+    """DEFAULT_USER_PASSWORD 环境变量生效,可用该密码登录。"""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.setenv("SECRET_KEY", "a" * 64)
+    custom_password = "StrongProdPass123!"
+    monkeypatch.setenv("DEFAULT_USER_PASSWORD", custom_password)
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+    mgr = TokenManager_cls()
+
+    # 用环境变量中的密码应可认证 admin 用户
+    user = mgr.authenticate("admin", custom_password)
+    assert user is not None, (
+        f"使用 DEFAULT_USER_PASSWORD='{custom_password}' 应可登录 admin, "
+        f"实际 authenticate 返回 None"
+    )
+    assert user.username == "admin"
+
+
+def test_default_password_dev_fallback(monkeypatch):
+    """开发模式无 DEFAULT_USER_PASSWORD 时使用 'password' 默认。"""
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    monkeypatch.delenv("DEFAULT_USER_PASSWORD", raising=False)
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+
+    auth_module = _reload_auth_module()
+    TokenManager_cls = auth_module.TokenManager
+    mgr = TokenManager_cls()
+
+    # 开发默认 'password' 应可登录
+    user = mgr.authenticate("admin", "password")
+    assert user is not None, "开发模式 'password' 默认密码应可登录"
+    assert user.username == "admin"

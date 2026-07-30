@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, Any
 
 from src.core.context import ExecutionContext
 from src.engine.processor.base import BaseProcessor
@@ -10,10 +10,9 @@ class DataProcessor(BaseProcessor):
     def __init__(self, strict: bool = True):
         super().__init__()
         self.strict = strict
-        self._strategies = {
+        self._strategies: Dict[str, Callable[..., Any]] = {
             "http": self._process_http,
             "grpc": self._process_grpc,
-            # 未来只需在此处注册： "graphql": self._process_graphql
         }
 
     # 【新增】：统一获取环境上下文

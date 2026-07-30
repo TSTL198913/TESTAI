@@ -44,3 +44,5 @@ class GovernanceProcessor(BaseProcessor):
 
             insight = await self.engine.execute_governance_flow(diagnostic_context)
             context.results[step.step_id]["governance_insight"] = insight
+
+        return step

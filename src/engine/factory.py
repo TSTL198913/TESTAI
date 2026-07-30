@@ -21,9 +21,11 @@ class StepFactory:
             # 1. 如果有嵌套结构（如 'http' 键），优先提取内部数据
             # 假设 transformer 返回的是 {'protocol': 'http', 'http': {...}}
             if protocol in raw_step and isinstance(raw_step[protocol], dict):
-                data_to_validate = raw_step[protocol]
+                data_to_validate = raw_step[protocol].copy()
+                if "step_id" in raw_step:
+                    data_to_validate["step_id"] = raw_step["step_id"]
             else:
-                data_to_validate = raw_step
+                data_to_validate = raw_step.copy()
 
             # 2. 注入协议字段，满足 Pydantic 校验需求
             data_to_validate["protocol"] = protocol

@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import stat
+import threading
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -33,7 +35,19 @@ class UserProfile:
 
 
 class UserManager:
-    def __init__(self, storage_path: str = None, use_database: bool = None):
+    _instance = None
+    _lock = threading.RLock()
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._instance._initialized = False
+            return cls._instance
+
+    def __init__(self, storage_path: Optional[str] = None, use_database: Optional[bool] = None):
+        if self._initialized:
+            return
         self.storage_path = storage_path or os.environ.get(
             "USER_STORAGE_PATH", "data/users.json"
         )
@@ -52,6 +66,7 @@ class UserManager:
 
         self._load_users()
         self._initialize_default_users()
+        self._initialized = True
 
     def _load_users(self):
         if self._use_database and self._db:
@@ -78,6 +93,8 @@ class UserManager:
                 logger.warning(f"Database load failed, using JSON: {e}")
 
         if os.path.exists(self.storage_path):
+            # 加载前校验文件权限(防止敏感凭证文件被其他用户读取)
+            self._enforce_file_permissions(self.storage_path, is_write=False)
             try:
                 with open(self.storage_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -100,6 +117,35 @@ class UserManager:
                         )
             except Exception:
                 self.users = {}
+
+    def _enforce_file_permissions(self, path: str, is_write: bool = False) -> None:
+        """校验/设置密码文件权限。
+
+        - 读取前(is_write=False):若文件权限过松(非 owner 可读),抛 PermissionError
+        - 写入后(is_write=True):设置文件权限为 0o600(仅 owner 可读写)
+        - Windows 环境跳过权限校验(ACL 模型不同)
+        """
+        if os.name == "nt":
+            logger.debug(
+                f"Windows environment, skipping permission check for {path}"
+            )
+            return
+
+        if not is_write:
+            # 读取前校验:已存在文件权限必须严格
+            if os.path.exists(path):
+                file_stat = os.stat(path)
+                mode = stat.S_IMODE(file_stat.st_mode)
+                # 检查 group/other 是否有任何权限(0o077 掩码)
+                if mode & 0o077:
+                    raise PermissionError(
+                        f"Password file {path} has overly permissive mode "
+                        f"{oct(mode)}: group/other can access. Required: 0o600"
+                    )
+        else:
+            # 写入后设置严格权限
+            if os.path.exists(path):
+                os.chmod(path, 0o600)
 
     def _save_users(self):
         if self._use_database and self._db:
@@ -125,9 +171,11 @@ class UserManager:
             }
         with open(self.storage_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+        # 写入后设置严格权限(仅 owner 可读写)
+        self._enforce_file_permissions(self.storage_path, is_write=True)
 
     def _initialize_default_users(self):
-        if not self.users:
+        if not any(u.username == "admin" for u in self.users.values()):
             self.create_user(
                 username="admin",
                 email="admin@testai.local",
@@ -135,6 +183,7 @@ class UserManager:
                 full_name="系统管理员",
                 department="技术部",
             )
+        if not any(u.username == "tester" for u in self.users.values()):
             self.create_user(
                 username="tester",
                 email="tester@testai.local",
@@ -142,6 +191,7 @@ class UserManager:
                 full_name="测试工程师",
                 department="测试部",
             )
+        if not any(u.username == "viewer" for u in self.users.values()):
             self.create_user(
                 username="viewer",
                 email="viewer@testai.local",
@@ -160,59 +210,63 @@ class UserManager:
         status: UserStatus = UserStatus.ACTIVE,
         password: str = "",  # nosec B107
     ) -> UserProfile:
-        if username in [u.username for u in self.users.values()]:
-            raise ValueError(f"Username '{username}' already exists")
-        if email in [u.email for u in self.users.values()]:
-            raise ValueError(f"Email '{email}' already exists")
+        with self._lock:
+            if username in [u.username for u in self.users.values()]:
+                raise ValueError(f"Username '{username}' already exists")
+            if email in [u.email for u in self.users.values()]:
+                raise ValueError(f"Email '{email}' already exists")
 
-        user_id = f"user_{len(self.users) + 1:04d}"
-        password_hash = PasswordHasher.hash_password(password) if password else ""
-        user = UserProfile(
-            user_id=user_id,
-            username=username,
-            email=email,
-            role=role,
-            status=status,
-            full_name=full_name,
-            department=department,
-            created_at=datetime.now(),
-            password_hash=password_hash,
-        )
-        self.users[user_id] = user
+            user_id = f"user_{len(self.users) + 1:04d}"
+            password_hash = PasswordHasher.hash_password(password) if password else ""
+            user = UserProfile(
+                user_id=user_id,
+                username=username,
+                email=email,
+                role=role,
+                status=status,
+                full_name=full_name,
+                department=department,
+                created_at=datetime.now(),
+                password_hash=password_hash,
+            )
+            self.users[user_id] = user
 
-        if self._use_database and self._db:
-            self._db.insert_one(self._db.users_table, {
-                "user_id": user.user_id,
-                "username": user.username,
-                "email": user.email,
-                "password_hash": password_hash,
-                "role": user.role.value,
-                "status": user.status.value,
-                "full_name": user.full_name,
-                "department": user.department,
-                "avatar_url": user.avatar_url,
-                "created_at": user.created_at,
-                "last_login_at": user.last_login_at,
-                "metadata": user.metadata,
-            })
-        else:
-            self._save_users()
-        return user
+            if self._use_database and self._db:
+                self._db.insert_one(self._db.users_table, {
+                    "user_id": user.user_id,
+                    "username": user.username,
+                    "email": user.email,
+                    "password_hash": password_hash,
+                    "role": user.role.value,
+                    "status": user.status.value,
+                    "full_name": user.full_name,
+                    "department": user.department,
+                    "avatar_url": user.avatar_url,
+                    "created_at": user.created_at,
+                    "last_login_at": user.last_login_at,
+                    "metadata": user.metadata,
+                })
+            else:
+                self._save_users()
+            return user
 
     def get_user(self, user_id: str) -> Optional[UserProfile]:
-        return self.users.get(user_id)
+        with self._lock:
+            return self.users.get(user_id)
 
     def get_user_by_username(self, username: str) -> Optional[UserProfile]:
-        for user in self.users.values():
-            if user.username == username:
-                return user
-        return None
+        with self._lock:
+            for user in self.users.values():
+                if user.username == username:
+                    return user
+            return None
 
     def get_user_by_email(self, email: str) -> Optional[UserProfile]:
-        for user in self.users.values():
-            if user.email == email:
-                return user
-        return None
+        with self._lock:
+            for user in self.users.values():
+                if user.email == email:
+                    return user
+            return None
 
     def verify_password(self, username: str, password: str) -> bool:
         """验证用户密码"""
@@ -223,19 +277,20 @@ class UserManager:
 
     def set_password(self, user_id: str, password: str) -> bool:
         """设置用户密码"""
-        user = self.users.get(user_id)
-        if not user:
-            return False
-        user.password_hash = PasswordHasher.hash_password(password)
-        if self._use_database and self._db:
-            self._db.update_many(
-                self._db.users_table,
-                self._db.users_table.c.user_id == user_id,
-                {"password_hash": user.password_hash},
-            )
-        else:
-            self._save_users()
-        return True
+        with self._lock:
+            user = self.users.get(user_id)
+            if not user:
+                return False
+            user.password_hash = PasswordHasher.hash_password(password)
+            if self._use_database and self._db:
+                self._db.update_many(
+                    self._db.users_table,
+                    self._db.users_table.c.user_id == user_id,
+                    {"password_hash": user.password_hash},
+                )
+            else:
+                self._save_users()
+            return True
 
     def update_user(
         self,
@@ -249,66 +304,68 @@ class UserManager:
         avatar_url: Optional[str] = None,
         metadata: Optional[Dict] = None,
     ) -> Optional[UserProfile]:
-        user = self.users.get(user_id)
-        if not user:
-            return None
+        with self._lock:
+            user = self.users.get(user_id)
+            if not user:
+                return None
 
-        if username:
-            existing = self.get_user_by_username(username)
-            if existing and existing.user_id != user_id:
-                raise ValueError(f"Username '{username}' already exists")
-            user.username = username
+            if username:
+                existing = self.get_user_by_username(username)
+                if existing and existing.user_id != user_id:
+                    raise ValueError(f"Username '{username}' already exists")
+                user.username = username
 
-        if email:
-            existing = self.get_user_by_email(email)
-            if existing and existing.user_id != user_id:
-                raise ValueError(f"Email '{email}' already exists")
-            user.email = email
+            if email:
+                existing = self.get_user_by_email(email)
+                if existing and existing.user_id != user_id:
+                    raise ValueError(f"Email '{email}' already exists")
+                user.email = email
 
-        if role:
-            user.role = role
-        if status:
-            user.status = status
-        if full_name is not None:
-            user.full_name = full_name
-        if department is not None:
-            user.department = department
-        if avatar_url is not None:
-            user.avatar_url = avatar_url
-        if metadata is not None:
-            user.metadata = metadata
+            if role:
+                user.role = role
+            if status:
+                user.status = status
+            if full_name is not None:
+                user.full_name = full_name
+            if department is not None:
+                user.department = department
+            if avatar_url is not None:
+                user.avatar_url = avatar_url
+            if metadata is not None:
+                user.metadata = metadata
 
-        if self._use_database and self._db:
-            self._db.update_many(
-                self._db.users_table,
-                self._db.users_table.c.user_id == user_id,
-                {
-                    "username": user.username,
-                    "email": user.email,
-                    "role": user.role.value,
-                    "status": user.status.value,
-                    "full_name": user.full_name,
-                    "department": user.department,
-                    "avatar_url": user.avatar_url,
-                    "metadata": user.metadata,
-                },
-            )
-        else:
-            self._save_users()
-        return user
-
-    def delete_user(self, user_id: str) -> bool:
-        if user_id in self.users:
-            del self.users[user_id]
             if self._use_database and self._db:
-                self._db.delete_many(
+                self._db.update_many(
                     self._db.users_table,
                     self._db.users_table.c.user_id == user_id,
+                    {
+                        "username": user.username,
+                        "email": user.email,
+                        "role": user.role.value,
+                        "status": user.status.value,
+                        "full_name": user.full_name,
+                        "department": user.department,
+                        "avatar_url": user.avatar_url,
+                        "metadata": user.metadata,
+                    },
                 )
             else:
                 self._save_users()
-            return True
-        return False
+            return user
+
+    def delete_user(self, user_id: str) -> bool:
+        with self._lock:
+            if user_id in self.users:
+                del self.users[user_id]
+                if self._use_database and self._db:
+                    self._db.delete_many(
+                        self._db.users_table,
+                        self._db.users_table.c.user_id == user_id,
+                    )
+                else:
+                    self._save_users()
+                return True
+            return False
 
     def list_users(
         self,
@@ -316,29 +373,31 @@ class UserManager:
         status: Optional[UserStatus] = None,
         department: Optional[str] = None,
     ) -> List[UserProfile]:
-        filtered = []
-        for user in self.users.values():
-            if role and user.role != role:
-                continue
-            if status and user.status != status:
-                continue
-            if department and user.department != department:
-                continue
-            filtered.append(user)
-        return sorted(filtered, key=lambda u: u.created_at, reverse=True)
+        with self._lock:
+            filtered = []
+            for user in self.users.values():
+                if role and user.role != role:
+                    continue
+                if status and user.status != status:
+                    continue
+                if department and user.department != department:
+                    continue
+                filtered.append(user)
+            return sorted(filtered, key=lambda u: u.created_at, reverse=True)
 
     def update_last_login(self, user_id: str):
-        user = self.users.get(user_id)
-        if user:
-            user.last_login_at = datetime.now()
-            if self._use_database and self._db:
-                self._db.update_many(
-                    self._db.users_table,
-                    self._db.users_table.c.user_id == user_id,
-                    {"last_login_at": user.last_login_at},
-                )
-            else:
-                self._save_users()
+        with self._lock:
+            user = self.users.get(user_id)
+            if user:
+                user.last_login_at = datetime.now()
+                if self._use_database and self._db:
+                    self._db.update_many(
+                        self._db.users_table,
+                        self._db.users_table.c.user_id == user_id,
+                        {"last_login_at": user.last_login_at},
+                    )
+                else:
+                    self._save_users()
 
     def activate_user(self, user_id: str) -> Optional[UserProfile]:
         return self.update_user(user_id, status=UserStatus.ACTIVE)
@@ -350,13 +409,14 @@ class UserManager:
         return self.update_user(user_id, status=UserStatus.INACTIVE)
 
     def count_users(self) -> Dict[str, int]:
-        counts = {"total": len(self.users)}
-        for role in UserRole:
-            counts[f"role_{role.value}"] = sum(
-                1 for u in self.users.values() if u.role == role
-            )
-        for status in UserStatus:
-            counts[f"status_{status.value}"] = sum(
-                1 for u in self.users.values() if u.status == status
-            )
-        return counts
+        with self._lock:
+            counts = {"total": len(self.users)}
+            for role in UserRole:
+                counts[f"role_{role.value}"] = sum(
+                    1 for u in self.users.values() if u.role == role
+                )
+            for status in UserStatus:
+                counts[f"status_{status.value}"] = sum(
+                    1 for u in self.users.values() if u.status == status
+                )
+            return counts

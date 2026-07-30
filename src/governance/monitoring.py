@@ -139,6 +139,14 @@ class AlertManager:
         trace_id: Optional[str] = None,
         details: Optional[Dict] = None,
     ) -> AlertRecord:
+        if not message or not message.strip():
+            raise ValueError("消息不能为空")
+        if not component or not component.strip():
+            raise ValueError("组件不能为空")
+        valid_levels = {AlertLevel.INFO, AlertLevel.WARNING, AlertLevel.ERROR, AlertLevel.CRITICAL}
+        if level not in valid_levels:
+            raise ValueError(f"无效级别: {level}, 有效值: {valid_levels}")
+
         alert_id = f"alert-{int(time.time())}-{len(self._alerts) + 1}"
         alert = AlertRecord(
             alert_id=alert_id,
@@ -172,25 +180,31 @@ class AlertManager:
         except Exception as e:
             self._logger.warning(f"Failed to send webhook for alert {alert.alert_id}: {e}")
 
-    def acknowledge_alert(self, alert_id: str) -> bool:
+    def acknowledge_alert(self, alert_id: str, user_id: str = "") -> bool:
         with self._lock:
             for alert in self._alerts:
                 if alert.alert_id == alert_id:
                     alert.acknowledged = True
-                    self._logger.log("INFO", f"Alert acknowledged: {alert_id}")
+                    self._logger.log("INFO", f"Alert acknowledged by {user_id}: {alert_id}")
                     return True
+        self._logger.warning(f"Failed to acknowledge alert: {alert_id} (not found)")
         return False
 
     def get_alerts(
         self, level: Optional[str] = None, acknowledged: Optional[bool] = None
-    ) -> List[AlertRecord]:
+    ) -> List[Dict]:
+        if level:
+            valid_levels = {AlertLevel.INFO, AlertLevel.WARNING, AlertLevel.ERROR, AlertLevel.CRITICAL}
+            if level not in valid_levels:
+                raise ValueError(f"无效级别: {level}, 有效值: {valid_levels}")
+
         with self._lock:
             alerts = self._alerts.copy()
             if level:
                 alerts = [a for a in alerts if a.level == level]
             if acknowledged is not None:
                 alerts = [a for a in alerts if a.acknowledged == acknowledged]
-            return sorted(alerts, key=lambda x: x.created_at, reverse=True)
+            return [a.to_dict() for a in sorted(alerts, key=lambda x: x.created_at, reverse=True)]
 
     def get_alert_count(self, level: Optional[str] = None) -> int:
         alerts = self.get_alerts(level=level)

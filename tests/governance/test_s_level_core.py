@@ -21,18 +21,14 @@ from src.platform.workflow import WorkflowEngine, WorkflowDefinition, WorkflowTa
 from src.storage.database import get_db_manager, reset_db_manager
 
 
-@pytest.fixture(autouse=True)
-def setup_db():
-    reset_db_manager()
-    yield
-    reset_db_manager()
+
 
 
 class TestSLevelApprovalPersistence:
     """S级测试：审批管理数据持久化"""
 
-    def test_approval_crud_persistence(self):
-        manager = ApprovalManager(db_path=":memory:")
+    def test_approval_crud_persistence(self, tmp_path):
+        manager = ApprovalManager(db_path=str(tmp_path / "test_approval.db"))
         tx_id = "test_tx_001"
         proposal = PatchProposal(
             target_function="test_func",
@@ -61,8 +57,8 @@ class TestSLevelApprovalPersistence:
         assert fetched.status == ApprovalStatus.APPROVED
         assert fetched.approved_by == "admin"
 
-    def test_approval_expiry(self):
-        manager = ApprovalManager(db_path=":memory:")
+    def test_approval_expiry(self, tmp_path):
+        manager = ApprovalManager(db_path=str(tmp_path / "test_approval_expiry.db"))
         tx_id = "test_tx_002"
         proposal = PatchProposal(
             target_function="test_func",
@@ -87,8 +83,8 @@ class TestSLevelApprovalPersistence:
 class TestSLevelGovernanceTracker:
     """S级测试：治理追踪器"""
 
-    def test_tracker_event_persistence(self):
-        tracker = GovernanceTracker(db_path=":memory:")
+    def test_tracker_event_persistence(self, tmp_path):
+        tracker = GovernanceTracker(db_path=str(tmp_path / "test_tracker.db"))
         tracker.clear()
         trace_id = "test_trace_001"
 
@@ -106,8 +102,8 @@ class TestSLevelGovernanceTracker:
         assert summary["total_events"] == 3
         assert summary["by_action"]["diagnose_complete"] == 1
 
-    def test_tracker_thread_safety(self):
-        tracker = GovernanceTracker(db_path=":memory:")
+    def test_tracker_thread_safety(self, tmp_path):
+        tracker = GovernanceTracker(db_path=str(tmp_path / "test_tracker_thread.db"))
         tracker.clear()
         trace_id = "thread_test"
 
@@ -278,7 +274,6 @@ class TestSLevelTeamPersistence:
     def test_team_crud(self):
         os.environ["DATABASE_URL"] = "sqlite:///:memory:"
         manager = TeamManager(use_database=True)
-        manager.teams.clear()
 
         team = manager.create_team(name="Test Team", description="Test Description")
         assert team is not None
@@ -297,8 +292,8 @@ class TestSLevelTeamPersistence:
         del os.environ["DATABASE_URL"]
 
     def test_team_member_management(self):
-        manager = TeamManager()
-        manager.teams.clear()
+        os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+        manager = TeamManager(use_database=True)
         
         team = manager.create_team(name="Member Test Team", owner_id="user1", owner_username="user1")
 
@@ -323,6 +318,8 @@ class TestSLevelConfigPersistence:
 
     def test_config_crud(self):
         os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+        ConfigManager._instance = None
+        ConfigManager._initialized = False
         manager = ConfigManager()
 
         assert manager.get_section("platform") is not None
@@ -353,6 +350,8 @@ class TestSLevelWorkflowEngine:
 
     def test_workflow_definition_and_execution(self):
         os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+        WorkflowEngine._instance = None
+        WorkflowEngine._initialized = False
         engine = WorkflowEngine()
 
         definition = WorkflowDefinition(
@@ -604,8 +603,9 @@ class TestSLevelAPIEndpoints:
         response = client.get("/health")
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "healthy"
-        assert data["platform"] == "TestAI"
+        assert data["success"] is True
+        assert data["data"]["status"] == "healthy"
+        assert data["data"]["platform"] == "TestAI"
 
     def test_api_auth_login(self):
         from fastapi.testclient import TestClient
@@ -615,9 +615,10 @@ class TestSLevelAPIEndpoints:
         response = client.post("/auth/login", json={"username": "admin", "password": "password"})
         assert response.status_code == 200
         data = response.json()
-        assert "access_token" in data
-        assert "refresh_token" in data
-        assert data["user"]["username"] == "admin"
+        assert data["success"] is True
+        assert "access_token" in data["data"]
+        assert "refresh_token" in data["data"]
+        assert data["data"]["user"]["username"] == "admin"
 
 
 class TestSLevelWorkflowOrchestration:
@@ -804,8 +805,8 @@ class TestSLevelGoldenBaseline:
 class TestSLevelApprovalWorkflow:
     """S级测试：审批工作流核心功能"""
 
-    def test_approval_chain(self):
-        manager = ApprovalManager(db_path=":memory:")
+    def test_approval_chain(self, tmp_path):
+        manager = ApprovalManager(db_path=str(tmp_path / "test_approval_chain.db"))
         tx_id = "approval_chain_test"
 
         proposal = PatchProposal(
@@ -828,8 +829,8 @@ class TestSLevelApprovalWorkflow:
         record = manager.get_approval(tx_id)
         assert record.status == ApprovalStatus.APPROVED
 
-    def test_approval_rejection(self):
-        manager = ApprovalManager(db_path=":memory:")
+    def test_approval_rejection(self, tmp_path):
+        manager = ApprovalManager(db_path=str(tmp_path / "test_approval_rejection.db"))
         tx_id = "rejection_test"
 
         proposal = PatchProposal(

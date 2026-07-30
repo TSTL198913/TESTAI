@@ -1,17 +1,27 @@
 # src/governance/git_manager.py
 import logging
+import re
 import subprocess  # nosec B404
 import shutil
+import threading
 from typing import Optional
 
 GIT_PATH = shutil.which("git") or "git"
 
 
 class GitTransactionManager:
+    _branch_name_pattern = re.compile(r"[^a-zA-Z0-9_-]")
+
     def __init__(self, repo_path: str):
         self.repo_path = repo_path
         self.logger = logging.getLogger("GitTransaction")
         self.base_branch = self._detect_base_branch()
+        self._lock = threading.Lock()
+
+    def _sanitize_branch_name(self, tx_id: str) -> str:
+        sanitized = self._branch_name_pattern.sub("_", tx_id)
+        max_length = 64 - len("governance_")
+        return f"governance_{sanitized[:max_length]}"
 
     def _detect_base_branch(self) -> str:
         for branch in ["main", "master"]:
@@ -43,35 +53,38 @@ class GitTransactionManager:
             raise e
 
     def start_transaction(self, tx_id: str):
-        branch_name = f"governance_{tx_id}"
-        self._run(["git", "checkout", self.base_branch])
-        try:
-            result = subprocess.run(
-                [GIT_PATH, "show-ref", "--verify", f"refs/heads/{branch_name}"],
-                cwd=self.repo_path,
-                capture_output=True,
-            )  # nosec B603
-            if result.returncode == 0:
-                self._run(["git", "branch", "-D", branch_name])
-        except Exception as e:
-            self.logger.warning(
-                f"Failed to check/clean existing branch {branch_name}: {e}"
-            )
-        self._run(["git", "checkout", "-b", branch_name])
+        with self._lock:
+            branch_name = self._sanitize_branch_name(tx_id)
+            self._run(["git", "checkout", self.base_branch])
+            try:
+                result = subprocess.run(
+                    [GIT_PATH, "show-ref", "--verify", f"refs/heads/{branch_name}"],
+                    cwd=self.repo_path,
+                    capture_output=True,
+                )  # nosec B603
+                if result.returncode == 0:
+                    self._run(["git", "branch", "-D", branch_name])
+            except Exception as e:
+                self.logger.warning(
+                    f"Failed to check/clean existing branch {branch_name}: {e}"
+                )
+            self._run(["git", "checkout", "-b", branch_name])
 
     def commit(self, message: str):
-        self._run(["git", "add", "."])
-        self._run(["git", "commit", "-m", message])
+        with self._lock:
+            self._run(["git", "add", "."])
+            self._run(["git", "commit", "-m", message])
 
     def rollback(self, tx_id: str):
         """回滚并清理现场"""
-        try:
-            self._run(["git", "checkout", self.base_branch])
+        with self._lock:
             try:
-                self._run(["git", "branch", "-D", f"governance_{tx_id}"])
+                self._run(["git", "checkout", self.base_branch])
+                try:
+                    self._run(["git", "branch", "-D", f"governance_{tx_id}"])
+                except Exception as e:
+                    self.logger.debug(f"Branch governance_{tx_id} does not exist or cannot be deleted: {e}")
+                self.logger.info(f"Transaction {tx_id} rolled back successfully.")
             except Exception as e:
-                self.logger.debug(f"Branch governance_{tx_id} does not exist or cannot be deleted: {e}")
-            self.logger.info(f"Transaction {tx_id} rolled back successfully.")
-        except Exception as e:
-            self.logger.critical(f"FATAL: Rollback failed for {tx_id}: {e}")
-            raise
+                self.logger.critical(f"FATAL: Rollback failed for {tx_id}: {e}")
+                raise

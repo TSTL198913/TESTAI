@@ -20,10 +20,12 @@ class Permission(str, Enum):
     DEFINE_WORKFLOW = "define_workflow"
     EXECUTE_WORKFLOW = "execute_workflow"
     VIEW_WORKFLOW = "view_workflow"
+    MANAGE_WORKFLOW = "manage_workflow"
     MANAGE_USERS = "manage_users"
     VIEW_USERS = "view_users"
     MANAGE_TEAMS = "manage_teams"
     VIEW_TEAMS = "view_teams"
+    RUN_TEST = "run_test"
 
 
 ROLE_PERMISSIONS: Dict[Role, List[Permission]] = {
@@ -43,10 +45,12 @@ ROLE_PERMISSIONS: Dict[Role, List[Permission]] = {
         Permission.DEFINE_WORKFLOW,
         Permission.EXECUTE_WORKFLOW,
         Permission.VIEW_WORKFLOW,
+        Permission.MANAGE_WORKFLOW,
         Permission.MANAGE_USERS,
         Permission.VIEW_USERS,
         Permission.MANAGE_TEAMS,
         Permission.VIEW_TEAMS,
+        Permission.RUN_TEST,
     ],
     Role.TESTER: [
         Permission.VIEW_HEALTH,
@@ -60,8 +64,10 @@ ROLE_PERMISSIONS: Dict[Role, List[Permission]] = {
         Permission.DEFINE_WORKFLOW,
         Permission.EXECUTE_WORKFLOW,
         Permission.VIEW_WORKFLOW,
+        Permission.MANAGE_WORKFLOW,
         Permission.VIEW_USERS,
         Permission.VIEW_TEAMS,
+        Permission.RUN_TEST,
     ],
     Role.VIEWER: [
         Permission.VIEW_HEALTH,
@@ -95,16 +101,16 @@ class PermissionManager:
         self.role_permissions = ROLE_PERMISSIONS
 
     def has_permission(self, user: User, permission: Permission) -> bool:
-        if user.role not in self.role_permissions:
+        if user is None or user.role not in self.role_permissions:
             return False
         return permission in self.role_permissions[user.role]
 
     def check_permission(self, user: User, permission: Permission) -> PermissionCheckResult:
-        if user.role not in self.role_permissions:
+        if user is None or user.role not in self.role_permissions:
             return PermissionCheckResult(
                 allowed=False,
                 required_permission=permission,
-                user_role=user.role,
+                user_role=None,
                 missing_permissions=[permission],
             )
         
@@ -123,13 +129,15 @@ class PermissionManager:
         )
 
     def get_user_permissions(self, user: User) -> List[Permission]:
+        if user is None:
+            return []
         return self.role_permissions.get(user.role, [])
 
     def is_admin(self, user: User) -> bool:
-        return user.role == Role.ADMIN
+        return user is not None and user.role == Role.ADMIN
 
     def is_tester(self, user: User) -> bool:
-        return user.role == Role.TESTER or user.role == Role.ADMIN
+        return user is not None and (user.role == Role.TESTER or user.role == Role.ADMIN)
 
     def is_viewer(self, user: User) -> bool:
-        return user.role in [Role.VIEWER, Role.TESTER, Role.ADMIN]
+        return user is not None and user.role in [Role.VIEWER, Role.TESTER, Role.ADMIN]

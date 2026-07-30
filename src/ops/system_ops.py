@@ -74,23 +74,30 @@ class SystemOperations:
             try:
                 with open(self.audit_log_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    for log_data in data:
-                        self.audit_logs.append(
-                            AuditLog(
-                                log_id=log_data["log_id"],
-                                user_id=log_data["user_id"],
-                                username=log_data["username"],
-                                action=AuditAction(log_data["action"]),
-                                resource=AuditResource(log_data["resource"]),
-                                resource_id=log_data.get("resource_id", ""),
-                                details=log_data.get("details", {}),
-                                timestamp=datetime.fromisoformat(log_data["timestamp"]),
-                                success=log_data.get("success", True),
-                                error_message=log_data.get("error_message", ""),
+                    for idx, log_data in enumerate(data):
+                        try:
+                            self.audit_logs.append(
+                                AuditLog(
+                                    log_id=log_data["log_id"],
+                                    user_id=log_data["user_id"],
+                                    username=log_data["username"],
+                                    action=AuditAction(log_data["action"].lower()),
+                                    resource=AuditResource(log_data["resource"].lower()),
+                                    resource_id=log_data.get("resource_id", ""),
+                                    details=log_data.get("details", {}),
+                                    timestamp=datetime.fromisoformat(log_data["timestamp"]),
+                                    success=log_data.get("success", True),
+                                    error_message=log_data.get("error_message", ""),
+                                )
                             )
-                        )
-            except Exception:
-                self.audit_logs = []
+                        except (KeyError, ValueError) as e:
+                            import logging
+                            logging.getLogger(__name__).warning(
+                                f"Skipping corrupted audit log at index {idx}: {e}"
+                            )
+            except (json.JSONDecodeError, OSError) as e:
+                import logging
+                logging.getLogger(__name__).error(f"Failed to load audit logs: {e}")
 
     def _save_audit_logs(self):
         os.makedirs(os.path.dirname(self.audit_log_path), exist_ok=True)
@@ -119,17 +126,24 @@ class SystemOperations:
                 with open(self.config_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     for key, config_data in data.items():
-                        self.configs[key] = SystemConfig(
-                            key=key,
-                            value=config_data["value"],
-                            description=config_data.get("description", ""),
-                            category=config_data.get("category", "general"),
-                            editable=config_data.get("editable", True),
-                            created_at=datetime.fromisoformat(config_data["created_at"]),
-                            updated_at=datetime.fromisoformat(config_data["updated_at"]),
-                        )
-            except Exception:
-                self.configs = {}
+                        try:
+                            self.configs[key] = SystemConfig(
+                                key=key,
+                                value=config_data["value"],
+                                description=config_data.get("description", ""),
+                                category=config_data.get("category", "general"),
+                                editable=config_data.get("editable", True),
+                                created_at=datetime.fromisoformat(config_data["created_at"]),
+                                updated_at=datetime.fromisoformat(config_data["updated_at"]),
+                            )
+                        except (KeyError, ValueError) as e:
+                            import logging
+                            logging.getLogger(__name__).warning(
+                                f"Skipping corrupted config '{key}': {e}"
+                            )
+            except (json.JSONDecodeError, OSError) as e:
+                import logging
+                logging.getLogger(__name__).error(f"Failed to load configs: {e}")
 
     def _save_configs(self):
         os.makedirs(os.path.dirname(self.config_path), exist_ok=True)

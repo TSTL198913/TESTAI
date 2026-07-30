@@ -1,0 +1,29 @@
+{
+  "team_0001": {
+    "team_id": "team_0001",
+    "name": "技术委员会",
+    "description": "负责技术决策和架构评审",
+    "members": [],
+    "created_at": "2026-07-25T12:24:53.141403",
+    "updated_at": "2026-07-25T12:24:53.141403",
+    "metadata": {}
+  },
+  "team_0002": {
+    "team_id": "team_0002",
+    "name": "测试团队",
+    "description": "负责测试用例设计和执行",
+    "members": [],
+    "created_at": "2026-07-25T12:24:53.142401",
+    "updated_at": "2026-07-25T12:24:53.142401",
+    "metadata": {}
+  },
+  "team_0003": {
+    "team_id": "team_0003",
+    "name": "运维团队",
+    "description": "负责系统运维和部署",
+    "members": [],
+    "created_at": "2026-07-25T12:24:53.151424",
+    "updated_at": "2026-07-25T12:24:53.151424",
+    "metadata": {}
+  }
+}

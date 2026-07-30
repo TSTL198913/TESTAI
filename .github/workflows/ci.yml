@@ -157,13 +157,17 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11']
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
 
       - name: Cache Python dependencies
         uses: actions/cache@v4
@@ -180,7 +184,7 @@ jobs:
           pip install pytest-cov --no-cache-dir
 
       - name: Run Unit Tests
-        run: python -m pytest tests/unit/ -v --tb=short -W error::RuntimeWarning
+        run: python -m pytest tests/platform/ tests/security/ -v --tb=short -W error::RuntimeWarning
 
   integration-tests:
     name: Integration Tests (Fast Track)
@@ -244,6 +248,84 @@ jobs:
         with:
           name: governance-coverage-report
           path: coverage.xml
+          retention-days: 7
+
+  ai-tests:
+    name: AI Module Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest-cov --no-cache-dir
+
+      - name: Run AI Module Tests
+        run: python -m pytest tests/ai/ -v --tb=short -W error::RuntimeWarning --cov=src/ai --cov-report=xml --cov-fail-under=70
+
+      - name: Upload AI coverage report
+        uses: actions/upload-artifact@v5
+        with:
+          name: ai-coverage-report
+          path: coverage.xml
+          retention-days: 7
+
+  ui-tests:
+    name: UI Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run UI Tests
+        run: python -m pytest tests/ui/ -v --tb=short
+        env:
+          BASE_URL: ${{ secrets.BASE_URL || 'http://localhost:3000' }}
+
+      - name: Upload UI test artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: ui-test-artifacts
+          path: |
+            test-results/
+            screenshots/
           retention-days: 7
 
   security-scan:
@@ -463,7 +545,7 @@ jobs:
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
-    needs: [config-validation, lint, unit-tests, integration-tests, governance-tests, security-scan, build-validation, docker-build, environment-check]
+    needs: [config-validation, lint, unit-tests, integration-tests, governance-tests, ai-tests, ui-tests, security-scan, build-validation, docker-build, environment-check]
     steps:
       - uses: actions/checkout@v4
 
@@ -501,6 +583,22 @@ jobs:
               print('✅ Coverage meets threshold')
           "
 
+      - name: Verify Mutation Test Result Authority
+        run: |
+          echo "=== Mutation Result Authority Check ==="
+          if [ -f tests/utils/all_modules_mutation_results.json ]; then
+            echo "⚠️  Checking if all_modules_mutation_results.json has _meta disclaimer..."
+            has_meta=$(grep -c '_meta' tests/utils/all_modules_mutation_results.json || true)
+            if [ "$has_meta" -eq 0 ]; then
+              echo "❌ all_modules_mutation_results.json missing _meta disclaimer - result non-authoritative"
+              echo "   This file must contain '_meta' field stating: '非权威结果，以 direct_mutation_results.json 为准'"
+              exit(1)
+            else
+              echo "✅ _meta disclaimer present"
+            fi
+          fi
+          echo "✅ Mutation result check passed (or file not found)"
+
       - name: Quality Gate Summary
         run: |
           echo "=== Quality Gate Summary ==="
@@ -510,6 +608,7 @@ jobs:
           echo "🧪 Unit Tests: Passed"
           echo "🔗 Integration Tests (Fast Track): Passed"
           echo "🏛️ Governance Tests: Passed"
+          echo "🤖 AI Module Tests: Passed"
           echo "🛡️ Security Scan: Passed"
           echo "📦 Build Validation with SBOM: Passed"
           echo "🐳 Docker Build with Signing: Passed"
@@ -525,6 +624,7 @@ jobs:
           echo "- Unit Tests: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Integration Tests (Fast Track): ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Governance Tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- AI Module Tests: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Security Scan: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Build Validation with SBOM: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Docker Build with Signing: ✅" >> $GITHUB_STEP_SUMMARY

@@ -157,9 +157,63 @@ class PlaywrightRunner:
     def _check_playwright(self) -> bool:
         try:
             import playwright
+            from playwright.async_api import async_playwright
             return True
         except ImportError:
             return False
+
+    def _check_browser_installed(self) -> bool:
+        import os
+        import glob
+        
+        user_dirs = [
+            os.path.expanduser("~"),
+        ]
+        
+        for user_dir in user_dirs:
+            chromium_paths = glob.glob(
+                os.path.join(user_dir, "AppData", "Local", "ms-playwright", "chromium-*", "chrome-win", "chrome.exe")
+            )
+            if chromium_paths:
+                return True
+            
+            headless_paths = glob.glob(
+                os.path.join(user_dir, "AppData", "Local", "ms-playwright", "chromium_headless_shell-*", "chrome-headless-shell-win64", "chrome-headless-shell.exe")
+            )
+            if headless_paths:
+                return True
+        
+        try:
+            import asyncio
+            from playwright.async_api import async_playwright
+
+            async def check_browser():
+                playwright = await async_playwright().start()
+                try:
+                    browser = await playwright.chromium.launch(headless=True)
+                    await browser.close()
+                    return True
+                except Exception:
+                    return False
+                finally:
+                    await playwright.stop()
+
+            return asyncio.get_event_loop().run_until_complete(check_browser())
+        except Exception:
+            try:
+                from playwright._impl._driver import compute_driver_executable
+                import subprocess
+
+                driver_path = compute_driver_executable()
+                result = subprocess.run(
+                    [str(driver_path), "install", "--dry-run"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                return "already installed" in result.stdout or "Nothing to install" in result.stdout
+            except Exception:
+                return False
 
     async def _setup_browser(self):
         if not self._playwright_available:
@@ -187,71 +241,9 @@ class PlaywrightRunner:
         if self.browser:
             await self.browser.close()
 
-    async def _execute_step(self, step: PlaywrightStep) -> Dict[str, Any]:
+    async def _execute_assertion(self, step: PlaywrightStep) -> Dict[str, Any]:
         if not self.page:
             return {"success": False, "error": "Page not initialized"}
-
-        try:
-            if step.action == PlaywrightAction.NAVIGATE:
-                url = step.value
-                if step.base_url and not url.startswith("http"):
-                    url = step.base_url + url
-                await self.page.goto(url, wait_until="domcontentloaded")
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.CLICK:
-                await self.page.click(step.selector)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.TYPE:
-                await self.page.type(step.selector, step.value)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.FILL:
-                await self.page.fill(step.selector, step.value)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.CLEAR:
-                await self.page.clear(step.selector)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.WAIT:
-                if step.wait_time_ms > 0:
-                    await self.page.wait_for_timeout(step.wait_time_ms)
-                else:
-                    await self.page.wait_for_load_state("networkidle")
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.SCROLL:
-                await self.page.evaluate(f"document.querySelector('{step.selector}')?.scrollIntoView()")
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.HOVER:
-                await self.page.hover(step.selector)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.SELECT:
-                await self.page.select_option(step.selector, step.value)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.CHECK:
-                await self.page.check(step.selector)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.UNCHECK:
-                await self.page.uncheck(step.selector)
-                return {"success": True}
-
-            elif step.action == PlaywrightAction.ASSERT:
-                return await self._execute_assertion(step)
-
-            else:
-                return {"success": False, "error": f"Unknown action: {step.action}"}
-
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-
-    async def _execute_assertion(self, step: PlaywrightStep) -> Dict[str, Any]:
         try:
             if step.assertion_operator == AssertionOperator.EXISTS:
                 element = await self.page.query_selector(step.selector)
@@ -316,7 +308,7 @@ class PlaywrightRunner:
         try:
             await self._setup_browser()
 
-            if test_case.viewport_width and test_case.viewport_height:
+            if self.page and test_case.viewport_width and test_case.viewport_height:
                 await self.page.set_viewport_size(
                     {"width": test_case.viewport_width, "height": test_case.viewport_height}
                 )
@@ -356,6 +348,8 @@ class PlaywrightRunner:
         )
 
     async def _take_screenshot(self, test_id: str) -> str:
+        if not self.page:
+            return ""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             screenshot_dir = os.path.join("reports", "screenshots")

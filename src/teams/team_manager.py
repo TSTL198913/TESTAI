@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import threading
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -36,7 +37,20 @@ class Team:
 
 
 class TeamManager:
+    _instance = None
+    _lock = threading.RLock()
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._instance._initialized = False
+            return cls._instance
+
     def __init__(self, storage_path: Optional[str] = None, use_database: Optional[bool] = None):
+        if self._initialized:
+            return
+        import threading
         self.storage_path = storage_path or os.environ.get(
             "TEAM_STORAGE_PATH", "data/teams.json"
         )
@@ -53,6 +67,24 @@ class TeamManager:
                 logger.warning(f"Database not available, falling back to JSON: {e}")
                 self._use_database = False
         self._load_teams()
+        self._initialize_default_teams()
+        self._initialized = True
+
+    def _initialize_default_teams(self):
+        if len(self.teams) == 0:
+            self.create_team(
+                name="技术委员会",
+                description="负责技术决策和架构评审",
+            )
+            self.create_team(
+                name="测试团队",
+                description="负责测试用例设计和执行",
+            )
+            self.create_team(
+                name="运维团队",
+                description="负责系统运维和部署",
+            )
+            logger.info("Initialized default teams")
 
     def _load_teams(self):
         if self._use_database and self._db:
@@ -265,15 +297,12 @@ class TeamManager:
             if member.user_id == user_id:
                 raise ValueError(f"User '{username}' is already a member")
 
-        team.members.append(
-            TeamMember(
-                user_id=user_id,
-                username=username,
-                role=role,
-                joined_at=datetime.now(),
-            )
+        new_member = TeamMember(
+            user_id=user_id,
+            username=username,
+            role=role,
+            joined_at=datetime.now(),
         )
-        team.updated_at = datetime.now()
 
         if self._use_database and self._db:
             self._db.insert_one(self._db.team_members_table, {
@@ -281,14 +310,18 @@ class TeamManager:
                 "user_id": user_id,
                 "username": username,
                 "role": role.value,
-                "joined_at": datetime.now(),
+                "joined_at": new_member.joined_at,
             })
             self._db.update_many(
                 self._db.teams_table,
                 self._db.teams_table.c.team_id == team_id,
-                {"updated_at": team.updated_at},
+                {"updated_at": new_member.joined_at},
             )
-        else:
+
+        team.members.append(new_member)
+        team.updated_at = new_member.joined_at
+
+        if not self._use_database:
             self._save_teams()
         return team
 

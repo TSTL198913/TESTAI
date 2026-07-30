@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 
@@ -46,6 +46,8 @@ class GovernanceTracker:
     _events: List[TrackingEvent] = []
     _db_path: Path = Path("data/governance.db")
     _db_lock: threading.Lock = threading.Lock()
+    _consecutive_convergence_count = 0
+    _consecutive_convergence_threshold = 3
 
     def __new__(cls, db_path: str = "data/governance.db"):
         if cls._instance is None:
@@ -177,11 +179,28 @@ class GovernanceTracker:
 
         with self._lock:
             self._events.append(event)
+            
+            if action_type == GovernanceActionType.CONVERGED:
+                self._consecutive_convergence_count += 1
+                if self._consecutive_convergence_count >= self._consecutive_convergence_threshold:
+                    logging.info(
+                        f"[TRACKER] Reached {self._consecutive_convergence_count} consecutive convergences - SYSTEM CONVERGED"
+                    )
+            elif action_type == GovernanceActionType.DIVERGED:
+                self._consecutive_convergence_count = 0
 
         self._save_to_db(event)
         logging.info(
-            f"[TRACKER] {action_type.value} | trace={trace_id} | component={component} | status={status}"
+            f"[TRACKER] {action_type.value} | trace={trace_id} | component={component} | status={status} | consecutive_convergences={self._consecutive_convergence_count}"
         )
+    
+    def get_consecutive_convergence_count(self) -> int:
+        with self._lock:
+            return self._consecutive_convergence_count
+    
+    def reset_consecutive_convergence_count(self):
+        with self._lock:
+            self._consecutive_convergence_count = 0
 
     def get_events_by_trace(self, trace_id: str) -> List[TrackingEvent]:
         with self._lock:
@@ -207,13 +226,13 @@ class GovernanceTracker:
         with self._lock:
             return self._events[-limit:]
 
-    def get_summary(self, trace_id: str = None) -> Dict:
+    def get_summary(self, trace_id: Optional[str] = None) -> Dict[str, Any]:
         with self._lock:
             events = (
                 self._events if trace_id is None else self.get_events_by_trace(trace_id)
             )
 
-        stats = {
+        stats: Dict[str, Any] = {
             "total_events": len(events),
             "by_action": {},
             "by_component": {},
@@ -259,7 +278,7 @@ class GovernanceTracker:
             conn.commit()
             conn.close()
 
-    def export_events(self, trace_id: str = None) -> List[Dict]:
+    def export_events(self, trace_id: Optional[str] = None) -> List[Dict[str, Any]]:
         with self._lock:
             events = (
                 self._events if trace_id is None else self.get_events_by_trace(trace_id)

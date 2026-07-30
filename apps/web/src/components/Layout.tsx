@@ -41,7 +41,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             {sidebarOpen && (
               <div>
-                <h1 className="text-lg font-bold">TestAI</h1>
+                <h1 data-testid="dashboard-title" className="text-lg font-bold">TestAI</h1>
                 <p className="text-xs text-slate-400">AI 测试平台</p>
               </div>
             )}

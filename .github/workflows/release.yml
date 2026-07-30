@@ -11,94 +11,218 @@ permissions:
   issues: write
 
 jobs:
-  release:
+  pre-release-validation:
+    name: Pre-Release Validation
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    - name: Cache Python dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-python-
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest pytest-cov pytest-asyncio --no-cache-dir
 
-    - name: Build package
-      run: |
-        python -m build
+      - name: Validate version tag matches pyproject.toml
+        id: validate-version
+        run: |
+          TAG_VERSION=${{ github.ref_name }}
+          TOML_VERSION=$(grep '^version' pyproject.toml | cut -d'"' -f2)
+          if [ "v${TOML_VERSION}" != "${TAG_VERSION}" ]; then
+            echo "❌ Version mismatch: tag=${TAG_VERSION}, pyproject.toml=v${TOML_VERSION}"
+            exit 1
+          else
+            echo "✅ Version match: ${TAG_VERSION}"
+          fi
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Run Release Validation Tests
+        run: |
+          python -m pytest tests/governance/ tests/platform/ tests/ai/ -v --tb=short -W error::RuntimeWarning --cov=src --cov-report=xml --cov-fail-under=70
 
-    - name: Log in to GHCR
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload validation coverage
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-validation-coverage
+          path: coverage.xml
+          retention-days: 3
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ github.repository }}
-        tags: |
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
-          type=sha,prefix=,suffix=,format=short
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.ref }}
-        name: Release ${{ github.ref_name }}
-        draft: false
-        prerelease: false
-        body: |
-          ## What's Changed
+      - name: Install security tools
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install bandit safety --no-cache-dir
 
-          See [CHANGELOG.md](CHANGELOG.md) for details.
+      - name: Run Bandit Security Scan
+        run: |
+          bandit -r src/ -f json -o bandit_report.json || true
+          python -c "
+          import json
+          data = json.load(open('bandit_report.json'))
+          if len(data.get('results', [])) > 0:
+              print('❌ Security vulnerabilities found')
+              exit(1)
+          else:
+              print('✅ Bandit scan passed')
+          "
 
-          ## Docker Images
+      - name: Run Safety Dependency Scan
+        run: |
+          safety check --json --output safety_report.json || true
+          python -c "
+          import json
+          import os
+          try:
+              data = json.load(open('safety_report.json'))
+          except:
+              data = {'vulnerabilities': []}
+          if len(data.get('vulnerabilities', [])) > 3:
+              print('❌ Safety vulnerabilities exceed threshold')
+              exit(1)
+          else:
+              print('✅ Safety scan passed')
+          "
 
-          ```bash
-          docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          ```
+  build-validation:
+    name: Build Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-          ## Installation
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-          ```bash
-          pip install testai==${{ github.ref_name }}
-          ```
+      - name: Install build tools
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install build --no-cache-dir
 
-    - name: Upload release artifacts
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          dist/testai-${{ github.ref_name }}.tar.gz
-          dist/testai-${{ github.ref_name }}.whl
+      - name: Build package
+        id: build-package
+        run: |
+          python -m build --sdist --wheel .
+          echo "✅ Package built successfully"
+
+      - name: Verify build artifacts
+        run: |
+          ls -la dist/
+          if [ -z "$(ls -A dist/)" ]; then
+            echo "❌ No build artifacts found"
+            exit 1
+          fi
+
+      - name: Install from built package
+        run: |
+          pip install --no-cache-dir dist/*.whl
+          python -c "from src.governance import agent; print('✅ Package installed successfully')"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-build-artifacts
+          path: dist/
+          retention-days: 7
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [pre-release-validation, security-scan, build-validation]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: release-build-artifacts
+          path: dist/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=,suffix=,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            ## What's Changed
+
+            See [CHANGELOG.md](CHANGELOG.md) for details.
+
+            ## Docker Images
+
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ```
+
+            ## Installation
+
+            ```bash
+            pip install testai==${{ github.ref_name }}
+            ```
+
+      - name: Upload release artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/testai-${{ github.ref_name }}.tar.gz
+            dist/testai-${{ github.ref_name }}.whl

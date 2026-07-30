@@ -187,13 +187,18 @@ class TestSecurityValidation:
         assert valid is False
 
     def test_validate_path_returns_true_for_valid_path(self):
-        validator = SecurePathValidator()
-        valid, msg = validator.validate_path("/src/governance/transformer.py")
-        assert valid is True
+        # 使用项目根下 src/ 子目录的合法绝对路径
+        project_root = os.path.abspath(".")
+        validator = SecurePathValidator(project_root=project_root)
+        valid_path = os.path.join(project_root, "src", "governance", "transformer.py")
+        valid, msg = validator.validate_path(valid_path)
+        assert valid is True, f"合法路径应通过校验: {valid_path}, msg={msg}"
 
     def test_is_sandboxed(self):
-        validator = SecurePathValidator()
-        assert validator.is_sandboxed("/src/governance/transformer.py") is True
+        project_root = os.path.abspath(".")
+        validator = SecurePathValidator(project_root=project_root)
+        valid_path = os.path.join(project_root, "src", "governance", "transformer.py")
+        assert validator.is_sandboxed(valid_path) is True
         assert validator.is_sandboxed("../../etc/passwd") is False
 
     def test_sanitize_path(self):

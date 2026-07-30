@@ -88,7 +88,7 @@ class TestAlertManager:
         alert = manager.create_alert(AlertLevel.WARNING, "Test", "test")
         alerts = manager.get_alerts()
         assert len(alerts) >= 1
-        assert any(a.alert_id == alert.alert_id for a in alerts)
+        assert any(a["alert_id"] == alert.alert_id for a in alerts)
 
     def test_get_alerts_by_level(self):
         manager = AlertManager()
@@ -104,7 +104,7 @@ class TestAlertManager:
         alert = manager.create_alert(AlertLevel.WARNING, "Test", "test")
         unacknowledged = manager.get_alerts(acknowledged=False)
         assert len(unacknowledged) >= 1
-        assert any(a.alert_id == alert.alert_id for a in unacknowledged)
+        assert any(a["alert_id"] == alert.alert_id for a in unacknowledged)
 
     def test_acknowledge_alert(self):
         manager = AlertManager()
@@ -112,7 +112,7 @@ class TestAlertManager:
         result = manager.acknowledge_alert(alert.alert_id)
         assert result is True
         acknowledged = manager.get_alerts(acknowledged=True)
-        assert any(a.alert_id == alert.alert_id for a in acknowledged)
+        assert any(a["alert_id"] == alert.alert_id for a in acknowledged)
 
     def test_acknowledge_nonexistent_alert(self):
         manager = AlertManager()

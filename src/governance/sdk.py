@@ -178,7 +178,7 @@ class GovernanceClientSDK:
         import json
         import re
 
-        context = self._parse_diagnostic_context(user_content)
+        context = self._parse_diagnostic_context(user_content or "")
         target_function = context.get("target_function", "leave_FunctionDef")
         component = context.get("component", "transformer")
         error_type = context.get("error_type", "")
@@ -203,7 +203,7 @@ class GovernanceClientSDK:
     def _parse_diagnostic_context(self, user_content: str) -> dict:
         import json
 
-        context = {}
+        context: dict[str, Any] = {}
 
         try:
             try:

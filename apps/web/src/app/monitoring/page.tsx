@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Bell,
   BellOff,
+  AlertCircle as AlertIcon,
 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { monitoringApi } from '../../lib/api';
@@ -17,22 +18,35 @@ export default function MonitoringPage() {
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [levelFilter, setLevelFilter] = useState<string>('all');
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      setError('未检测到登录凭证，请先登录');
+      setLoading(false);
+      return;
+    }
     fetchData();
   }, [levelFilter]);
 
   const fetchData = async () => {
     setLoading(true);
+    setError('');
     try {
       const [alertsRes, metricsRes] = await Promise.all([
         monitoringApi.getAlerts(levelFilter === 'all' ? undefined : levelFilter),
         monitoringApi.getMetrics(),
       ]);
-      setAlerts(alertsRes.data.alerts || []);
+      setAlerts(alertsRes.data.alerts || alertsRes.data || []);
       setMetrics(metricsRes.data);
-    } catch (error) {
-      console.error('Failed to fetch monitoring data:', error);
+    } catch (err: any) {
+      const detail =
+        err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
+      console.error('Failed to fetch monitoring data:', err);
+      if (err?.response?.status === 401) {
+        setError('登录已过期，请重新登录');
+      }
       setAlerts([
         { id: '1', message: '系统启动正常', level: 'INFO', timestamp: '2026-07-20 18:00' },
         { id: '2', message: '工作流 wf-001 执行完成', level: 'INFO', timestamp: '2026-07-20 17:30' },

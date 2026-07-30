@@ -28,6 +28,8 @@ class E2EStep:
     assertion_value: str = ""
     wait_time_ms: int = 0
     skip_if_failed: bool = False
+    username: str = ""
+    password: str = ""
 
 
 @dataclass
@@ -68,10 +70,11 @@ class E2ERunner:
         try:
             await self.runner._setup_browser()
 
-            if flow.viewport_width and flow.viewport_height:
-                await self.runner.page.set_viewport_size(
-                    {"width": flow.viewport_width, "height": flow.viewport_height}
-                )
+            if hasattr(flow, 'viewport_width') and hasattr(flow, 'viewport_height'):
+                if self.runner.page and flow.viewport_width and flow.viewport_height:
+                    await self.runner.page.set_viewport_size(
+                        {"width": flow.viewport_width, "height": flow.viewport_height}
+                    )
 
             for step in flow.steps:
                 step_start = datetime.now()
@@ -118,6 +121,8 @@ class E2ERunner:
         )
 
     async def _execute_e2e_step(self, step: E2EStep, base_url: str = "") -> Dict:
+        if not self.runner.page:
+            return {"success": False, "error": "Page not initialized"}
         try:
             if step.step_type == E2EStepType.NAVIGATE:
                 url = step.value
@@ -127,9 +132,11 @@ class E2ERunner:
                 return {"success": True}
 
             elif step.step_type == E2EStepType.AUTH:
+                username = getattr(step, 'username', '')
+                password = getattr(step, 'password', '')
                 await self.runner.page.goto(f"{base_url}/login", wait_until="domcontentloaded")
-                await self.runner.page.fill('input[name="username"]', step.username)
-                await self.runner.page.fill('input[name="password"]', step.password)
+                await self.runner.page.fill('input[name="username"]', username)
+                await self.runner.page.fill('input[name="password"]', password)
                 await self.runner.page.click('button[type="submit"]')
                 await self.runner.page.wait_for_load_state("networkidle")
                 return {"success": True}

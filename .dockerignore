@@ -1,0 +1,68 @@
+# Docker 构建安全配置 - 排除敏感和不必要的文件
+
+# ---- 敏感文件 ----
+.env
+.env.*
+*.log
+logs/
+config/local/
+config/debug/
+
+# ---- 数据文件 ----
+data/
+tests/
+tmp/
+temp/
+cache/
+__pycache__/
+*.pyc
+*.pyo
+
+# ---- 版本控制 ----
+.git/
+.gitignore
+.github/
+
+# ---- 开发工具 ----
+.idea/
+.vscode/
+.trae/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 文档 ----
+docs/
+README.md
+*.md
+
+# ---- Docker 自身 ----
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# ---- CI/CD ----
+.gitlab-ci.yml
+Jenkinsfile
+
+# ---- 依赖文件 ----
+.venv/
+venv/
+env/
+.conda/
+
+# ---- 构建产物 ----
+dist/
+build/
+egg-info/
+*.whl
+
+# ---- 系统文件 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- IDE 配置 ----
+*.swp
+*.swo
+*~

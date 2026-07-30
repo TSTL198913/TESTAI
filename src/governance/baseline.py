@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import threading
 from datetime import datetime
@@ -47,6 +48,7 @@ class GoldenBaselineManager:
             os.path.dirname(os.path.abspath(__file__)),
             "../../data/golden_baseline.json",
         )
+        self.logger = logging.getLogger(__name__)
         self._load_baselines()
         self._initialized = True
 
@@ -157,7 +159,7 @@ class GoldenBaselineManager:
             confidence = actual_data.get("data", {}).get("confidence_level", "")
             if confidence not in data["expected_confidence_level"]:
                 errors.append(
-f"Confidence level {confidence} in {data['expected_confidence_level']}"
+                    f"Confidence level {confidence} not in {data['expected_confidence_level']}"
                 )
 
         return {"passed": len(errors) == 0, "errors": errors, "baseline_id": record_id}
@@ -167,6 +169,34 @@ f"Confidence level {confidence} in {data['expected_confidence_level']}"
         if result["passed"]:
             return 1.0
         return max(0.0, 1.0 - len(result["errors"]) * 0.2)
+
+    def check_convergence(self, record_id: str, actual_data: Dict) -> Dict:
+        score = self.calculate_convergence_score(actual_data, record_id)
+        result = self.validate_against_baseline(record_id, actual_data)
+        
+        from src.governance.tracker import GovernanceTracker, GovernanceActionType
+        tracker = GovernanceTracker()
+        
+        trace_id = f"baseline_{record_id}"
+        
+        if score >= 0.9:
+            tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.CONVERGED,
+                component="baseline",
+                message=f"Converged with score {score}",
+                metadata={"baseline_id": record_id, "score": score},
+            )
+            return {"converged": True, "score": score, "errors": []}
+        else:
+            tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.DIVERGED,
+                component="baseline",
+                message=f"Diverged with score {score}",
+                metadata={"baseline_id": record_id, "score": score, "errors": result["errors"]},
+            )
+            return {"converged": False, "score": score, "errors": result["errors"]}
 
     def get_all_baseline_ids(self) -> List[str]:
         return list(self._baselines.keys())

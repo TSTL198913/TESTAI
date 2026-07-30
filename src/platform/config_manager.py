@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
 import logging
@@ -16,7 +17,20 @@ class ConfigSection:
 
 
 class ConfigManager:
-    def __init__(self, config_file: str = None):
+    _instance = None
+    _lock = threading.RLock()
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._instance._initialized = False
+            return cls._instance
+
+    def __init__(self, config_file: Optional[str] = None):
+        if self._initialized:
+            return
+        import threading
         self._config_file = config_file or os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             "config",
@@ -32,6 +46,7 @@ class ConfigManager:
             except Exception as e:
                 logger.warning(f"Database not available, falling back to JSON: {e}")
                 self._use_database = False
+        self._initialized = True
 
         self._default_config = {
             "platform": {
@@ -90,7 +105,7 @@ class ConfigManager:
                         if config_key:
                             try:
                                 sections[section_name]["data"][config_key] = json.loads(row["value"])
-                            except:
+                            except json.JSONDecodeError:
                                 sections[section_name]["data"][config_key] = row["value"]
 
                     for name, section_data in sections.items():
@@ -100,6 +115,9 @@ class ConfigManager:
                             description=section_data.get("description", ""),
                             readonly=section_data.get("readonly", False),
                         )
+                    return
+                else:
+                    self._load_defaults()
                     return
             except Exception as e:
                 logger.warning(f"Database load failed, using JSON: {e}")
@@ -115,7 +133,8 @@ class ConfigManager:
                             description=section_data.get("description", ""),
                             readonly=section_data.get("readonly", False),
                         )
-            except Exception:
+            except (json.JSONDecodeError, OSError):
+                logger.warning("Config file load failed, using defaults")
                 self._load_defaults()
         else:
             self._load_defaults()
@@ -132,7 +151,7 @@ class ConfigManager:
                     full_key = f"{name}.{key}"
                     try:
                         value_str = json.dumps(value)
-                    except:
+                    except TypeError:
                         value_str = str(value)
                     existing = self._db.select_one(
                         self._db.system_config_table,
@@ -220,7 +239,7 @@ class ConfigManager:
             return default
         return section_obj.data.get(key, default)
 
-    def add_section(self, name: str, data: Dict[str, Any] = None, description: str = "", readonly: bool = False):
+    def add_section(self, name: str, data: Optional[Dict[str, Any]] = None, description: str = "", readonly: bool = False):
         if name in self._sections:
             raise ValueError(f"Config section '{name}' already exists")
 

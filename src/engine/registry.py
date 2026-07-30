@@ -49,8 +49,5 @@ def get_pipeline(pipeline_config: list):
             )
             name = "http"
 
-        try:
-            processors.append(get_processor_instance(name))
-        except ValueError:
-            logger.warning(f"Skipping unknown processor: {name}")
+        processors.append(get_processor_instance(name))
     return processors

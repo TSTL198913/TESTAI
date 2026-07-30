@@ -1,8 +1,11 @@
 # src/governance/transformer.py
+import logging
 from abc import ABC
 from typing import List, Optional
 
 import libcst as cst
+
+logger = logging.getLogger(__name__)
 
 
 class BaseGovernanceTransformer(cst.CSTTransformer, ABC):
@@ -55,7 +58,7 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
             required_imports=required_imports,
         )
         self.target_class = target_class
-        self.current_class = None
+        self.current_class: Optional[str] = None
 
     def leave_FunctionDef(
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
@@ -72,8 +75,8 @@ class ContextAwareTransformer(BaseGovernanceTransformer):
             )
 
         if name_match and self.target_class and self.current_class != self.target_class:
-            print(
-                f"[DEBUG] Class mismatch: Expected {self.target_class}, found {self.current_class}"
+            logger.debug(
+                f"Class mismatch: Expected {self.target_class}, found {self.current_class}"
             )
 
         return updated_node

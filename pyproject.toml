@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "TestAI"
-version = "0.1.0"
+version = "0.2.0"
 description = "Industrial-grade Test Automation Engine"
 dependencies = [
     "httpx>=0.24.0",

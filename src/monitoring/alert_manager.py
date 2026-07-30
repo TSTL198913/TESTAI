@@ -64,8 +64,10 @@ class AlertManager:
         )
         self.alerts: List[Alert] = []
         self.rules: Dict[str, AlertRule] = {}
+        self._file_load_failed = False
         self._load_alerts()
-        self._initialize_default_rules()
+        if not self._file_load_failed:
+            self._initialize_default_rules()
 
     def _load_alerts(self):
         if os.path.exists(self.storage_path):
@@ -94,8 +96,22 @@ class AlertManager:
                                 else None,
                             )
                         )
+                    for rule_data in data.get("rules", []):
+                        self.rules[rule_data["rule_id"]] = AlertRule(
+                            rule_id=rule_data["rule_id"],
+                            name=rule_data["name"],
+                            alert_type=AlertType(rule_data["alert_type"]),
+                            level=AlertLevel(rule_data["level"]),
+                            condition=rule_data["condition"],
+                            threshold=rule_data["threshold"],
+                            window_seconds=rule_data.get("window_seconds", 300),
+                            enabled=rule_data.get("enabled", True),
+                            created_at=datetime.fromisoformat(rule_data["created_at"]),
+                        )
             except Exception:
                 self.alerts = []
+                self.rules = {}
+                self._file_load_failed = True
 
     def _save_alerts(self):
         os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
@@ -229,7 +245,7 @@ class AlertManager:
                 return alert
         return None
 
-    def acknowledge_alert(self, alert_id: str, user_id: str) -> Optional[Alert]:
+    def acknowledge_alert(self, alert_id: str, user_id: str = "") -> Optional[Alert]:
         alert = self.get_alert(alert_id)
         if alert:
             alert.status = AlertStatus.ACKNOWLEDGED

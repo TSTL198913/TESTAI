@@ -10,8 +10,11 @@ from src.storage.utils import sanitize_for_mongo
 logger = logging.getLogger(__name__)
 
 
+from typing import Optional, Any
+
+
 class ResultRepository:
-    def __init__(self, uri: str = None, db=None):
+    def __init__(self, uri: Optional[str] = None, db: Any = None):
         self.uri = uri
         self.db = db
         self.client = None

@@ -28,6 +28,13 @@ repos:
         language: python
         pass_filenames: false
         description: "Run effectiveness gate"
+        
+      - id: ai-tests
+        name: AI Module Tests
+        entry: python -m pytest tests/ai/ -x -q --tb=short
+        language: python
+        pass_filenames: false
+        description: "Run AI module integration tests"
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

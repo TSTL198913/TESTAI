@@ -1,10 +1,16 @@
 import os
 import json
 import re
+import logging
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
+
+try:
+    import openai
+except ImportError:
+    openai = None
 
 
 class DefectSeverity(str, Enum):
@@ -55,6 +61,7 @@ class DefectAnalyzer:
     def __init__(self, llm_api_key: Optional[str] = None):
         self.llm_api_key = llm_api_key or os.environ.get("OPENAI_API_KEY")
         self.use_fallback = not self.llm_api_key
+        self.logger = logging.getLogger(__name__)
 
     def analyze_test_results(self, test_results: Dict[str, Any]) -> AnalysisResult:
         if self.use_fallback:
@@ -63,11 +70,16 @@ class DefectAnalyzer:
         try:
             return self._analyze_with_llm(test_results)
         except Exception as e:
+            try:
+                fallback_findings = self._analyze_fallback(test_results).findings
+            except Exception as fallback_e:
+                self.logger.error(f"Fallback analysis also failed: {fallback_e}")
+                fallback_findings = []
             return AnalysisResult(
                 success=False,
                 error_message=f"LLM analysis failed: {str(e)}",
                 fallback_used=True,
-                findings=self._analyze_fallback(test_results).findings,
+                findings=fallback_findings,
             )
 
     def analyze_code(self, code: str, file_path: str = "") -> AnalysisResult:
@@ -77,18 +89,22 @@ class DefectAnalyzer:
         try:
             return self._analyze_code_with_llm(code, file_path)
         except Exception as e:
+            try:
+                fallback_findings = self._analyze_code_fallback(code, file_path).findings
+            except Exception as fallback_e:
+                self.logger.error(f"Fallback analysis also failed: {fallback_e}")
+                fallback_findings = []
             return AnalysisResult(
                 success=False,
                 error_message=f"LLM analysis failed: {str(e)}",
                 fallback_used=True,
-                findings=self._analyze_code_fallback(code, file_path).findings,
+                findings=fallback_findings,
             )
 
     def _analyze_with_llm(self, test_results: Dict[str, Any]) -> AnalysisResult:
         prompt = self._build_test_analysis_prompt(test_results)
         
         try:
-            import openai
             client = openai.OpenAI(api_key=self.llm_api_key)
             
             response = client.chat.completions.create(
@@ -140,7 +156,7 @@ class DefectAnalyzer:
                 related_tests=[error.get("test_name", "")],
             ))
         
-        return self._build_analysis_result(findings)
+        return self._build_analysis_result(findings, fallback_used=True)
 
     def _analyze_code_fallback(self, code: str, file_path: str) -> AnalysisResult:
         findings = []
@@ -193,7 +209,7 @@ class DefectAnalyzer:
                 confidence=0.85,
             ))
         
-        return self._build_analysis_result(findings)
+        return self._build_analysis_result(findings, fallback_used=True)
 
     def _build_test_analysis_prompt(self, test_results: Dict[str, Any]) -> str:
         return f"""
@@ -270,7 +286,6 @@ class DefectAnalyzer:
 """
         
         try:
-            import openai
             client = openai.OpenAI(api_key=self.llm_api_key)
             
             response = client.chat.completions.create(
@@ -292,7 +307,7 @@ class DefectAnalyzer:
         except Exception as e:
             raise e
 
-    def _build_analysis_result(self, findings: List[DefectFinding]) -> AnalysisResult:
+    def _build_analysis_result(self, findings: List[DefectFinding], fallback_used: bool = False) -> AnalysisResult:
         critical_count = sum(1 for f in findings if f.severity == DefectSeverity.CRITICAL)
         high_count = sum(1 for f in findings if f.severity == DefectSeverity.HIGH)
         medium_count = sum(1 for f in findings if f.severity == DefectSeverity.MEDIUM)
@@ -306,6 +321,7 @@ class DefectAnalyzer:
             high_count=high_count,
             medium_count=medium_count,
             low_count=low_count,
+            fallback_used=fallback_used,
         )
 
     def _infer_severity(self, failure: Dict[str, Any]) -> DefectSeverity:

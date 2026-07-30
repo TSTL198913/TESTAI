@@ -1,6 +1,7 @@
 # src/engine/processor/http.py
 import asyncio
 import logging
+from typing import Dict, Any, Optional
 
 import httpx
 from tenacity import (
@@ -18,7 +19,7 @@ from src.models.result import StepResult
 logger = logging.getLogger("ai_test_platform")
 
 
-class HTTPProcessor(BaseProcessor):  # 修改类名
+class HTTPProcessor(BaseProcessor):
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
@@ -26,23 +27,30 @@ class HTTPProcessor(BaseProcessor):  # 修改类名
         before_sleep=lambda retry_state: logger.warning(
             f"正在重试第 {retry_state.attempt_number} 次..."
         ),
+        reraise=True,
     )
-    # 增加 client 参数，并添加返回类型
     async def process(
         self, context, step: HttpRequest, client: httpx.AsyncClient
     ) -> HttpRequest:
-        # 1. 准备参数映射 (保持原有逻辑)
-        request_kwargs = {
+        request_kwargs: Dict[str, Any] = {
             "method": step.method,
             "url": str(step.url),
-            "headers": step.headers,
-            "params": {k: v[0] if isinstance(v, (list, tuple)) else v for k, v in (step.params or {}).items()},
         }
+        
+        if step.headers:
+            request_kwargs["headers"] = dict(step.headers)
+        
+        if step.params:
+            request_kwargs["params"] = {
+                k: v[0] if isinstance(v, (list, tuple)) else v 
+                for k, v in step.params.items()
+            }
+        
         if step.body:
             request_kwargs["json"] = step.body
 
+        response = None
         try:
-            # 2. 使用传入的 client 发起请求
             response = await client.request(**request_kwargs)
 
             # 3. 核心治理逻辑...
@@ -64,7 +72,19 @@ class HTTPProcessor(BaseProcessor):  # 修改类名
 
         except httpx.RequestError as e:
             raise InfrastructureError(f"Network error: {type(e).__name__}") from e
+        except InfrastructureError:
+            raise
+        except EngineError:
+            raise
         except Exception as e:
+            if any(keyword in str(e).lower() for keyword in ["network", "timeout", "connect", "socket", "unreachable"]):
+                raise InfrastructureError(f"Network error: {str(e)}") from e
             raise EngineError(f"Unexpected error: {str(e)}") from e
+        finally:
+            if response is not None:
+                try:
+                    await response.aclose()
+                except Exception:
+                    pass
 
         return step  # 必须返回 step，供下一环处理

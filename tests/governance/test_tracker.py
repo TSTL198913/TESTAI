@@ -253,3 +253,116 @@ class TestGovernanceTracker:
 
         tracker.clear()
         assert len(tracker.get_recent_events()) == 0
+
+    def test_consecutive_convergence_count_increments(self):
+        tracker = GovernanceTracker()
+        tracker.clear()
+
+        tracker.record_event(
+            trace_id="trace_conv_001",
+            action_type=GovernanceActionType.CONVERGED,
+            component="TestComponent",
+        )
+        assert tracker._consecutive_convergence_count == 1
+
+        tracker.record_event(
+            trace_id="trace_conv_002",
+            action_type=GovernanceActionType.CONVERGED,
+            component="TestComponent",
+        )
+        assert tracker._consecutive_convergence_count == 2
+
+        tracker.record_event(
+            trace_id="trace_conv_003",
+            action_type=GovernanceActionType.CONVERGED,
+            component="TestComponent",
+        )
+        assert tracker._consecutive_convergence_count == 3
+
+    def test_consecutive_convergence_count_resets_on_diverged(self):
+        tracker = GovernanceTracker()
+        tracker.clear()
+
+        tracker.record_event(
+            trace_id="trace_conv_001",
+            action_type=GovernanceActionType.CONVERGED,
+            component="TestComponent",
+        )
+        tracker.record_event(
+            trace_id="trace_conv_002",
+            action_type=GovernanceActionType.CONVERGED,
+            component="TestComponent",
+        )
+        assert tracker._consecutive_convergence_count == 2
+
+        tracker.record_event(
+            trace_id="trace_div_001",
+            action_type=GovernanceActionType.DIVERGED,
+            component="TestComponent",
+        )
+        assert tracker._consecutive_convergence_count == 0
+
+    def test_consecutive_convergence_count_logs_at_threshold(self):
+        import io
+        import logging
+        
+        log_stream = io.StringIO()
+        handler = logging.StreamHandler(log_stream)
+        handler.setLevel(logging.INFO)
+        logger = logging.getLogger()
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+        
+        try:
+            tracker = GovernanceTracker()
+            tracker.clear()
+
+            tracker.record_event(
+                trace_id="trace_conv_001",
+                action_type=GovernanceActionType.CONVERGED,
+                component="TestComponent",
+            )
+            tracker.record_event(
+                trace_id="trace_conv_002",
+                action_type=GovernanceActionType.CONVERGED,
+                component="TestComponent",
+            )
+
+            log_output = log_stream.getvalue()
+            assert "consecutive convergences" not in log_output
+
+            tracker.record_event(
+                trace_id="trace_conv_003",
+                action_type=GovernanceActionType.CONVERGED,
+                component="TestComponent",
+            )
+
+            log_output = log_stream.getvalue()
+            assert "consecutive convergences" in log_output
+            assert "SYSTEM CONVERGED" in log_output
+        finally:
+            logger.removeHandler(handler)
+
+    def test_other_action_types_do_not_affect_convergence_count(self):
+        tracker = GovernanceTracker()
+        tracker.clear()
+
+        tracker.record_event(
+            trace_id="trace_001",
+            action_type=GovernanceActionType.DIAGNOSE_START,
+            component="TestComponent",
+        )
+        tracker.record_event(
+            trace_id="trace_002",
+            action_type=GovernanceActionType.PATCH_APPLIED,
+            component="TestComponent",
+        )
+
+        assert tracker._consecutive_convergence_count == 0
+
+        tracker.record_event(
+            trace_id="trace_conv_001",
+            action_type=GovernanceActionType.CONVERGED,
+            component="TestComponent",
+        )
+        assert tracker._consecutive_convergence_count == 1

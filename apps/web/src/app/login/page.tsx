@@ -25,12 +25,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await authApi.login(username.trim(), password);
+      // 归一化拦截器已将 ApiResponse.data 提升到 res.data
+      // 所以 res.data 直接就是 {access_token, refresh_token, user}
       const data = res.data || {};
-      const token = data.access_token || data.token;
-      if (!token) {
-        throw new Error('服务器未返回有效的 token');
-      }
-      localStorage.setItem('token', token);
+      // P0-6 修复:后端已通过 Set-Cookie 设置 HttpOnly cookie,前端不再将 token 写入 localStorage
+      // cookie 不暴露给 JavaScript,XSS 攻击无法窃取 token
+      // user 信息非敏感,可保留在 localStorage 供 UI 显示
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
@@ -62,7 +62,7 @@ export default function LoginPage() {
           <h2 className="text-xl font-semibold text-gray-800 mb-6">欢迎回来</h2>
 
           {error && (
-            <div className="mb-4 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div data-testid="login-error" className="mb-4 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-700 break-words">{error}</p>
             </div>

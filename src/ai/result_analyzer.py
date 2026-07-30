@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
@@ -55,6 +56,7 @@ class ResultAnalyzer:
     def __init__(self, llm_api_key: Optional[str] = None):
         self.llm_api_key = llm_api_key or os.environ.get("OPENAI_API_KEY")
         self.use_fallback = not self.llm_api_key
+        self.logger = logging.getLogger(__name__)
 
     def analyze(self, current_results: Dict[str, Any], previous_results: Optional[Dict[str, Any]] = None) -> ResultAnalysis:
         if self.use_fallback:
@@ -88,11 +90,15 @@ class ResultAnalyzer:
                 temperature=0.3,
             )
             
-            result = json.loads(response.choices[0].message.content)
+            content = response.choices[0].message.content
+            if content is None:
+                raise ValueError("LLM response content is None")
+            result = json.loads(content)
             return self._parse_llm_result(result)
             
         except Exception as e:
-            raise e
+            self.logger.error(f"LLM analysis failed: {e}")
+            raise
 
     def _analyze_fallback(self, current_results: Dict[str, Any], previous_results: Optional[Dict[str, Any]]) -> ResultAnalysis:
         trends = self._calculate_trends(current_results, previous_results)

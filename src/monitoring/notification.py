@@ -2,7 +2,7 @@ import os
 import json
 import smtplib
 import requests
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -35,13 +35,13 @@ class Notification:
 
 
 class EmailNotifier:
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: Optional[Dict] = None):
         self.config = config or {}
         self.smtp_server = self.config.get("smtp_server", os.environ.get("SMTP_SERVER", "smtp.gmail.com"))
         self.smtp_port = int(self.config.get("smtp_port", os.environ.get("SMTP_PORT", "587")))
-        self.smtp_username = self.config.get("smtp_username", os.environ.get("SMTP_USERNAME"))
-        self.smtp_password = self.config.get("smtp_password", os.environ.get("SMTP_PASSWORD"))
-        self.sender_email = self.config.get("sender_email", os.environ.get("SMTP_USERNAME"))
+        self.smtp_username = self.config.get("smtp_username", os.environ.get("SMTP_USERNAME")) or ""
+        self.smtp_password = self.config.get("smtp_password", os.environ.get("SMTP_PASSWORD")) or ""
+        self.sender_email = self.config.get("sender_email", os.environ.get("SMTP_USERNAME")) or ""
         self.enabled = bool(self.smtp_username and self.smtp_password)
 
     def send(self, to_email: str, subject: str, body: str) -> bool:
@@ -67,9 +67,9 @@ class EmailNotifier:
 
 
 class DingTalkNotifier:
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: Optional[Dict] = None):
         self.config = config or {}
-        self.webhook_url = self.config.get("webhook_url", os.environ.get("DINGTALK_WEBHOOK"))
+        self.webhook_url = self.config.get("webhook_url", os.environ.get("DINGTALK_WEBHOOK")) or ""
         self.secret = self.config.get("secret", os.environ.get("DINGTALK_SECRET"))
         self.enabled = bool(self.webhook_url)
 
@@ -78,7 +78,7 @@ class DingTalkNotifier:
             return False
 
         try:
-            payload = {
+            payload: Dict[str, Any] = {
                 "msgtype": "markdown",
                 "markdown": {
                     "title": title,
@@ -95,9 +95,9 @@ class DingTalkNotifier:
 
 
 class FeishuNotifier:
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: Optional[Dict] = None):
         self.config = config or {}
-        self.webhook_url = self.config.get("webhook_url", os.environ.get("FEISHU_WEBHOOK"))
+        self.webhook_url = self.config.get("webhook_url", os.environ.get("FEISHU_WEBHOOK")) or ""
         self.enabled = bool(self.webhook_url)
 
     def send(self, title: str, message: str) -> bool:
@@ -105,7 +105,7 @@ class FeishuNotifier:
             return False
 
         try:
-            payload = {
+            payload: Dict[str, Any] = {
                 "msg_type": "interactive",
                 "card": {
                     "config": {"wide_screen_mode": True},
@@ -129,7 +129,7 @@ class FeishuNotifier:
 
 
 class NotificationManager:
-    def __init__(self, storage_path: str = None):
+    def __init__(self, storage_path: Optional[str] = None):
         self.storage_path = storage_path or os.environ.get(
             "NOTIFICATION_STORAGE_PATH", "data/notifications.json"
         )
@@ -217,7 +217,7 @@ class NotificationManager:
         self,
         title: str,
         message: str,
-        email_recipients: list = None,
+        email_recipients: Optional[list] = None,
         dingtalk_enabled: bool = True,
         feishu_enabled: bool = True,
     ) -> Dict[str, Notification]:

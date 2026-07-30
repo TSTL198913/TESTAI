@@ -8,14 +8,11 @@ from src.governance.executor import GovernanceExecutor
 def worker(file_path, iteration):
     """模拟一个并发的任务进程"""
     executor = GovernanceExecutor()
-    # 每个进程尝试打一个不同的补丁，目标是最终文件依然合法
     new_code = f"return {iteration}"
     try:
-        # 这里直接模拟 apply_patch 流程，跳过复杂的备份逻辑以测试锁
         executor._write_patch(Path(file_path), "run", new_code, [])
     except Exception as e:
-        # 记录冲突或失败，但不要中断测试
-        pass
+        print(f"[Worker {iteration}] Patch conflict/error: {type(e).__name__}: {e}")
 
 
 def test_concurrency_stress():

@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 
 from src.governance.orchestrator import governance_transaction, GovernanceOrchestrator
 from src.governance.models import DiagnosticContext, PatchProposal, GovernanceAction, PatchType
+from src.governance.tracker import GovernanceActionType
 from src.governance.approval import ApprovalStatus
 
 
@@ -60,6 +61,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         with patch.object(self.orchestrator, '_classify_exception', return_value=GovernanceAction.ABORT):
@@ -77,6 +79,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         diagnosis = MagicMock()
@@ -100,6 +103,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         patch_proposal = PatchProposal(
@@ -131,6 +135,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         patch_proposal = PatchProposal(
@@ -162,6 +167,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         patch_proposal = PatchProposal(
@@ -192,6 +198,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         patch_proposal = PatchProposal(
@@ -215,17 +222,216 @@ class TestGovernanceOrchestrator:
         assert result["status"] == "FAILED"
         assert "reason" in result
 
-    def test_classify_exception(self):
+    @pytest.mark.asyncio
+    async def test_execute_governance_flow_agent_exception_records_failed_event(self):
+        """P1-1/P1-2: Agent 异常时审计链必须完整,记录 DIAGNOSE_COMPLETE FAILED 事件。
+
+        验证点:
+        1. agent.analyze_with_context 抛异常时不向上传播,而是返回 FAILED
+        2. tracker.record_event 必须记录 DIAGNOSE_COMPLETE + status=FAILED
+        3. 返回结果包含 status=FAILED 和具体错误信息
+        """
         context = DiagnosticContext(
-            step_id="step1",
+            step_id="step_agent_fail",
             component_name="test",
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: bad input",
         )
 
+        # Agent 抛出异常
+        self.orchestrator.agent.analyze_with_context.side_effect = RuntimeError("LLM API timeout")
+
+        result = await self.orchestrator.execute_governance_flow(context)
+
+        # 1. 返回 FAILED 状态
+        assert result["status"] == "FAILED", (
+            f"Agent 异常时应返回 FAILED, 实际: {result['status']}"
+        )
+        assert "error" in result, "FAILED 结果必须包含 error 字段"
+        assert "LLM API timeout" in result["error"], (
+            f"error 字段必须包含原始异常信息, 实际: {result.get('error')}"
+        )
+        assert result["confidence_score"] == 0.0, "异常时置信度必须为 0"
+
+        # 2. 验证审计链:必须记录 DIAGNOSE_COMPLETE + status=FAILED
+        record_event_calls = self.orchestrator.tracker.record_event.call_args_list
+        diagnose_complete_calls = [
+            call for call in record_event_calls
+            if call.kwargs.get("action_type") == GovernanceActionType.DIAGNOSE_COMPLETE
+        ]
+        assert len(diagnose_complete_calls) >= 1, (
+            "Agent 异常时必须记录 DIAGNOSE_COMPLETE 事件以补全审计链"
+        )
+        failed_calls = [
+            call for call in diagnose_complete_calls
+            if call.kwargs.get("status") == "FAILED"
+        ]
+        assert len(failed_calls) >= 1, (
+            "DIAGNOSE_COMPLETE 事件必须标记 status=FAILED"
+        )
+        # 验证事件中包含异常信息
+        failed_call = failed_calls[0]
+        assert failed_call.kwargs.get("message") is not None, (
+            "FAILED 事件必须包含异常信息 message"
+        )
+        assert "LLM API timeout" in failed_call.kwargs.get("message"), (
+            f"FAILED 事件 message 必须包含异常信息, 实际: {failed_call.kwargs.get('message')}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_execute_governance_flow_agent_exception_does_not_break_flow(self):
+        """P1-1: Agent 异常不应导致整个流程崩溃(不向上抛出)。"""
+        context = DiagnosticContext(
+            step_id="step_no_crash",
+            component_name="test",
+            input_data={},
+            actual_output="",
+            expected_baseline="",
+            exception_trace="KeyError: 'missing'",
+        )
+
+        self.orchestrator.agent.analyze_with_context.side_effect = ValueError("Critical LLM failure")
+
+        # 不应抛出异常
+        result = await self.orchestrator.execute_governance_flow(context)
+        assert result["status"] == "FAILED"
+        assert "Critical LLM failure" in result["error"]
+
+    def test_classify_exception_network_error_returns_retry(self):
+        """P1-3: 网络异常应分类为 RETRY。"""
+        network_traces = [
+            "ConnectionError: Failed to establish connection",
+            "TimeoutError: Request timed out after 30s",
+            "ConnectionResetError: Connection reset by peer",
+            "ConnectionRefusedError: Connection refused",
+            "OSError: Network unreachable",
+        ]
+        for trace in network_traces:
+            context = DiagnosticContext(
+                step_id="step_net",
+                component_name="test",
+                input_data={},
+                actual_output="",
+                expected_baseline="",
+                exception_trace=trace,
+            )
+            result = self.orchestrator._classify_exception(context)
+            assert result == GovernanceAction.RETRY, (
+                f"网络异常应分类为 RETRY, trace={trace!r}, 实际: {result}"
+            )
+
+    def test_classify_exception_code_error_returns_ai_diagnose(self):
+        """P1-3: 代码级异常应分类为 AI_DIAGNOSE。"""
+        code_traces = [
+            "SyntaxError: invalid syntax",
+            "NameError: name 'foo' is not defined",
+            "TypeError: unsupported operand type",
+            "ValueError: invalid literal for int()",
+            "AttributeError: 'NoneType' object has no attribute 'x'",
+            "KeyError: 'missing_key'",
+            "IndexError: list index out of range",
+            "ZeroDivisionError: division by zero",
+        ]
+        for trace in code_traces:
+            context = DiagnosticContext(
+                step_id="step_code",
+                component_name="test",
+                input_data={},
+                actual_output="",
+                expected_baseline="",
+                exception_trace=trace,
+            )
+            result = self.orchestrator._classify_exception(context)
+            assert result == GovernanceAction.AI_DIAGNOSE, (
+                f"代码级异常应分类为 AI_DIAGNOSE, trace={trace!r}, 实际: {result}"
+            )
+
+    def test_classify_exception_unknown_returns_manual_required(self):
+        """P1-3: 未知异常应分类为 MANUAL_REQUIRED。"""
+        unknown_traces = [
+            "SomeWeirdUnknownError: something happened",
+            "RuntimeError: generic runtime issue",
+            "SystemExit: 1",
+        ]
+        for trace in unknown_traces:
+            context = DiagnosticContext(
+                step_id="step_unknown",
+                component_name="test",
+                input_data={},
+                actual_output="",
+                expected_baseline="",
+                exception_trace=trace,
+            )
+            result = self.orchestrator._classify_exception(context)
+            assert result == GovernanceAction.MANUAL_REQUIRED, (
+                f"未知异常应分类为 MANUAL_REQUIRED, trace={trace!r}, 实际: {result}"
+            )
+
+    def test_classify_exception_empty_trace_returns_manual_required(self):
+        """P1-3: 空 exception_trace 应分类为 MANUAL_REQUIRED。"""
+        context = DiagnosticContext(
+            step_id="step_empty",
+            component_name="test",
+            input_data={},
+            actual_output="",
+            expected_baseline="",
+            exception_trace=None,
+        )
         result = self.orchestrator._classify_exception(context)
-        assert result == GovernanceAction.AI_DIAGNOSE
+        assert result == GovernanceAction.MANUAL_REQUIRED, (
+            f"空 exception_trace 应分类为 MANUAL_REQUIRED, 实际: {result}"
+        )
+
+    def test_classify_exception_case_insensitive(self):
+        """P1-3: 异常分类应大小写不敏感(小写 trace 也能识别)。"""
+        context = DiagnosticContext(
+            step_id="step_lower",
+            component_name="test",
+            input_data={},
+            actual_output="",
+            expected_baseline="",
+            exception_trace="connectionerror: failed to connect",
+        )
+        result = self.orchestrator._classify_exception(context)
+        assert result == GovernanceAction.RETRY, (
+            f"小写 connectionerror 应识别为 RETRY, 实际: {result}"
+        )
+
+    def test_classify_exception_baseline_mismatch_returns_ai_diagnose(self):
+        """P1-3 回归防护:无异常 trace 但存在基线偏差时应触发 AI 诊断。
+
+        场景:测试执行未抛异常,但实际输出与预期基线不一致,
+        此时应交由 AI 诊断根因,而非返回 MANUAL_REQUIRED 导致流程被跳过。
+        """
+        context = DiagnosticContext(
+            step_id="step_baseline_mismatch",
+            component_name="test",
+            input_data={},
+            actual_output="error response",
+            expected_baseline="success response",
+            exception_trace="",
+        )
+        result = self.orchestrator._classify_exception(context)
+        assert result == GovernanceAction.AI_DIAGNOSE, (
+            f"基线偏差(actual != expected)应触发 AI_DIAGNOSE, 实际: {result}"
+        )
+
+    def test_classify_exception_no_trace_no_mismatch_returns_manual_required(self):
+        """P1-3: 既无异常 trace 也无基线偏差时返回 MANUAL_REQUIRED。"""
+        context = DiagnosticContext(
+            step_id="step_empty",
+            component_name="test",
+            input_data={},
+            actual_output="",
+            expected_baseline="",
+            exception_trace="",
+        )
+        result = self.orchestrator._classify_exception(context)
+        assert result == GovernanceAction.MANUAL_REQUIRED, (
+            f"既无 trace 也无基线偏差应返回 MANUAL_REQUIRED, 实际: {result}"
+        )
 
     def test_resolve_file_path_with_mapping(self):
         result = self.orchestrator._resolve_file_path("EvalPlatformProcessor")
@@ -253,9 +459,11 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
         record.proposal = MagicMock()
         record.proposal.patch_type = PatchType.SECURITY
+        record.status = ApprovalStatus.PENDING
 
         self.orchestrator.approval_mgr.get_approval.return_value = record
         self.orchestrator.approval_mgr.approve.return_value = False
@@ -274,12 +482,14 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
         record.proposal = PatchProposal(
             target_function="test_func",
             suggested_code='return "fixed"',
             patch_type=PatchType.SECURITY,
         )
+        record.status = ApprovalStatus.PENDING
 
         self.orchestrator.approval_mgr.get_approval.return_value = record
         self.orchestrator.approval_mgr.approve.return_value = True
@@ -299,6 +509,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
         record.proposal = PatchProposal(
             target_function="test_func",
@@ -323,6 +534,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
         record.proposal = PatchProposal(
             target_function="test_func",
@@ -347,6 +559,7 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
 
         patch_proposal = PatchProposal(
@@ -379,12 +592,14 @@ class TestGovernanceOrchestrator:
             input_data={},
             actual_output="",
             expected_baseline="",
+            exception_trace="ValueError: test error",
         )
         record.proposal = PatchProposal(
             target_function="MyClass.my_method",
             suggested_code='return "fixed"',
             patch_type=PatchType.SECURITY,
         )
+        record.status = ApprovalStatus.PENDING
 
         self.orchestrator.approval_mgr.get_approval.return_value = record
         self.orchestrator.approval_mgr.approve.return_value = True

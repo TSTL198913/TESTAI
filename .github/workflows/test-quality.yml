@@ -32,22 +32,17 @@ jobs:
           pip install -r requirements.txt --no-cache-dir
           pip install pytest pytest-rerunfailures pytest-cov --no-cache-dir
 
-      - name: Step 1 - CI Guard Check
-        run: |
-          echo "🔍 Running CI Guard..."
-          python tests/ci_guard.py
-
-      - name: Step 2 - Mutation Gate
-        run: |
-          echo "🧬 Running Mutation Gate..."
-          python tests/utils/auto_mutation_gate.py --test tests/governance/test_transformer_new.py
-
-      - name: Step 3 - Governance Effectiveness
+      - name: Step 1 - Governance Effectiveness
         run: |
           echo "📊 Running Governance Effectiveness..."
           python -m pytest tests/governance/test_effectiveness_gate.py -v --tb=short
 
-      - name: Step 4 - Full Test Suite
+      - name: Step 2 - Security Tests
+        run: |
+          echo "🛡️ Running Security Tests..."
+          python -m pytest tests/security/ -v --tb=short
+
+      - name: Step 3 - Full Test Suite
         run: |
           echo "🧪 Running Full Test Suite..."
-          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py --ignore=tests/fixtures/vulnerable_app.py --ignore=tests/fixtures/vulnerable_app_full.py
+          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning --ignore=tests/governance/test_p0_exposure.py

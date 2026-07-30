@@ -1,0 +1,1511 @@
+[
+  {
+    "timestamp": "2026-07-25T12:26:46.540081",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:26:47.164272",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:26:48.328427",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:43.766789",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:44.284716",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:45.106948",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:45.307449",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:45.619139",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:45.630234",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:45.978729",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:46.144982",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:46.437639",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:46.500049",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:46.655194",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:47.007405",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:47.020431",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:47.167343",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:47.507045",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:47.518517",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:48.033621",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T12:29:48.546233",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T15:56:05.172333",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T15:56:05.838424",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T15:56:06.978227",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T15:59:55.309913",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T15:59:55.837638",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T15:59:56.841391",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:05:22.001648",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:05:22.513979",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:05:23.488421",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:08:12.502829",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:08:12.998109",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:08:14.008701",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:12:37.607318",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:12:38.130962",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:12:39.141714",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:14:24.955800",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:14:25.483865",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:14:26.502465",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:38.685525",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:39.197547",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:40.207794",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:45.331120",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:45.846325",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:46.873426",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:50.028867",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:50.534455",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:28:51.536069",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:29:17.205437",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:29:17.716802",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:29:18.861497",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:30:50.891810",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:30:51.409627",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:30:52.436645",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:32:56.172349",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:32:56.692406",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:32:57.714084",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:02.578112",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:03.095115",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:04.102754",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:07.120550",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:07.619424",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:08.631896",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:31.711911",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:32.256469",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:33:33.267279",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:35:05.307220",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:35:05.836033",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:35:06.858774",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:23.568976",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:24.118917",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:25.117967",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:30.267298",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:30.781868",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:31.803438",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:34.998747",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:35.511131",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:38:36.526852",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:39:01.356847",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:39:01.922581",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:39:02.941178",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:40:09.058004",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:40:09.600888",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:40:10.616965",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:20.207521",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:20.764765",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:21.772365",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:26.643471",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:27.161635",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:28.197662",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:31.135748",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:31.646305",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:32.663657",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:55.893014",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:56.423159",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:41:57.431751",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:43:02.687105",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:43:03.227983",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:43:04.208392",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:16.476910",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:17.035140",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:18.064187",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:23.211468",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:23.713783",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:24.728142",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:27.906415",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:28.439304",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:29.462271",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:54.634779",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:55.173396",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:51:56.199024",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:53:03.498426",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:53:04.065226",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:53:05.070001",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:56:50.415641",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:56:50.979689",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:56:51.983386",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:56:56.959988",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:56:57.477841",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:56:58.499247",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:57:01.526886",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:57:02.060858",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:57:03.084883",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:57:26.760722",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:57:27.299962",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:57:28.322306",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:58:33.845790",
+    "error_type": "unknown_error",
+    "error_message": "Error code: 400 - {'error': {'message': 'The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed deepseek-chat.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_request_error'}}",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {
+      "model": "deepseek-chat",
+      "messages_count": 2
+    },
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:58:34.396451",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  },
+  {
+    "timestamp": "2026-07-25T16:58:35.419561",
+    "error_type": "circuit_breaker_open",
+    "error_message": "Circuit Breaker is OPEN: Governance service unavailable.",
+    "api_key_masked": "sk-1***6bbd",
+    "endpoint": "/v1/chat/completions",
+    "http_status": null,
+    "additional_info": {},
+    "testai_rule_13_compliant": true,
+    "complaint_ready": true
+  }
+]

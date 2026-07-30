@@ -17,7 +17,11 @@ class TestWorkflowEngine:
     def test_define_workflow_returns_id(self):
         """正向：定义工作流返回ID"""
         engine = WorkflowEngine()
-        workflow_def = WorkflowDefinition(name="Test Workflow", description="Test Description")
+        workflow_def = WorkflowDefinition(
+            name="Test Workflow", 
+            description="Test Description",
+            tasks=[WorkflowTask(type=TaskType.MONITORING, name="Task")],
+        )
         
         workflow_id = engine.define_workflow(workflow_def)
         
@@ -28,7 +32,10 @@ class TestWorkflowEngine:
     def test_get_workflow_returns_definition(self):
         """正向：获取工作流定义"""
         engine = WorkflowEngine()
-        workflow_def = WorkflowDefinition(name="Test Workflow")
+        workflow_def = WorkflowDefinition(
+            name="Test Workflow",
+            tasks=[WorkflowTask(type=TaskType.MONITORING, name="Task")],
+        )
         workflow_id = engine.define_workflow(workflow_def)
         
         result = engine.get_workflow(workflow_id)
@@ -39,8 +46,9 @@ class TestWorkflowEngine:
     def test_list_workflows_returns_all(self):
         """正向：列出所有工作流"""
         engine = WorkflowEngine()
-        engine.define_workflow(WorkflowDefinition(name="Workflow 1"))
-        engine.define_workflow(WorkflowDefinition(name="Workflow 2"))
+        engine.workflows.clear()
+        engine.define_workflow(WorkflowDefinition(name="Workflow 1", tasks=[WorkflowTask(type=TaskType.MONITORING, name="Task")]))
+        engine.define_workflow(WorkflowDefinition(name="Workflow 2", tasks=[WorkflowTask(type=TaskType.MONITORING, name="Task")]))
         
         workflows = engine.list_workflows()
         
@@ -214,7 +222,7 @@ class TestWorkflowEngine:
 
     @pytest.mark.asyncio
     async def test_execute_workflow_with_unknown_task_type(self):
-        """负向：执行包含未知任务类型的工作流"""
+        """负向：执行包含未知任务类型的工作流应失败"""
         engine = WorkflowEngine()
         workflow_def = WorkflowDefinition(
             name="Test Workflow",
@@ -226,42 +234,40 @@ class TestWorkflowEngine:
         
         result = await engine.execute_workflow(workflow_id)
         
-        assert result["status"] == "completed"
+        assert result["status"] == "failed"
 
     # === 边界场景 ===
     def test_define_empty_workflow(self):
-        """边界：定义空工作流"""
+        """边界：定义空工作流应被拒绝"""
         engine = WorkflowEngine()
+        engine.workflows.clear()
         workflow_def = WorkflowDefinition(name="Empty Workflow")
         
-        workflow_id = engine.define_workflow(workflow_def)
-        
-        assert workflow_id is not None
-        assert len(engine.list_workflows()) == 1
+        with pytest.raises(ValueError, match="工作流必须包含至少一个任务"):
+            engine.define_workflow(workflow_def)
 
     @pytest.mark.asyncio
     async def test_execute_empty_workflow(self):
-        """边界：执行空工作流"""
+        """边界：执行空工作流应失败"""
         engine = WorkflowEngine()
         workflow_def = WorkflowDefinition(name="Empty Workflow")
-        workflow_id = engine.define_workflow(workflow_def)
         
-        result = await engine.execute_workflow(workflow_id)
-        
-        assert result["status"] == "completed"
-        assert len(result["task_results"]) == 0
+        with pytest.raises(ValueError, match="工作流必须包含至少一个任务"):
+            engine.define_workflow(workflow_def)
 
     def test_calculate_execution_order_cyclic_dependencies(self):
-        """边界：循环依赖"""
+        """边界：循环依赖 - 应fail-fast抛出异常，而非静默丢弃
+        BE-017修复：原测试期望静默返回空列表（弱断言，掩盖配置错误）
+        改进：循环依赖是配置错误，应抛出ValueError让调用方感知
+        """
         engine = WorkflowEngine()
         tasks = [
             WorkflowTask(type=TaskType.MONITORING, name="Task 1", id="task1", depends_on=["task2"]),
             WorkflowTask(type=TaskType.MONITORING, name="Task 2", id="task2", depends_on=["task1"]),
         ]
-        
-        order = engine._calculate_execution_order(tasks)
-        
-        assert len(order) == 0
+
+        with pytest.raises(ValueError, match="Circular dependency"):
+            engine._calculate_execution_order(tasks)
 
     def test_calculate_execution_order_empty_tasks(self):
         """边界：空任务列表"""
@@ -329,31 +335,44 @@ class TestWorkflowEngine:
         """异常：任务不存在"""
         engine = WorkflowEngine()
         workflow_def = WorkflowDefinition(name="Test Workflow", tasks=[])
-        workflow_id = engine.define_workflow(workflow_def)
         
-        result = await engine.execute_workflow(workflow_id)
-        
-        assert result["status"] == "completed"
-        assert len(result["task_results"]) == 0
+        with pytest.raises(ValueError, match="工作流必须包含至少一个任务"):
+            engine.define_workflow(workflow_def)
 
     @pytest.mark.asyncio
     async def test_handle_mutation_test_task(self):
-        """正向：处理变异测试任务"""
-        from unittest.mock import patch, MagicMock
-        
-        with patch("tests.utils.custom_mutation_test.CustomMutationTester") as mock_tester_cls:
-            mock_tester = MagicMock()
-            mock_tester.run.return_value = {"kill_rate": 0.8}
-            mock_tester_cls.return_value = mock_tester
-            
-            engine = WorkflowEngine()
-            task = WorkflowTask(type=TaskType.MUTATION_TEST, name="Mutation Test", params={"target_dir": "src/governance/"})
-            
+        """正向：处理变异测试任务 - 真实AST变异分析
+
+        P1-4 修复:使用 mock 隔离 subprocess 调用,避免真实 pytest 执行导致超时。
+        真实执行测试在 tests/platform/test_mutation_test_real.py 中验证。
+        """
+        from unittest.mock import patch
+        engine = WorkflowEngine()
+        task = WorkflowTask(type=TaskType.MUTATION_TEST, name="Mutation Test", params={"target_dir": "src/governance/"})
+
+        # mock _run_mutation_test 避免真实 subprocess 调用
+        # 返回 True(killed) 模拟测试发现变异
+        with patch.object(engine, '_run_mutation_test', return_value=True):
             result = await engine._handle_mutation_test_task(task, {}, {})
-            
-            assert "status" in result
-            assert result["status"] == "completed"
-            assert "report" in result
+
+        assert "status" in result
+        assert result["status"] == "completed"
+        assert "report" in result
+        assert result["report"]["target_dir"] == "src/governance/"
+        assert "kill_rate" in result["report"]
+        assert 0 <= result["report"]["kill_rate"] <= 1.0
+        assert "mutations" in result["report"]
+        assert "killed" in result["report"]
+        assert "survived" in result["report"]
+        # 一致性校验:total = killed + survived
+        assert result["report"]["mutations"] == result["report"]["killed"] + result["report"]["survived"]
+        # mock 返回 True,所有变异应被 killed
+        assert result["report"]["killed"] == result["report"]["mutations"]
+        assert result["report"]["survived"] == 0
+        # kill_rate 应为 1.0(全部 killed)
+        if result["report"]["mutations"] > 0:
+            assert result["report"]["kill_rate"] == 1.0
+        assert "details" in result["report"]
 
     @pytest.mark.asyncio
     async def test_handle_approval_task_approve(self):
@@ -447,8 +466,55 @@ class TestWorkflowEngine:
         """正向：处理延迟任务"""
         engine = WorkflowEngine()
         task = WorkflowTask(type=TaskType.DELAY, name="Delay", params={"seconds": 0.01})
-        
+
         result = await engine._handle_delay_task(task, {}, {})
-        
+
         assert result["status"] == "completed"
         assert result["delayed_seconds"] == 0.01
+
+    # === BE-017 复现测试：循环依赖检测 ===
+    def test_calculate_execution_order_with_circular_dependency(self):
+        """复现BUG BE-017：循环依赖应被检测并抛出异常，而非死循环
+        成功指标：循环依赖抛出ValueError
+        失败指标：死循环或返回不完整顺序
+        """
+        engine = WorkflowEngine()
+        # task_a 依赖 task_b, task_b 依赖 task_a → 循环
+        task_a = WorkflowTask(
+            type=TaskType.DELAY, name="A", id="task_a",
+            depends_on=["task_b"], params={"seconds": 0.01}
+        )
+        task_b = WorkflowTask(
+            type=TaskType.DELAY, name="B", id="task_b",
+            depends_on=["task_a"], params={"seconds": 0.01}
+        )
+
+        with pytest.raises(ValueError, match="Circular dependency"):
+            engine._calculate_execution_order([task_a, task_b])
+
+    def test_calculate_execution_order_with_self_dependency(self):
+        """复现BUG BE-017变体：自依赖也应被检测
+        成功指标：自依赖抛出ValueError
+        """
+        engine = WorkflowEngine()
+        task = WorkflowTask(
+            type=TaskType.DELAY, name="Self", id="task_self",
+            depends_on=["task_self"], params={"seconds": 0.01}
+        )
+
+        with pytest.raises(ValueError, match="Circular dependency"):
+            engine._calculate_execution_order([task])
+
+    def test_calculate_execution_order_with_valid_chain(self):
+        """回归保障：正常依赖链应返回正确顺序
+        成功指标：A→B→C 按拓扑顺序返回
+        """
+        engine = WorkflowEngine()
+        task_a = WorkflowTask(type=TaskType.DELAY, name="A", id="a", params={"seconds": 0.01})
+        task_b = WorkflowTask(type=TaskType.DELAY, name="B", id="b", depends_on=["a"], params={"seconds": 0.01})
+        task_c = WorkflowTask(type=TaskType.DELAY, name="C", id="c", depends_on=["b"], params={"seconds": 0.01})
+
+        order = engine._calculate_execution_order([task_a, task_b, task_c])
+
+        assert order == ["a", "b", "c"]
+        assert len(order) == 3

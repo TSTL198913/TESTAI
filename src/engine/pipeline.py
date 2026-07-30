@@ -6,6 +6,7 @@ import httpx
 
 from src.engine.factory import StepFactory
 from src.engine.processor.base import BaseProcessor
+from src.core.exceptions import PipelineError
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,8 @@ class ExecutionPipeline:
                     )
                     result = context.results.get(step.step_id, {})
                     result["status"] = "FAILED"
-                    result["error"] = e
+                    result["error"] = str(e)
+                    result["error_type"] = type(e).__name__
                     context.results[step.step_id] = result
                     is_failed = True
                     last_exception = e
@@ -56,6 +58,11 @@ class ExecutionPipeline:
                 all_exceptions.append(last_exception)
 
         if all_exceptions:
-            raise all_exceptions[0]
+            if len(all_exceptions) == 1:
+                raise all_exceptions[0]
+            raise PipelineError(
+                message=f"Pipeline failed with {len(all_exceptions)} errors",
+                errors=all_exceptions,
+            )
 
         return processed_steps

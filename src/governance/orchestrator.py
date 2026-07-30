@@ -1,7 +1,8 @@
 import json
 import logging
+import os
 from contextlib import contextmanager
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from src.governance.agent import AIGovernanceAgent
 from src.governance.approval import ApprovalManager, ApprovalStatus
@@ -70,7 +71,30 @@ class GovernanceOrchestrator:
                 "suggested_fix": None,
             }
 
-        diagnosis = await self.agent.analyze_with_context(context)
+        # P1-1/P1-2 修复:Agent 异常必须捕获并补全审计链,避免流程崩溃
+        try:
+            diagnosis = await self.agent.analyze_with_context(context)
+        except Exception as e:
+            self.logger.critical(
+                f"Agent diagnosis failed for trace {trace_id}: {e}",
+                exc_info=True,
+            )
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.DIAGNOSE_COMPLETE,
+                component=context.component_name,
+                step_id=context.step_id,
+                status="FAILED",
+                message=f"Agent exception: {type(e).__name__}: {e}",
+            )
+            return {
+                "status": "FAILED",
+                "error": str(e),
+                "reason": f"Agent diagnosis failed: {e}",
+                "confidence_score": 0.0,
+                "reasoning": f"Agent raised {type(e).__name__}",
+                "suggested_fix": None,
+            }
 
         result = {
             "status": "DIAGNOSED",
@@ -138,6 +162,16 @@ class GovernanceOrchestrator:
             )
             return result
 
+        self.approval_mgr.approve(tx_id, approver="system", reason="Auto-approved")
+        self.tracker.record_event(
+            trace_id=trace_id,
+            action_type=GovernanceActionType.APPROVAL_GRANTED,
+            component=context.component_name,
+            step_id=context.step_id,
+            tx_id=tx_id,
+            message="Auto-approved by system",
+        )
+
         try:
             with governance_transaction(self.git_mgr, tx_id, proposal):
                 target_file = self._resolve_file_path(context.component_name)
@@ -160,6 +194,9 @@ class GovernanceOrchestrator:
                 if not success:
                     raise RuntimeError(f"Executor failed to apply patch for {tx_id}")
 
+            evaluation_result = self._evaluate_patch_quality(proposal, context)
+            result["evaluation"] = evaluation_result
+
             result["status"] = "FIXED"
             self.tracker.record_event(
                 trace_id=trace_id,
@@ -169,6 +206,8 @@ class GovernanceOrchestrator:
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
                 status="FIXED",
+                evaluation_score=evaluation_result.get("score", 0.0),
+                evaluation_grade=evaluation_result.get("grade", "unknown"),
             )
             return result
 
@@ -189,11 +228,126 @@ class GovernanceOrchestrator:
             return result
 
     def _classify_exception(self, context: DiagnosticContext) -> GovernanceAction:
-        return GovernanceAction.AI_DIAGNOSE
+        """P1-3 修复:基于异常 trace 与基线偏差分类治理动作。
+
+        分类规则(大小写不敏感):
+        - 网络/超时异常 → RETRY(可重试恢复)
+        - 代码级异常 → AI_DIAGNOSE(AI 诊断修复)
+        - 空 trace 但存在基线偏差(actual != expected) → AI_DIAGNOSE
+        - 空 trace 且无基线偏差 → MANUAL_REQUIRED(人工介入)
+        - 未知异常 → MANUAL_REQUIRED(人工介入)
+
+        Args:
+            context: 诊断上下文,包含 exception_trace / actual_output / expected_baseline 字段
+
+        Returns:
+            GovernanceAction 枚举值
+        """
+        trace = (context.exception_trace or "").lower()
+
+        # 无异常 trace 时:检查是否存在基线偏差
+        if not trace:
+            actual = (context.actual_output or "").strip()
+            expected = (context.expected_baseline or "").strip()
+            # 存在基线偏差:需要 AI 诊断根因
+            if actual and expected and actual != expected:
+                return GovernanceAction.AI_DIAGNOSE
+            # 既无异常 trace 也无基线偏差:无法自动诊断
+            return GovernanceAction.MANUAL_REQUIRED
+
+        # 网络/超时类异常:可重试恢复
+        network_keywords = [
+            "connectionerror",
+            "timeout",
+            "timeouterror",
+            "connectionreset",
+            "connectionrefused",
+            "network unreachable",
+            "connection aborted",
+            "connection refused",
+            "connection reset",
+        ]
+        if any(kw in trace for kw in network_keywords):
+            return GovernanceAction.RETRY
+
+        # 代码级异常:AI 诊断修复
+        code_keywords = [
+            "syntaxerror",
+            "nameerror",
+            "typeerror",
+            "valueerror",
+            "attributeerror",
+            "keyerror",
+            "indexerror",
+            "zerodivisionerror",
+            "importerror",
+            "modulenotfounderror",
+            "recursionerror",
+            "notimplementederror",
+            "assertionerror",
+        ]
+        if any(kw in trace for kw in code_keywords):
+            return GovernanceAction.AI_DIAGNOSE
+
+        # 未知异常:人工介入
+        return GovernanceAction.MANUAL_REQUIRED
 
     def _resolve_file_path(self, component_name: str) -> str:
+        if component_name is None:
+            component_name = "None"
+        
+        if ".." in component_name or "/" in component_name or "\\" in component_name:
+            raise ValueError(f"Invalid component name: {component_name}")
+        
         mapping = {"EvalPlatformProcessor": "extensions/eval_platform/processor.py"}
-        return mapping.get(component_name, f"src/components/{component_name}.py")
+        relative_path = mapping.get(component_name, f"src/components/{component_name}.py")
+        
+        abs_path = os.path.abspath(relative_path)
+        project_root = os.path.abspath(".")
+        
+        if not abs_path.startswith(project_root + os.sep) and abs_path != project_root:
+            raise ValueError(f"Path traversal detected: {component_name} -> {abs_path}")
+        
+        return relative_path
+
+    def _evaluate_patch_quality(self, proposal, context) -> Dict[str, Any]:
+        try:
+            from src.ai.evaluator import AIEvaluator
+
+            evaluator = AIEvaluator()
+            expected_output = context.expected_baseline or ""
+            actual_output = context.actual_output or ""
+
+            if expected_output and actual_output:
+                evaluation = evaluator.evaluate(actual_output, expected_output)
+                return evaluation.to_dict()
+            else:
+                return {
+                    "grade": "fair",
+                    "score": 0.5,
+                    "matches_expected": None,
+                    "similarity": 0.0,
+                    "correctness": 0.0,
+                    "completeness": 0.0,
+                    "confidence": 0.5,
+                    "explanation": "Insufficient data for evaluation",
+                    "discrepancies": {},
+                    "suggestions": {},
+                }
+        except Exception as e:
+            self.logger.warning(f"Patch evaluation failed: {e}")
+            return {
+                "grade": "fair",
+                "score": 0.5,
+                "matches_expected": None,
+                "similarity": 0.0,
+                "correctness": 0.0,
+                "completeness": 0.0,
+                "confidence": 0.3,
+                "explanation": f"Evaluation error: {str(e)}",
+                "discrepancies": {},
+                "suggestions": {},
+            }
 
     async def approve_and_apply(
         self, tx_id: str, approver: str, reason: Optional[str] = None
@@ -204,6 +358,9 @@ class GovernanceOrchestrator:
 
         trace_id = record.context.step_id or tx_id
         context = record.context
+
+        if record.status != ApprovalStatus.PENDING:
+            return {"status": "FAILED", "reason": f"Approval already processed (status: {record.status.value})"}
 
         if not self.approval_mgr.approve(tx_id, approver, reason):
             self.tracker.record_event(

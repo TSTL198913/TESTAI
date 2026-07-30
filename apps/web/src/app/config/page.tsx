@@ -64,6 +64,10 @@ export default function ConfigPage() {
         return '工作流配置';
       case 'api':
         return 'API 配置';
+      case 'mutation_test':
+        return '变异测试配置';
+      case 'platform':
+        return '平台配置';
       default:
         return section;
     }

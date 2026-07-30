@@ -3,6 +3,7 @@
 覆盖场景：正向、负向、边界、异常、依赖
 """
 import os
+import sys
 import pytest
 import tempfile
 from unittest.mock import patch, MagicMock
@@ -82,8 +83,10 @@ class TestPasswordHasher:
     # === 依赖场景 ===
     def test_pbkdf2_format_verification(self):
         """依赖：PBKDF2哈希格式正确（当bcrypt不可用时）"""
-        with patch("src.security.auth.BCRYPT_AVAILABLE", False):
-            hashed = PasswordHasher.hash_password("testpassword")
+        with patch.dict(sys.modules, {"bcrypt": None}):
+            import src.security.auth as auth_module
+            auth_module.BCRYPT_AVAILABLE = False
+            hashed = auth_module.PasswordHasher.hash_password("testpassword")
             assert hashed.startswith("pbkdf2$")
             parts = hashed.split("$")
             assert len(parts) == 4
@@ -94,12 +97,14 @@ class TestPasswordHasher:
 
     def test_pbkdf2_verification_works(self):
         """依赖：PBKDF2哈希能正确验证"""
-        with patch("src.security.auth.BCRYPT_AVAILABLE", False):
+        with patch.dict(sys.modules, {"bcrypt": None}):
+            import src.security.auth as auth_module
+            auth_module.BCRYPT_AVAILABLE = False
             password = "pbkdf2testpassword"
-            hashed = PasswordHasher.hash_password(password)
+            hashed = auth_module.PasswordHasher.hash_password(password)
             assert hashed.startswith("pbkdf2$")
-            assert PasswordHasher.verify_password(password, hashed) is True
-            assert PasswordHasher.verify_password("wrong", hashed) is False
+            assert auth_module.PasswordHasher.verify_password(password, hashed) is True
+            assert auth_module.PasswordHasher.verify_password("wrong", hashed) is False
 
 
 class TestTokenManagerSecretKey:
@@ -206,7 +211,7 @@ class TestTokenManagerPasswordAuth:
     def test_password_hash_not_stored_in_plaintext(self):
         """依赖：密码哈希不是明文"""
         manager = TokenManager(secret_key="test-secret-key-at-least-32-bytes-long!")
-        stored_hash = manager.get_password_hash("admin")
+        stored_hash = manager._get_password_hash("admin")
         assert stored_hash != "password"
         assert len(stored_hash) > 0
 

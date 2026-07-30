@@ -53,6 +53,12 @@ class APITestClient:
 
     async def close(self):
         await self.client.aclose()
+    
+    async def __aenter__(self):
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
 
     async def get(self, url: str, **kwargs) -> Tuple[int, Dict[str, Any], float, Dict[str, str]]:
         return await self.send_request(HTTPMethod.GET, url, **kwargs)

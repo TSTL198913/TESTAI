@@ -26,7 +26,12 @@ class GovernanceRegistryError(Exception):
 class GovernanceRegistry:
     _instance = None
     _lock = threading.Lock()
-    _registry: Dict[PatchType, Type[cst.CSTTransformer]] = {}
+    _registry: Dict[PatchType, Type[cst.CSTTransformer]] = {
+        PatchType.SECURITY: ContextAwareTransformer,
+        PatchType.PERFORMANCE: FunctionTransformer,
+        PatchType.FUNCTIONAL: FunctionTransformer,
+        PatchType.REFACTORING: ContextAwareTransformer,
+    }
 
     def __new__(cls):
         """单例模式：确保治理策略在全局唯一"""
@@ -49,9 +54,10 @@ class GovernanceRegistry:
                 f"Governance Policy Registered: {patch_type.value} -> {transformer_cls.__name__}"
             )
 
-    @staticmethod
-    def create_transformer(patch_type: PatchType, **kwargs):
-        # 如果提供了 target_class，强制使用 ContextAwareTransformer
+    @classmethod
+    def create_transformer(cls, patch_type: PatchType, **kwargs):
+        transformer_cls = cls._registry.get(patch_type, FunctionTransformer)
+        
         if kwargs.get("target_class"):
             return ContextAwareTransformer(
                 target_function=kwargs["target_function"],
@@ -59,8 +65,8 @@ class GovernanceRegistry:
                 new_body=kwargs["new_body"],
                 required_imports=kwargs.get("required_imports"),
             )
-        # 默认回退到标准 FunctionTransformer
-        return FunctionTransformer(
+        
+        return transformer_cls(
             target_function=kwargs["target_function"],
             new_body=kwargs["new_body"],
             required_imports=kwargs.get("required_imports"),

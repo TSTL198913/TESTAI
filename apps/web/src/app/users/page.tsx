@@ -60,7 +60,6 @@ const statusText = (status?: string) => {
 };
 
 export default function UsersPage() {
-  const [token, setToken] = useState<string>('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -79,26 +78,28 @@ export default function UsersPage() {
   const [formError, setFormError] = useState<string>('');
 
   useEffect(() => {
-    const stored = localStorage.getItem('token') || '';
-    setToken(stored);
-    if (!stored) {
+    const user = localStorage.getItem('user');
+    if (!user) {
       setError('未检测到登录凭证，请先登录');
       setLoading(false);
+      return;
     }
+    fetchUsers();
   }, []);
-
-  useEffect(() => {
-    if (token) fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
 
   const fetchUsers = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await userApi.list(token);
+      const res = await userApi.list();
       const list = res.data?.users || res.data?.items || res.data || [];
-      setUsers(Array.isArray(list) ? list : []);
+      const mapped = Array.isArray(list)
+        ? list.map((u: any) => ({
+            ...u,
+            id: u.id || u.user_id,
+          }))
+        : [];
+      setUsers(mapped);
     } catch (err: any) {
       const detail =
         err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
@@ -143,10 +144,6 @@ export default function UsersPage() {
       setFormError('用户名和邮箱不能为空');
       return;
     }
-    if (!editingUser && !form.password) {
-      setFormError('创建用户时必须设置密码');
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -156,12 +153,11 @@ export default function UsersPage() {
         role: form.role,
       };
       if (form.department.trim()) payload.department = form.department.trim();
-      if (form.password) payload.password = form.password;
 
       if (editingUser) {
-        await userApi.update(token, editingUser.id, payload);
+        await userApi.update(editingUser.id, payload);
       } else {
-        await userApi.create(token, payload);
+        await userApi.create(payload);
       }
       closeModal();
       await fetchUsers();
@@ -177,7 +173,7 @@ export default function UsersPage() {
   const handleDelete = async (user: User) => {
     if (!confirm(`确认删除用户 ${user.username}？此操作不可恢复。`)) return;
     try {
-      await userApi.delete(token, user.id);
+      await userApi.delete(user.id);
       await fetchUsers();
     } catch (err: any) {
       const detail =
@@ -188,7 +184,7 @@ export default function UsersPage() {
 
   const handleActivate = async (user: User) => {
     try {
-      await userApi.activate(token, user.id);
+      await userApi.activate(user.id);
       await fetchUsers();
     } catch (err: any) {
       const detail =
@@ -200,7 +196,7 @@ export default function UsersPage() {
   const handleSuspend = async (user: User) => {
     if (!confirm(`确认停用用户 ${user.username}？`)) return;
     try {
-      await userApi.suspend(token, user.id);
+      await userApi.suspend(user.id);
       await fetchUsers();
     } catch (err: any) {
       const detail =

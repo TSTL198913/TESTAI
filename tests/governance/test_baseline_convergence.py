@@ -252,6 +252,32 @@ class TestCalculateConvergenceScore:
         assert score >= 0.0, "Convergence score should never be negative"
 
 
+class TestCheckConvergence:
+    def test_check_convergence_returns_converged_when_score_above_threshold(self, baseline_manager, security_normal_data):
+        result = baseline_manager.check_convergence("golden_sec_normal_001", security_normal_data)
+        assert result["converged"] is True
+        assert result["score"] >= 0.9
+        assert len(result["errors"]) == 0
+
+    def test_check_convergence_returns_diverged_when_score_below_threshold(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["score"] = 0.85
+        data["data"]["data"]["overall_score"] = 0.85
+        result = baseline_manager.check_convergence("golden_sec_normal_001", data)
+        assert result["converged"] is False
+        assert result["score"] < 0.9
+        assert len(result["errors"]) > 0
+
+    def test_check_convergence_diverged_with_multiple_errors(self, baseline_manager, security_normal_data):
+        data = copy.deepcopy(security_normal_data)
+        data["data"]["score"] = 0.85
+        data["data"]["data"]["risk_level"] = "medium"
+        result = baseline_manager.check_convergence("golden_sec_normal_001", data)
+        assert result["converged"] is False
+        assert result["score"] == 0.6
+        assert len(result["errors"]) == 2
+
+
 class TestBaselineRecord:
     def test_baseline_record_creation(self):
         record = BaselineRecord(

@@ -124,8 +124,8 @@ class DashboardService:
         metrics = health_monitor.get_metrics()
         alerts = alert_manager.get_alerts()
 
-        critical_alerts = [a for a in alerts if a.level == "CRITICAL"]
-        error_alerts = [a for a in alerts if a.level == "ERROR"]
+        critical_alerts = [a for a in alerts if a["level"] == "CRITICAL"]
+        error_alerts = [a for a in alerts if a["level"] == "ERROR"]
 
         return {
             "status": status.get("status", "UNKNOWN"),
