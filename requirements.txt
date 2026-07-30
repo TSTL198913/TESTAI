@@ -1,6 +1,7 @@
 amqp==5.3.1
 annotated-doc==0.0.4
 annotated-types==0.7.0
+bcrypt>=4.0.0
 anyio==4.14.1
 async-timeout==5.0.1
 backports.asyncio.runner==1.2.0
@@ -43,6 +44,7 @@ pytest-cov==4.1.0
 pytest-timeout==2.2.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
+pyyaml==6.0.2
 redis==4.6.0
 respx==0.23.1
 six==1.17.0
