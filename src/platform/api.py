@@ -76,6 +76,24 @@ async def remove_server_header(request, call_next):
         del response.headers["Server"]
     return response
 
+# P0-2 修复: API 请求指标中间件
+# 每次请求结束后记录 Prometheus 指标
+@app.middleware("http")
+async def api_metrics_middleware(request: Request, call_next):
+    import time
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+    
+    api_metrics.record_request(
+        endpoint=str(request.url.path),
+        method=request.method,
+        status_code=response.status_code,
+        duration=duration
+    )
+    
+    return response
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_allowed_origins,
