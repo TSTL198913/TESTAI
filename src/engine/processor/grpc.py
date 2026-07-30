@@ -9,27 +9,43 @@ from src.models.result import StepResult
 # ... imports 保持不变 ...
 
 
-class GrpcProcessor(BaseProcessor):  # 修改类名
+class GrpcProcessor(BaseProcessor):
     _channels: dict[tuple[str, int], Any] = {}
 
     @classmethod
     def _get_channel(cls, host: str, port: int):
-        # ... 逻辑保持不变 ...
-        pass
+        key = (host, port)
+        if key not in cls._channels:
+            # P0-5 修复: 不返回空实现，抛出 NotImplementedError
+            # gRPC 生产环境未实现，诚实报错而非假成功
+            raise NotImplementedError(
+                f"gRPC channel not implemented for {host}:{port}. "
+                f"GrpcProcessor requires actual gRPC infrastructure. "
+                f"If you need gRPC support, implement _get_channel() with grpc.insecure_channel()."
+            )
+        return cls._channels[key]
 
-    # 必须接收 client 参数（尽管 gRPC 可能使用单独的 Channel 管理，但为了接口统一，保留 client 位）
     async def process(self, context, step: GrpcRequest, client=None) -> GrpcRequest:
         host = context.env.get("grpc_host", "localhost")
         port = int(context.env.get("grpc_port", 50051))
-        channel = self._get_channel(host, port)
+        
+        # P0-5 修复: 当 gRPC 不可用时抛出异常，而非假成功
+        try:
+            channel = self._get_channel(host, port)
+        except NotImplementedError as e:
+            raise EngineError(
+                f"gRPC step '{step.step_id}' failed: {str(e)}"
+            ) from e
 
         try:
-            # ... 执行逻辑 ...
-            result = {"message": "Success", "data": step.payload}
-            context.results[step.step_id] = StepResult(
-                status="PASSED", status_code=200, body=result, error=None
-            ).model_dump()
+            # 真实 gRPC 调用应在此处执行
+            # 当前未实现，抛出异常而非返回假成功
+            raise NotImplementedError(
+                f"gRPC call not implemented for method '{step.method}'. "
+                f"GrpcProcessor.process() requires actual gRPC stub implementation."
+            )
+        except NotImplementedError:
+            # 转换为业务异常
+            raise
         except Exception as e:
             raise InfrastructureError(f"GRPC Error: {str(e)}") from e
-
-        return step  # 必须返回 step
