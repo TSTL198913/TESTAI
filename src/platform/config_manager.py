@@ -28,7 +28,7 @@ class ConfigManager:
             return cls._instance
 
     def __init__(self, config_file: Optional[str] = None):
-        if self._initialized:
+        if self._initialized:  # pylint: disable=access-member-before-definition
             return
         import threading
         self._config_file = config_file or os.path.join(

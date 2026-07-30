@@ -29,7 +29,7 @@ from src.ai.evaluator import AIEvaluator
 from src.ai.qa_engine import AIQAEngine
 from src.ai.classifier import AITextClassifier
 from src.platform.metrics import APIMetrics
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST  # pylint: disable=import-error
 
 
 app = FastAPI(
@@ -229,7 +229,8 @@ class CreateUserRequest(BaseModel):
     department: str = ""
 
     @field_validator('email')
-    def validate_email(cls, v):
+    @classmethod
+    def validate_email(cls, v):  # pylint: disable=no-self-argument
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, v):
             raise ValueError("Invalid email format")
@@ -250,7 +251,8 @@ class CreateTeamRequest(BaseModel):
     description: str = ""
 
     @field_validator('name')
-    def validate_name(cls, v):
+    @classmethod
+    def validate_name(cls, v):  # pylint: disable=no-self-argument
         if not v or not v.strip():
             raise ValueError("Team name cannot be empty")
         if len(v.strip()) > 100:

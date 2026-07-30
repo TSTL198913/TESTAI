@@ -171,7 +171,7 @@ class AlertManager:
         return alert
 
     def _send_webhook(self, alert: AlertRecord):
-        import requests
+        import requests  # pylint: disable=import-error
 
         try:
             requests.post(

@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Any
 
-from src.governance.governance_history import GovernanceDecision, GovernanceHistory
+from src.governance.governance_history import GovernanceDecision, GovernanceHistory  # pylint: disable=import-error,no-name-in-module
 
 
 @dataclass
@@ -32,7 +32,7 @@ class AutoDecisionEngine:
         return cls._instance
 
     def __init__(self):
-        if self._initialized:
+        if self._initialized:  # pylint: disable=access-member-before-definition
             return
         self._initialized = True
         self._rules: List[DecisionRule] = []

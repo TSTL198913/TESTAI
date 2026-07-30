@@ -73,7 +73,8 @@ class WorkflowDefinition(BaseModel):
     task_count: Optional[int] = None
 
     @field_validator('name')
-    def validate_name(cls, v):
+    @classmethod
+    def validate_name(cls, v):  # pylint: disable=no-self-argument
         if not v or not v.strip():
             raise ValueError("工作流名称不能为空")
         if len(v.strip()) > 100:
@@ -92,7 +93,8 @@ class WorkflowDefinition(BaseModel):
         return v.strip()
 
     @field_validator('task_count')
-    def validate_task_count(cls, v):
+    @classmethod
+    def validate_task_count(cls, v):  # pylint: disable=no-self-argument
         if v is not None:
             if not isinstance(v, int):
                 raise ValueError("任务数必须为整数")
@@ -103,7 +105,8 @@ class WorkflowDefinition(BaseModel):
         return v
 
     @field_validator('description')
-    def validate_description(cls, v):
+    @classmethod
+    def validate_description(cls, v):  # pylint: disable=no-self-argument
         if v and len(v) > 1000:
             raise ValueError("工作流描述不能超过1000个字符")
         return v
@@ -152,7 +155,7 @@ class WorkflowEngine:
             return cls._instance
 
     def __init__(self):
-        if self._initialized:
+        if self._initialized:  # pylint: disable=access-member-before-definition
             return
         self.workflows: Dict[str, WorkflowDefinition] = {}
         self.instances: Dict[str, WorkflowInstance] = {}

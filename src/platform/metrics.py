@@ -1,5 +1,5 @@
 import threading
-from prometheus_client import Counter, Histogram, Gauge
+from prometheus_client import Counter, Histogram, Gauge  # pylint: disable=import-error
 
 
 class APIMetrics:

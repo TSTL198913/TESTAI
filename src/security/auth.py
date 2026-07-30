@@ -93,7 +93,7 @@ class TokenManager:
             return cls._instance
 
     def __init__(self, secret_key: Optional[str] = None, algorithm: str = "HS256"):
-        if self._initialized:
+        if self._initialized:  # pylint: disable=access-member-before-definition
             return
         self.secret_key = self._get_or_generate_secret_key(secret_key)
         self.algorithm = algorithm

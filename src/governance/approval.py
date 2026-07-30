@@ -55,8 +55,10 @@ class ApprovalManager:
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
-                cls._instance._approvals = {}
-                cls._instance._db_path = Path(db_path)
+                # pylint: disable=no-member
+                cls._instance._approvals: Dict[str, ApprovalRecord] = {}
+                cls._instance._db_path: Path = Path(db_path)
+                # pylint: enable=no-member
                 cls._instance._init_db()
                 cls._instance._load_from_db()
         return cls._instance
@@ -68,8 +70,8 @@ class ApprovalManager:
 
     def _init_db(self):
         with self._db_lock:
-            self._db_path.parent.mkdir(parents=True, exist_ok=True)
-            conn = sqlite3.connect(str(self._db_path))
+            self._db_path.parent.mkdir(parents=True, exist_ok=True)  # pylint: disable=no-member
+            conn = sqlite3.connect(str(self._db_path))  # pylint: disable=no-member
             cursor = conn.cursor()
             cursor.execute('\n                CREATE TABLE IF NOT EXISTS approval_records (\n                    tx_id TEXT PRIMARY KEY,\n                    proposal_json TEXT NOT NULL,\n                    context_json TEXT NOT NULL,\n                    status TEXT NOT NULL,\n                    created_at TEXT NOT NULL,\n                    approved_by TEXT,\n                    approved_at TEXT,\n                    reason TEXT,\n                    expires_at TEXT NOT NULL\n                )\n            ')
             conn.commit()
@@ -78,7 +80,7 @@ class ApprovalManager:
     def _load_from_db(self):
         with self._lock:
             with self._db_lock:
-                conn = sqlite3.connect(str(self._db_path))
+                conn = sqlite3.connect(str(self._db_path))  # pylint: disable=no-member
                 cursor = conn.cursor()
                 cursor.execute('SELECT * FROM approval_records')
                 for row in cursor.fetchall():
@@ -92,13 +94,13 @@ class ApprovalManager:
                     record.approved_at = datetime.fromisoformat(approved_at) if approved_at else None
                     record.reason = reason
                     record.expires_at = datetime.fromisoformat(expires_at)
-                    self._approvals[tx_id] = record
+                    self._approvals[tx_id] = record  # pylint: disable=no-member
                 conn.close()
 
     def _save_to_db(self, record: ApprovalRecord):
         with self._lock:
             with self._db_lock:
-                conn = sqlite3.connect(str(self._db_path))
+                conn = sqlite3.connect(str(self._db_path))  # pylint: disable=no-member
                 cursor = conn.cursor()
                 cursor.execute('\n                    INSERT OR REPLACE INTO approval_records\n                    (tx_id, proposal_json, context_json, status, created_at,\n                     approved_by, approved_at, reason, expires_at)\n                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)\n                ', (record.tx_id, record.proposal.model_dump_json(), record.context.model_dump_json(), record.status.value, record.created_at.isoformat(), record.approved_by, record.approved_at.isoformat() if record.approved_at else None, record.reason, record.expires_at.isoformat()))
                 conn.commit()
@@ -106,19 +108,19 @@ class ApprovalManager:
 
     def create_approval(self, tx_id: str, proposal: PatchProposal, context: DiagnosticContext) -> ApprovalRecord:
         with self._lock:
-            if tx_id in self._approvals:
-                existing_record = self._approvals[tx_id]
+            if tx_id in self._approvals:  # pylint: disable=no-member
+                existing_record = self._approvals[tx_id]  # pylint: disable=no-member
                 self._logger.warning(f'[APPROVAL] Approval record already exists: {tx_id}, status: {existing_record.status.value}')
                 raise ValueError(f"duplicate tx_id: {tx_id}")
             record = ApprovalRecord(tx_id, proposal, context)
-            self._approvals[tx_id] = record
+            self._approvals[tx_id] = record  # pylint: disable=no-member
         self._save_to_db(record)
         self._logger.info(f'[APPROVAL] Created approval record: {tx_id} ({proposal.patch_type.value})')
         return record
 
     def get_approval(self, tx_id: str) -> Optional[ApprovalRecord]:
         with self._lock:
-            record = self._approvals.get(tx_id)
+            record = self._approvals.get(tx_id)  # pylint: disable=no-member
             if record and record.is_expired:
                 record.status = ApprovalStatus.EXPIRED
                 self._save_to_db(record)
@@ -127,7 +129,7 @@ class ApprovalManager:
 
     def approve(self, tx_id: str, approver: str, reason: Optional[str]=None) -> bool:
         with self._lock:
-            record = self._approvals.get(tx_id)
+            record = self._approvals.get(tx_id)  # pylint: disable=no-member
             if not record:
                 return False
             if record.status != ApprovalStatus.PENDING:
@@ -146,7 +148,7 @@ class ApprovalManager:
 
     def reject(self, tx_id: str, approver: str, reason: str) -> bool:
         with self._lock:
-            record = self._approvals.get(tx_id)
+            record = self._approvals.get(tx_id)  # pylint: disable=no-member
             if not record:
                 return False
             if record.status != ApprovalStatus.PENDING:
@@ -165,7 +167,7 @@ class ApprovalManager:
 
     def requires_approval(self, tx_id: str) -> bool:
         with self._lock:
-            record = self._approvals.get(tx_id)
+            record = self._approvals.get(tx_id)  # pylint: disable=no-member
             if not record:
                 return False
             if record.is_expired:
@@ -180,12 +182,12 @@ class ApprovalManager:
 
     def list_pending(self) -> list[ApprovalRecord]:
         with self._lock:
-            return [r for r in self._approvals.values() if r.status == ApprovalStatus.PENDING and (not r.is_expired)]
+            return [r for r in self._approvals.values() if r.status == ApprovalStatus.PENDING and (not r.is_expired)]  # pylint: disable=no-member
 
     def cleanup_expired(self):
         with self._lock:
-            expired_ids = [tx_id for (tx_id, record) in self._approvals.items() if record.is_expired]
+            expired_ids = [tx_id for (tx_id, record) in self._approvals.items() if record.is_expired]  # pylint: disable=no-member
             for tx_id in expired_ids:
-                self._approvals[tx_id].status = ApprovalStatus.EXPIRED
-                self._save_to_db(self._approvals[tx_id])
+                self._approvals[tx_id].status = ApprovalStatus.EXPIRED  # pylint: disable=no-member
+                self._save_to_db(self._approvals[tx_id])  # pylint: disable=no-member
                 self._logger.info(f'[APPROVAL] Cleaned up expired: {tx_id}')
