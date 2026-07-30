@@ -55,17 +55,18 @@ class TestGrpcProcessorChannelsConcurrency:
 
 
 class TestGrpcProcessorNotImplemented:
-    """BUG-082: GrpcProcessor._get_channel和核心逻辑未实现"""
+    """BUG-082: GrpcProcessor._get_channel和核心逻辑未实现 (已修复: P0-5)"""
     
-    def test_get_channel_returns_none(self):
-        """验证_get_channel方法返回None而非实际的gRPC channel"""
+    def test_get_channel_raises_not_implemented_error(self):
+        """验证_get_channel方法在gRPC未实现时抛出NotImplementedError"""
         processor = GrpcProcessor()
-        channel = processor._get_channel("localhost", 50051)
-        assert channel is None
+        with pytest.raises(NotImplementedError) as exc_info:
+            processor._get_channel("localhost", 50051)
+        assert "gRPC channel not implemented" in str(exc_info.value)
     
     @pytest.mark.asyncio
-    async def test_process_returns_success_without_actual_call(self):
-        """验证process方法没有执行实际的gRPC调用就返回成功"""
+    async def test_process_raises_engine_error_when_grpc_unavailable(self):
+        """验证process方法在gRPC不可用时抛出EngineError，而非假成功"""
         processor = GrpcProcessor()
         context = ExecutionContext(case_id="test_case")
         step = GrpcRequest(
@@ -77,11 +78,10 @@ class TestGrpcProcessorNotImplemented:
             proto_file_path="test.proto"
         )
         
-        result = await processor.process(context, step, None)
+        with pytest.raises(EngineError) as exc_info:
+            await processor.process(context, step, None)
         
-        assert result == step
-        assert "test_grpc" in context.results
-        assert context.results["test_grpc"]["status"] == "PASSED"
+        assert "gRPC step 'test_grpc' failed" in str(exc_info.value)
 
 
 class TestDataProcessorUnusedMethod:
