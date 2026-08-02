@@ -1,0 +1,183 @@
+# Dockerfile.prod 生产镜像验证工作流
+#
+# 背景: 本地 Windows 不支持 Docker (Docker Desktop 无法启动),
+# 改为在 GitHub Actions (ubuntu-latest) 上验证 Dockerfile.prod 可构建且可运行。
+#
+# 现有 ci.yml 的 docker-build job 只构建开发版 Dockerfile (docker build -t testai:ci .),
+# 从未构建过 Dockerfile.prod — 本工作流填补该缺口。
+#
+# 验证内容 (4 层):
+#   1. 构建: docker build -f Dockerfile.prod 成功
+#   2. 冒烟: 镜像内 app 可导入 (无需外部依赖)
+#   3. 密钥强制: docker-compose.prod.yml 的 :? 语法生效 (缺密钥时拒绝启动)
+#   4. compose 启动: api+mongo+redis 全栈启动, /health 响应
+#
+# 触发: Dockerfile.prod / docker-compose.prod.yml / requirements.txt / src/ 变更, 或手动
+
+name: Docker Prod Image Verification
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'Dockerfile.prod'
+      - 'docker-compose.prod.yml'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'src/**'
+      - '.github/workflows/docker-prod.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Dockerfile.prod'
+      - 'docker-compose.prod.yml'
+      - 'requirements.txt'
+      - 'src/**'
+  workflow_dispatch:
+
+concurrency:
+  group: docker-prod-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prod-docker-verify:
+    name: Dockerfile.prod Build & Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # ============================================================
+      # 层 1: 构建 Dockerfile.prod
+      # ============================================================
+      - name: Build Dockerfile.prod
+        run: |
+          echo "=== 构建 Dockerfile.prod ==="
+          docker build -f Dockerfile.prod -t testai-prod:ci .
+          echo "✅ Dockerfile.prod 构建成功"
+
+      # ============================================================
+      # 层 2: 冒烟测试 - 镜像内 app 可导入 (无需 mongo/redis)
+      # ============================================================
+      - name: Smoke test - verify app imports in prod image
+        run: |
+          echo "=== 冒烟测试: 镜像内 app 导入 ==="
+          # 不启动 uvicorn (避免依赖 mongo/redis), 仅验证 Python 可导入 app
+          docker run --rm --entrypoint python testai-prod:ci -c "
+          from src.platform.api import app
+          print(f'✅ App 导入成功, 路由数={len(app.routes)}')
+          # 验证非 root 用户生效
+          import os, pwd
+          print(f'✅ 运行用户={pwd.getpwuid(os.getuid()).pw_name} (uid={os.getuid()})')
+          assert os.getuid() != 0, '❌ 不应以 root 运行'
+          print('✅ 非 root 用户验证通过')
+          "
+
+      # ============================================================
+      # 层 3: 密钥强制验证 - docker-compose.prod.yml 的 :? 语法
+      # ============================================================
+      - name: Validate secret enforcement (:? syntax)
+        run: |
+          echo "=== 测试 1: 未设置密钥时 compose config 应失败 ==="
+          # 不提供 PROD_SECRET_KEY / PROD_JWT_SECRET_KEY / GRAFANA_ADMIN_PASSWORD
+          # :? 语法应使 docker compose config 立即报错退出
+          if docker compose -f docker-compose.prod.yml config > /dev/null 2>&1; then
+            echo "❌ :? 未生效: 缺少密钥时 compose config 不应成功"
+            echo "   这意味着生产环境可能用空密钥启动 (P0 安全漏洞)"
+            exit 1
+          else
+            echo "✅ :? 生效: 缺少密钥时 compose 拒绝启动"
+          fi
+
+          echo ""
+          echo "=== 测试 2: 设置密钥后 compose config 应成功 ==="
+          PROD_SECRET_KEY=ci-secret \
+          PROD_JWT_SECRET_KEY=ci-jwt \
+          GRAFANA_ADMIN_PASSWORD=ci-admin \
+          DEEPSEEK_API_KEY=ci-test \
+            docker compose -f docker-compose.prod.yml config > /dev/null 2>&1 \
+            && echo "✅ 设置密钥后 compose config 成功" \
+            || { echo "❌ 设置密钥后 compose config 仍失败"; exit 1; }
+
+      # ============================================================
+      # 层 4: compose 全栈启动 - api + mongo + redis
+      # ============================================================
+      - name: Start prod stack (api + mongo + redis)
+        env:
+          PROD_SECRET_KEY: ci-test-secret-key-not-for-prod-use
+          PROD_JWT_SECRET_KEY: ci-test-jwt-secret-not-for-prod-use
+          DEEPSEEK_API_KEY: ci-test-deepseek-key
+        run: |
+          echo "=== 启动 prod compose 栈 (api+mongo+redis) ==="
+          # 仅启动 api 及其依赖 (mongo, redis), 不启动 prometheus/grafana/nginx
+          # 避免外部监控服务的配置依赖干扰核心验证
+          docker compose -f docker-compose.prod.yml up -d api mongo redis
+          echo "✅ compose 栈已启动"
+
+      - name: Wait for API health
+        run: |
+          echo "=== 等待 API 健康 (最长 120s) ==="
+          # api 服务 healthcheck start_period=40s, 这里给 120s 余量
+          for i in $(seq 1 60); do
+            HTTP_CODE=$(curl -s -o /tmp/health.json -w "%{http_code}" http://localhost:8000/health || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Prod API 健康响应 (第 $((i*2))s)"
+              cat /tmp/health.json
+              echo ""
+              exit 0
+            fi
+            echo "  等待中... ${i}/60 (HTTP $HTTP_CODE)"
+            sleep 2
+          done
+          echo "❌ Prod API 在 120s 内未健康"
+          echo "=== API 日志 ==="
+          docker compose -f docker-compose.prod.yml logs api --tail 50
+          echo "=== Mongo 日志 ==="
+          docker compose -f docker-compose.prod.yml logs mongo --tail 20
+          exit 1
+
+      - name: Verify API responds (health detail)
+        run: |
+          echo "=== 验证 /health 端点详情 ==="
+          curl -s http://localhost:8000/health | python3 -m json.tool 2>/dev/null || curl -s http://localhost:8000/health
+
+      - name: Test auth login endpoint (requires MongoDB)
+        continue-on-error: true
+        run: |
+          echo "=== 测试 /auth/login (验证 MongoDB 连通) ==="
+          # 注意: 全新 MongoDB 无 admin 用户种子数据时, login 会返回 401/500
+          # 此步为信息性验证, 不阻断流水线 (seed 数据依赖初始化脚本)
+          RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:8000/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin","password":"password"}')
+          echo "Login 响应:"
+          echo "$RESPONSE"
+          echo ""
+          echo "注: 401/500 属正常 (无种子数据), 502/连接拒绝才说明 api 崩溃"
+
+      # ============================================================
+      # 清理
+      # ============================================================
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "=== 清理 compose 栈 ==="
+          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Dockerfile.prod 验证结果" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ **全部通过**: 构建 + 冒烟 + 密钥强制 + compose 启动" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **验证失败**, 见上方日志" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 层级 | 验证内容 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 构建 | docker build -f Dockerfile.prod |" >> $GITHUB_STEP_SUMMARY
+          echo "| 冒烟 | 镜像内 app 导入 + 非 root 用户 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 密钥 | :? 语法强制 (缺密钥拒绝启动) |" >> $GITHUB_STEP_SUMMARY
+          echo "| 启动 | compose up api+mongo+redis + /health |" >> $GITHUB_STEP_SUMMARY
