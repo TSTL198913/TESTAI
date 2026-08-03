@@ -13,43 +13,63 @@ os.environ.setdefault("DEEPSEEK_API_KEY", "test-key-for-ci")
 # =============================================================================
 # 修复 ValueError: I/O operation on closed file
 # =============================================================================
-# 根因: pytest capture 系统替换 sys.stderr 为 CaptureIO 对象 (使用 tmpfile)。
-# 当 TokenManager/GovernanceTracker 等单例在 fixture setup 期间 logging.warning()
-# 时,logging 的 StreamHandler 持有对 CaptureIO 的引用。session teardown 时
-# pytest 关闭 CaptureIO 的 tmpfile,但 handler 仍尝试写入 → ValueError。
+# 根因: pytest.ini 未禁用 capture 前,其 capture 系统用 tmpfile 包装 stderr/stdout,
+# session teardown 时 tmpfile 被提前关闭, 但 logging 的 StreamHandler 仍持有
+# 对该 tmpfile 的引用并尝试写入 → ValueError。
+# 配合 pytest.ini 的 --capture=no 是根因修复 (见 pytest.ini 注释)。
 #
-# 此错误被 -W error::RuntimeWarning 升级为 ERROR,导致 fixture setup/teardown
-# 崩溃 (pytest 报 ERROR 而非 FAILED)。
+# 此处额外在 logging 层提供最后防线: 用 _SafeStreamHandler 替换所有 StreamHandler,
+# 在 emit() 前检查 stream.closed 并静默丢弃 closed stream 上的记录。
 #
-# 修复策略: 在 conftest 加载时禁用所有 logging handler,改用 NullHandler。
-# 测试日志对 CI 门禁无价值,而禁用 handler 从根本上消除了对 closed stream 的写入。
+# 重要: 绝不能用 NullHandler + CRITICAL 来"屏蔽"日志——这会破坏 pytest 的
+# caplog fixture 的捕获能力，导致依赖 caplog 断言日志内容的测试(如
+# test_secret_key_dev_fallback_allowed)静默失败。
 # =============================================================================
-_logging_root = logging.getLogger()
-_logging_root.handlers.clear()
-_logging_root.addHandler(logging.NullHandler())
-_logging_root.setLevel(logging.CRITICAL)
+class _SafeStreamHandler(logging.StreamHandler):
+    """StreamHandler 安全变种: stream 已关闭时静默丢弃记录。"""
 
-# 对所有已知的模块 logger 也设置 NullHandler
-for _logger_name in (
-    "src", "src.security", "src.security.auth", "src.governance",
-    "src.governance.tracker", "src.governance.approval", "src.platform",
-    "src.platform.api", "src.platform.config_manager", "src.ai",
-    "src.report", "src.report.generator", "src.report.storage",
-    "src.users", "src.teams", "src.storage", "src.core",
-):
-    _lg = logging.getLogger(_logger_name)
-    _lg.handlers.clear()
-    _lg.addHandler(logging.NullHandler())
-    _lg.setLevel(logging.CRITICAL)
-    _lg.propagate = True  # 让记录传播到 root NullHandler
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            stream = self.stream
+            if stream is None or getattr(stream, "closed", False):
+                return
+            super().emit(record)
+        except (ValueError, OSError):
+            pass
+
+
+def _install_safe_handlers() -> None:
+    """将 root logger 上所有的 StreamHandler 替换为 _SafeStreamHandler。
+
+    不动 logger 上的非 StreamHandler (如 FileHandler), 不改动 level,
+    确保 caplog fixture 能正常安装自己的 handler 并捕获日志。
+    """
+    root = logging.getLogger()
+    for h in list(root.handlers):
+        if isinstance(h, logging.StreamHandler) and not isinstance(h, _SafeStreamHandler):
+            safe = _SafeStreamHandler(h.stream)
+            safe.setLevel(h.level)
+            safe.setFormatter(h.formatter)
+            try:
+                safe.set_name(h.get_name())
+            except Exception:
+                pass
+            root.removeHandler(h)
+            root.addHandler(safe)
+
+
+_install_safe_handlers()
+# 作为保险: 确保 stderr 上总有一个安全 handler
+logging.getLogger().addHandler(_SafeStreamHandler(sys.stderr))
 
 from src.platform.api import app
 from src.report.generator import generator
 from src.report.storage import registry
 
-# 模块导入后再次清理 — 某些模块在 import 时添加了自己的 handler
-_logging_root.handlers.clear()
-_logging_root.addHandler(logging.NullHandler())
+# 模块导入后重新安装 _SafeStreamHandler — 某些模块在 import 时
+# 会自行添加 StreamHandler (使用原始 stderr/stdout 引用),
+# 这些 handler 在 session teardown 时同样可能访问 closed stream。
+_install_safe_handlers()
 
 GLOBAL_RESULTS = {}
 

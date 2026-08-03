@@ -1,0 +1,583 @@
+#!/usr/bin/env python3
+"""
+Auto Mutation Gate: Validates test quality via mutation testing.
+
+Runs on each commit for modified test files. Verifies that tests can detect
+synthetic code mutations (kill rate >= 80%).
+
+Usage:
+    python -m tests.utils.auto_mutation_gate <test_file_or_dir>
+    python tests/utils/auto_mutation_gate.py tests/some_test.py
+"""
+
+import os
+import sys
+import ast
+import io
+import copy
+import shutil
+import tempfile
+import subprocess
+import threading
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List, Dict, Any, Optional, Tuple
+
+# UTF-8 stdout/stderr (for Windows gbk console with emoji)
+try:
+    if hasattr(sys.stdout, 'buffer'):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    if hasattr(sys.stderr, 'buffer'):
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+except Exception:
+    pass
+
+
+MUTATION_OPERATORS = [
+    'replace_arithmetic',
+    'replace_comparison',
+    'replace_boolean',
+    'negate_condition',
+    'replace_return_value',
+    'invert_assignment',
+]
+
+DEFAULT_KILL_THRESHOLD = 0.8  # 80%
+DEFAULT_TIMEOUT_PER_TEST = 60  # seconds
+
+
+@dataclass
+class MutationResult:
+    operator: str
+    file: str
+    lineno: int
+    killed: bool
+    test_output: str = ""
+
+
+@dataclass
+class MutationReport:
+    test_file: str
+    source_file: Optional[str]
+    total_mutations: int = 0
+    killed_mutations: int = 0
+    survived_mutations: int = 0
+    skipped: bool = False
+    skip_reason: str = ""
+    results: List[MutationResult] = field(default_factory=list)
+
+    @property
+    def kill_rate(self) -> float:
+        if self.total_mutations == 0:
+            return 1.0  # No mutations possible => pass (nothing to kill)
+        return self.killed_mutations / self.total_mutations
+
+    @property
+    def passed(self) -> bool:
+        if self.skipped:
+            return True
+        return self.kill_rate >= DEFAULT_KILL_THRESHOLD
+
+
+# ============================================================
+#   Pre-commit helper: determine test file -> source file
+# ============================================================
+
+def _guess_source_file(test_file: str) -> Optional[str]:
+    """
+    Best-effort mapping from tests/X/test_foo.py -> src/X/foo.py
+    Also supports tests/exposed_bugs/test_bug_*.py -> lookup test imports.
+    """
+    p = Path(test_file).resolve()
+    if not p.exists():
+        return None
+
+    test_root = Path(__file__).resolve().parent.parent  # tests/
+    repo_root = test_root.parent
+
+    # Strategy 1: parse imports for src.XXX references
+    try:
+        tree = ast.parse(p.read_text(encoding='utf-8'))
+    except SyntaxError:
+        tree = None
+
+    if tree is not None:
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                if node.module and node.module.startswith('src.'):
+                    parts = node.module.split('.')  # ['src','governance','auto_decision_engine']
+                    candidate = repo_root / Path(*parts[:1]) / Path(*parts[1:]).with_suffix('.py')
+                    if candidate.exists():
+                        return str(candidate)
+                    # Or src/governance/auto_decision_engine.py
+                    candidate2 = repo_root / Path(*parts).with_suffix('.py')
+                    if candidate2.exists():
+                        return str(candidate2)
+
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name.startswith('src.'):
+                        parts = alias.name.split('.')
+                        candidate = repo_root / Path(*parts).with_suffix('.py')
+                        if candidate.exists():
+                            return str(candidate)
+
+    # Strategy 2: path heuristic tests/governance/test_X.py -> src/governance/X.py
+    rel = p.relative_to(test_root)
+    parts = list(rel.parts)
+    if parts[-1].startswith('test_'):
+        mod_name = parts[-1][5:]  # strip test_
+        mod_name = mod_name[:-3] if mod_name.endswith('.py') else mod_name
+        # test_bug_077_xxx.py -> unlikely to map directly; skip heuristic here
+        if not mod_name.startswith('bug_'):
+            candidate = repo_root / 'src' / Path(*parts[:-1]) / f"{mod_name}.py"
+            if candidate.exists():
+                return str(candidate)
+
+    return None
+
+
+# ============================================================
+#   Collection guard (avoid pytest errors breaking the gate)
+# ============================================================
+
+def _verify_collectible(test_file: str) -> bool:
+    """
+    Run pytest --collect-only. Treat exit code 5 (no tests collected)
+    as OK (e.g., ci_guard.py is a tool script, not a test module).
+    """
+    try:
+        result = subprocess.run(
+            [sys.executable, '-m', 'pytest', test_file, '--collect-only', '-q'],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=os.getcwd(),
+        )
+        combined = (result.stdout or '') + (result.stderr or '')
+
+        if 'no tests collected' in combined.lower() or result.returncode == 5:
+            print(f"⏭️  跳过: {test_file} (无测试用例，可能是工具脚本)")
+            return False  # signal "not actually a test module"
+
+        # Exit codes: 0 = collected, 1 = error, 2 = interrupt, 5 = no tests
+        if result.returncode == 0:
+            return True
+
+        print(f"❌ 测试收集失败: {test_file}")
+        err_output = combined[:800]
+        print(err_output)
+        raise SystemExit(f"测试收集失败: {test_file}")
+    except subprocess.TimeoutExpired:
+        print(f"⚠️  测试收集超时: {test_file}")
+        raise SystemExit(f"测试收集超时: {test_file}")
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(f"⚠️  测试收集异常: {test_file} - {e}")
+        raise SystemExit(f"测试收集异常: {e}")
+
+
+# ============================================================
+#   Baseline: ensure tests pass BEFORE mutating
+# ============================================================
+
+def _run_tests(test_file: str, tmp_root: Optional[str] = None,
+               timeout: int = DEFAULT_TIMEOUT_PER_TEST) -> Tuple[int, str, str]:
+    env = os.environ.copy()
+    if tmp_root:
+        # CRITICAL FIX: Use 'python -c' to inject tmp_root at sys.path[0]
+        # AND pre-import the 'src' package BEFORE pytest runs.
+        #
+        # Root cause of 0% kill rate: '' (cwd=project_root) is at sys.path[0].
+        # Since project_root/src/__init__.py exists, Python locks the 'src'
+        # package to project_root/src/, completely ignoring the mutated file
+        # in tmp_root/src/.
+        #
+        # Even after sys.path.insert(0, tmp_root), pytest's startup modifies
+        # sys.path (adding rootdir, test paths, etc.), which can re-order
+        # paths and cause 'src' to be imported from the original location.
+        #
+        # Solution: Pre-import 'src' package after sys.path injection but
+        # BEFORE pytest.main(). This locks src.__path__ to tmp_root/src/,
+        # and all subsequent src.* imports use the cached package path.
+        abs_test = os.path.abspath(test_file)
+        boot = (
+            'import sys; '
+            f'sys.path.insert(0, r"{tmp_root}"); '
+            'import src; '  # Lock src.__path__ to tmp_root/src/
+            'import pytest; '
+            f'sys.exit(pytest.main([r"{abs_test}", "-q", "--tb=no", '
+            f'"--no-header", "-p", "no:cacheprovider"]))'
+        )
+        cmd = [sys.executable, '-c', boot]
+    else:
+        cmd = [sys.executable, '-m', 'pytest', test_file, '-q',
+               '--tb=no', '--no-header', '-p', 'no:cacheprovider']
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=os.getcwd(),
+            env=env,
+        )
+        return result.returncode, (result.stdout or ''), (result.stderr or '')
+    except subprocess.TimeoutExpired:
+        return -1, '', 'TimeoutExpired'
+
+
+def _verify_baseline(test_file: str) -> None:
+    code, out, err = _run_tests(test_file, timeout=DEFAULT_TIMEOUT_PER_TEST * 3)
+    combined = out + err
+    if code != 0:
+        # Exit code 5 means no tests -> OK
+        if code == 5 or 'no tests collected' in combined.lower():
+            return
+        print(f"❌ 基线测试失败 (code={code}): 修复测试后再提交")
+        print(combined[:1500])
+        raise SystemExit(1)
+
+
+# ============================================================
+#   Mutation engine
+# ============================================================
+
+class MutationTransformer(ast.NodeTransformer):
+    """Applies a single mutation selected by index. Tracks location."""
+
+    def __init__(self, target_index: int):
+        self.target_index = target_index
+        self.current_index = -1
+        self.applied: Optional[Tuple[str, int]] = None  # (operator, lineno)
+        # Counters for each operator class so we can deterministically pick one
+        self._counters: Dict[str, int] = {}
+
+    def _next(self, operator: str, lineno: int) -> bool:
+        self.current_index += 1
+        if self.current_index == self.target_index:
+            self.applied = (operator, lineno)
+            return True
+        return False
+
+    # --- Arithmetic: + <-> -, * <-> /, // <-> % ---
+    def visit_BinOp(self, node: ast.BinOp):
+        self.generic_visit(node)
+        op_map = {
+            ast.Add: ast.Sub,
+            ast.Sub: ast.Add,
+            ast.Mult: ast.Div,
+            ast.Div: ast.Mult,
+            ast.FloorDiv: ast.Mod,
+            ast.Mod: ast.FloorDiv,
+        }
+        if type(node.op) in op_map:
+            if self._next('replace_arithmetic', node.lineno):
+                node.op = op_map[type(node.op)]()
+        return node
+
+    # --- Comparisons: < <-> >=, > <-> <=, == <-> !=, in <-> not in ---
+    def visit_Compare(self, node: ast.Compare):
+        self.generic_visit(node)
+        if len(node.ops) != 1:
+            return node
+        op = node.ops[0]
+        cmp_map = {
+            ast.Lt: ast.GtE,
+            ast.GtE: ast.Lt,
+            ast.Gt: ast.LtE,
+            ast.LtE: ast.Gt,
+            ast.Eq: ast.NotEq,
+            ast.NotEq: ast.Eq,
+            ast.Is: ast.IsNot,
+            ast.IsNot: ast.Is,
+            ast.In: ast.NotIn,
+            ast.NotIn: ast.In,
+        }
+        if type(op) in cmp_map:
+            if self._next('replace_comparison', node.lineno):
+                node.ops = [cmp_map[type(op)]()]
+        return node
+
+    # --- Boolean constants: True <-> False ---
+    def visit_Constant(self, node: ast.Constant):
+        if isinstance(node.value, bool):
+            if self._next('replace_boolean', getattr(node, 'lineno', 0) or 0):
+                node.value = not node.value
+        return node
+
+    # --- Negate conditions (if test, while test) ---
+    def visit_If(self, node: ast.If):
+        self.generic_visit(node)
+        if self._next('negate_condition', node.lineno):
+            node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
+            ast.fix_missing_locations(node)
+        return node
+
+    def visit_While(self, node: ast.While):
+        self.generic_visit(node)
+        if self._next('negate_condition', node.lineno):
+            node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
+            ast.fix_missing_locations(node)
+        return node
+
+    # --- Flip return values in small cases ---
+    def visit_Return(self, node: ast.Return):
+        self.generic_visit(node)
+        if node.value is None:
+            return node
+        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, bool):
+            if self._next('replace_return_value', node.lineno):
+                node.value.value = not node.value.value
+        elif isinstance(node.value, ast.Constant) and isinstance(node.value.value, int):
+            if self._next('replace_return_value', node.lineno):
+                node.value.value = node.value.value + 1
+        return node
+
+    # --- Assignment a = b  ->  a = b + 1 for numeric assignments ---
+    def visit_Assign(self, node: ast.Assign):
+        self.generic_visit(node)
+        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, int):
+            if self._next('invert_assignment', node.lineno):
+                node.value.value = -node.value.value
+        return node
+
+
+def _count_mutations(source: str) -> int:
+    """Dry-run transformer to count total possible mutations."""
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return 0
+    # Run once with a huge target; the final current_index+1 is the count
+    t = MutationTransformer(target_index=10_000_000)
+    t.visit(tree)
+    return t.current_index + 1 if t.current_index >= 0 else 0
+
+
+def _apply_nth_mutation(source: str, index: int) -> Tuple[Optional[str], Optional[Tuple[str, int]]]:
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return None, None
+    t = MutationTransformer(target_index=index)
+    new_tree = t.visit(tree)
+    if t.applied is None:
+        return None, None
+    ast.fix_missing_locations(new_tree)
+    try:
+        new_src = ast.unparse(new_tree)
+    except Exception:
+        return None, None
+    return new_src, t.applied
+
+
+# ============================================================
+#   Gate runner for a single test file
+# ============================================================
+
+class AutoMutationGate:
+    def __init__(self, max_mutations_per_file: int = 20):
+        self.max_mutations_per_file = max_mutations_per_file
+
+    def run(self, test_file: str) -> MutationReport:
+        test_file = os.path.abspath(test_file)
+
+        # 1) Check if it's actually a test module (else skip)
+        if not _verify_collectible(test_file):
+            return MutationReport(
+                test_file=test_file,
+                source_file=None,
+                skipped=True,
+                skip_reason="Not a collectible test module (tool script or empty)",
+            )
+
+        # 2) Baseline sanity
+        _verify_baseline(test_file)
+
+        # 3) Locate source file
+        source_file = _guess_source_file(test_file)
+        report = MutationReport(test_file=test_file, source_file=source_file)
+        if source_file is None:
+            report.skipped = True
+            report.skip_reason = "No source file mapping found (utils/meta modules)"
+            return report
+
+        source_path = Path(source_file)
+        original_source = source_path.read_text(encoding='utf-8')
+
+        # 4) Determine mutation plan
+        total_possible = _count_mutations(original_source)
+        if total_possible == 0:
+            report.skipped = True
+            report.skip_reason = "Source file contains no mutable patterns"
+            return report
+
+        # Sample at most N mutations, evenly spaced
+        indices: List[int] = []
+        if total_possible <= self.max_mutations_per_file:
+            indices = list(range(total_possible))
+        else:
+            step = total_possible / self.max_mutations_per_file
+            indices = [int(i * step) for i in range(self.max_mutations_per_file)]
+
+        # 5) Prepare temp dir with mutated source
+        tmp_root = tempfile.mkdtemp(prefix='mut_gate_')
+
+        # FIX: Copy the entire src/ directory tree into tmp_root so that all
+        # __init__.py files and sibling modules are present. Without this,
+        # Python's import system treats original/src/ (which has __init__.py)
+        # as the canonical package path and completely ignores the mutated
+        # file in tmp_root/src/, resulting in 0% kill rate regardless of
+        # test assertion strength.
+        #
+        # Root cause: src/ and src/ai/ both have __init__.py, making them
+        # regular packages. Python locks the first sys.path entry that
+        # contains __init__.py. Since tmp_root/src/__init__.py was missing,
+        # Python fell back to the original src/, bypassing mutations entirely.
+        cwd_root = Path.cwd().resolve()
+        src_dir = cwd_root / 'src'
+        if src_dir.is_dir():
+            tmp_src = Path(tmp_root) / 'src'
+
+            def _ignore_pycache(_directory, contents):
+                """Exclude __pycache__ and .pyc to prevent stale bytecode loading."""
+                return [
+                    c for c in contents
+                    if c == '__pycache__' or c.endswith('.pyc')
+                ]
+
+            shutil.copytree(
+                src_dir, tmp_src,
+                ignore=_ignore_pycache,
+                dirs_exist_ok=True,
+            )
+
+        # NOTE: The sys.path injection for loading mutated source is handled
+        # in _run_tests() via 'python -c "sys.path.insert(0, tmp_root); ..."'
+        # rather than PYTHONPATH, because '' (cwd) has higher priority than
+        # PYTHONPATH entries in sys.path.
+
+        try:
+            for idx in indices:
+                mutated_src, meta = _apply_nth_mutation(original_source, idx)
+                if mutated_src is None or meta is None:
+                    continue
+                operator, lineno = meta
+                report.total_mutations += 1
+
+                # Write mutated src into tmp_root, overwriting the copied original
+                src_rel = Path(source_file).resolve().relative_to(cwd_root)
+                target = Path(tmp_root) / src_rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(mutated_src, encoding='utf-8')
+
+                # Run tests with PYTHONPATH pointing to tmp_root first
+                code, out, err = _run_tests(test_file, tmp_root=tmp_root)
+                combined = out + err
+
+                # Killed = tests failed (non-zero exit, but NOT timeout of our runner)
+                killed = False
+                if code == 0:
+                    killed = False
+                elif code == -1:
+                    killed = True  # Timeout -> treated as infinite loop detected
+                elif 'no tests collected' in combined.lower():
+                    killed = False  # Survived: mutation made tests vanish
+                else:
+                    killed = True  # Any nonzero (1-4,6,...) => failed => killed
+
+                if killed:
+                    report.killed_mutations += 1
+                else:
+                    report.survived_mutations += 1
+
+                report.results.append(MutationResult(
+                    operator=operator,
+                    file=str(src_rel),
+                    lineno=lineno,
+                    killed=killed,
+                    test_output=combined[:300],
+                ))
+
+                # Restore original source in tmp_root so next mutation starts clean
+                target.write_text(original_source, encoding='utf-8')
+        finally:
+            shutil.rmtree(tmp_root, ignore_errors=True)
+
+        return report
+
+
+# ============================================================
+#   Entry
+# ============================================================
+
+def _print_report(report: MutationReport) -> None:
+    tf = os.path.relpath(report.test_file)
+    if report.skipped:
+        print(f"⏭️  {tf}  -> 跳过 ({report.skip_reason})")
+        return
+    rate = report.kill_rate * 100
+    flag = "✅" if report.passed else "❌"
+    src_disp = os.path.relpath(report.source_file) if report.source_file else "N/A"
+    print(
+        f"{flag} {tf}\n"
+        f"   源文件: {src_disp}\n"
+        f"   变异: {report.total_mutations} | 杀死: {report.killed_mutations} "
+        f"| 存活: {report.survived_mutations} | Kill rate: {rate:.1f}%"
+    )
+    if not report.passed:
+        print("   存活变异详情 (前5条):")
+        for r in report.results:
+            if not r.killed:
+                rel = os.path.relpath(r.file)
+                print(f"     - [SURVIVED] {r.operator} @ {rel}:{r.lineno}")
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if not argv:
+        print("用法: python tests/utils/auto_mutation_gate.py <test_file_or_dir> [更多文件...]")
+        return 1
+
+    # Collect files
+    targets: List[str] = []
+    for a in argv:
+        p = Path(a)
+        if p.is_dir():
+            for f in p.rglob('test_*.py'):
+                targets.append(str(f))
+            for f in p.rglob('*_test.py'):
+                targets.append(str(f))
+        elif p.is_file():
+            targets.append(str(p))
+        else:
+            # Pass-through: may be a glob or non-existent; gate will skip safely
+            targets.append(a)
+
+    gate = AutoMutationGate()
+    reports: List[MutationReport] = []
+    for tf in targets:
+        print(f"🧬 验证文件: {tf}")
+        try:
+            reports.append(gate.run(tf))
+        except SystemExit as e:
+            # Propagate explicit exit (e.g., baseline failure)
+            return int(e.code) if e.code is not None else 1
+        _print_report(reports[-1])
+
+    overall = all(r.passed for r in reports)
+    print()
+    if overall:
+        print("✅ 变异验证通过")
+        return 0
+    else:
+        print("❌ 变异验证失败！")
+        print("   kill rate < 80%，请重写测试")
+        return 2
+
+
+if __name__ == '__main__':
+    sys.exit(main())

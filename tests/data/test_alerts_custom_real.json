@@ -1,0 +1,71 @@
+{
+  "alerts": [],
+  "rules": [
+    {
+      "rule_id": "rule_test_failure",
+      "name": "测试失败率超过阈值",
+      "alert_type": "test_failure",
+      "level": "warning",
+      "condition": "failed_ratio > threshold",
+      "threshold": 0.1,
+      "window_seconds": 300,
+      "enabled": true,
+      "created_at": "2026-08-01T08:17:51.669304"
+    },
+    {
+      "rule_id": "rule_performance",
+      "name": "响应时间超过阈值",
+      "alert_type": "performance_degradation",
+      "level": "warning",
+      "condition": "avg_response_time > threshold",
+      "threshold": 2000,
+      "window_seconds": 300,
+      "enabled": true,
+      "created_at": "2026-08-01T08:17:51.669304"
+    },
+    {
+      "rule_id": "rule_performance_critical",
+      "name": "响应时间严重超时",
+      "alert_type": "performance_degradation",
+      "level": "critical",
+      "condition": "avg_response_time > threshold",
+      "threshold": 5000,
+      "window_seconds": 300,
+      "enabled": true,
+      "created_at": "2026-08-01T08:17:51.669304"
+    },
+    {
+      "rule_id": "rule_kill_rate",
+      "name": "变异测试Kill Rate不足",
+      "alert_type": "test_failure",
+      "level": "warning",
+      "condition": "kill_rate < threshold",
+      "threshold": 80,
+      "window_seconds": 0,
+      "enabled": true,
+      "created_at": "2026-08-01T08:17:51.669304"
+    },
+    {
+      "rule_id": "rule_coverage",
+      "name": "测试覆盖率不足",
+      "alert_type": "test_failure",
+      "level": "warning",
+      "condition": "coverage < threshold",
+      "threshold": 80,
+      "window_seconds": 0,
+      "enabled": true,
+      "created_at": "2026-08-01T08:17:51.669304"
+    },
+    {
+      "rule_id": "my_custom_rule",
+      "name": "Custom Rule",
+      "alert_type": "performance_degradation",
+      "level": "warning",
+      "condition": "cpu_usage > 90",
+      "threshold": 90,
+      "window_seconds": 300,
+      "enabled": true,
+      "created_at": "2026-08-02T22:13:10.081342"
+    }
+  ]
+}

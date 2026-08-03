@@ -1,0 +1,1145 @@
+﻿python : WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for developm
+ent. Set SECRET_KEY environment variable for production.
+At C:\Users\18907\AppData\Local\Temp\trae-agent-toolhost\jobs\job-f9fb832a43d44aa988ac346bf17e359a\command.ps1:15 char:
+7041
++ ... orEach{$_}; python -m pytest @files --tb=no -q -s -p no:cacheprovider ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING:src.sec...for production.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:ApprovalManager:[APPROVAL] Approval record already exists: tx_duplicate, status: pending
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:ApprovalManager:[APPROVAL] Approval expired: tx_cleanup_001
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:AutoDecisionEngine:Invalid confidence type in context for rule rule_auto_approve_high_confidence
+WARNING:AutoDecisionEngine:Invalid confidence type in context for rule rule_reject_low_confidence
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:AutoDecisionEngine:Invalid consecutive_failures type in context for rule rule_escalate_multiple_failures
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+...................................................................................................
+✅ [Hard Mode Passed] 装饰器与类结构保持完整！
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.[Worker 0] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 1] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 2] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 3] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 4] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 5] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 6] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 7] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 9] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+[Worker 8] Patch conflict/error: TypeError: GovernanceExecutor._write_patch() missing 1 required positional argument: 'required_imports'
+🚀 启动并发压力测试，目标文件: stress_test_target.py
+
+--- 并发测试结果 ---
+def run():
+    return 0
+✅ [Concurrency Test Passed] 锁定机制生效，数据完整性未受损！
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+...............DEBUG: result = True
+
+✅ E2E 治理闭环测试通过：成功诊断并修复了目标代码！
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.✅ 测试体系有效性验证通过：self.patched = True 已正确设置
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.✅ 测试体系有效性验证通过：governance 处理器已正确注册
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:PATH VALIDATION FAILED: Invalid path
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:SECURITY ALERT: Forbidden function call: eval
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:Security Gate failed to parse code: Syntax Error @ 1:1.
+parser error: error at 1:12: expected one of ), *, **, NAME
+
+def invalid(
+^
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:SECURITY ALERT: Forbidden function call: eval
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:PATH VALIDATION FAILED: Invalid
+CRITICAL:GovernanceExecutor:Patch rejected: unsafe file path '/invalid/path.py'
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:File not found: \nonexistent\file.py
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceExecutor:No write permission for: C:\Users\18907\AppData\Local\Temp\tmprymg4p0e\no_permission.py. Att
+empting to grant...
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:Backup failed: Backup failed
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:Patch failed due to permission error: . Restoring backup...
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:Patch failed: Write failed. Restoring backup...
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:Failed to change permissions via chmod: chmod failed
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:Failed to change permissions via chmod: chmod failed
+ERROR:GovernanceExecutor:icacls failed: icacls failed
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+...............................
+[Test Passed] Transformer logic is correct!
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:File not found: src\components\Calculator.py
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction tx_e2e_func_001 failed: Executor failed to apply patch for tx_e
+2e_func_001. Rolling back.
+CRITICAL:src.governance.orchestrator:Governance flow failed for tx_e2e_func_001: Executor failed to apply patch for tx_
+e2e_func_001
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:File not found: src\components\Calculator.py
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction tx_e2e_multi_001 failed: Executor failed to apply patch for tx_
+e2e_multi_001. Rolling back.
+CRITICAL:src.governance.orchestrator:Governance flow failed for tx_e2e_multi_001: Executor failed to apply patch for tx
+_e2e_multi_001
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:File not found: src\components\Calculator.py
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction tx_e2e_fail_001 failed: Executor failed to apply patch for tx_e
+2e_fail_001. Rolling back.
+CRITICAL:src.governance.orchestrator:Governance flow failed for tx_e2e_fail_001: Executor failed to apply patch for tx_
+e2e_fail_001
+.FF
+✅ E2E-003 失败回滚验证:
+   最终状态: FAILED
+   事件数: 5
+   含 PATCH_FAILED: True
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.
+✅ E2E-004 非治理跳过:
+   状态: SKIPPED
+   事件数: 2
+   无 PATCH_CREATE: True
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.
+✅ E2E-005 决策拒绝:
+   状态: REJECTED
+   事件数: 4
+   含 APPROVAL_REJECTED: True
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:File not found: src\components\Calculator.py
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction tx_e2e_trace_001 failed: Executor failed to apply patch for tx_
+e2e_trace_001. Rolling back.
+CRITICAL:src.governance.orchestrator:Governance flow failed for tx_e2e_trace_001: Executor failed to apply patch for tx
+_e2e_trace_001
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-34' coro=<AsyncClient.aclose() done, defined at D:\python310\lib\site-packages\httpx\
+_client.py:1978> exception=RuntimeError('Event loop is closed')>
+Traceback (most recent call last):
+  File "D:\python310\lib\site-packages\httpx\_client.py", line 1988, in aclose
+    await proxy.aclose()
+  File "D:\python310\lib\site-packages\httpx\_transports\default.py", line 406, in aclose
+    await self._pool.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\connection_pool.py", line 353, in aclose
+    await self._close_connections(closing_connections)
+  File "D:\python310\lib\site-packages\httpcore\_async\connection_pool.py", line 345, in _close_connections
+    await connection.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\http_proxy.py", line 349, in aclose
+    await self._connection.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\http11.py", line 258, in aclose
+    await self._network_stream.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_backends\anyio.py", line 53, in aclose
+    await self._stream.aclose()
+  File "D:\python310\lib\site-packages\anyio\streams\tls.py", line 236, in aclose
+    await self.transport_stream.aclose()
+  File "D:\python310\lib\site-packages\anyio\_backends\_asyncio.py", line 1344, in aclose
+    self._transport.close()
+  File "D:\python310\lib\asyncio\proactor_events.py", line 109, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "D:\python310\lib\asyncio\base_events.py", line 753, in call_soon
+    self._check_closed()
+  File "D:\python310\lib\asyncio\base_events.py", line 515, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-35' coro=<AsyncClient.aclose() done, defined at D:\python310\lib\site-packages\httpx\
+_client.py:1978> exception=RuntimeError('Event loop is closed')>
+Traceback (most recent call last):
+  File "D:\python310\lib\site-packages\httpx\_client.py", line 1988, in aclose
+    await proxy.aclose()
+  File "D:\python310\lib\site-packages\httpx\_transports\default.py", line 406, in aclose
+    await self._pool.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\connection_pool.py", line 353, in aclose
+    await self._close_connections(closing_connections)
+  File "D:\python310\lib\site-packages\httpcore\_async\connection_pool.py", line 345, in _close_connections
+    await connection.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\http_proxy.py", line 349, in aclose
+    await self._connection.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\http11.py", line 258, in aclose
+    await self._network_stream.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_backends\anyio.py", line 53, in aclose
+    await self._stream.aclose()
+  File "D:\python310\lib\site-packages\anyio\streams\tls.py", line 236, in aclose
+    await self.transport_stream.aclose()
+  File "D:\python310\lib\site-packages\anyio\_backends\_asyncio.py", line 1344, in aclose
+    self._transport.close()
+  File "D:\python310\lib\asyncio\proactor_events.py", line 109, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "D:\python310\lib\asyncio\base_events.py", line 753, in call_soon
+    self._check_closed()
+  File "D:\python310\lib\asyncio\base_events.py", line 515, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-36' coro=<AsyncClient.aclose() done, defined at D:\python310\lib\site-packages\httpx\
+_client.py:1978> exception=RuntimeError('Event loop is closed')>
+Traceback (most recent call last):
+  File "D:\python310\lib\site-packages\httpx\_client.py", line 1988, in aclose
+    await proxy.aclose()
+  File "D:\python310\lib\site-packages\httpx\_transports\default.py", line 406, in aclose
+    await self._pool.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\connection_pool.py", line 353, in aclose
+    await self._close_connections(closing_connections)
+  File "D:\python310\lib\site-packages\httpcore\_async\connection_pool.py", line 345, in _close_connections
+    await connection.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\http_proxy.py", line 349, in aclose
+    await self._connection.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_async\http11.py", line 258, in aclose
+    await self._network_stream.aclose()
+  File "D:\python310\lib\site-packages\httpcore\_backends\anyio.py", line 53, in aclose
+    await self._stream.aclose()
+  File "D:\python310\lib\site-packages\anyio\streams\tls.py", line 236, in aclose
+    await self.transport_stream.aclose()
+  File "D:\python310\lib\site-packages\anyio\_backends\_asyncio.py", line 1344, in aclose
+    self._transport.close()
+  File "D:\python310\lib\asyncio\proactor_events.py", line 109, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "D:\python310\lib\asyncio\base_events.py", line 753, in call_soon
+    self._check_closed()
+  File "D:\python310\lib\asyncio\base_events.py", line 515, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+.
+✅ E2E-006 事件完整性:
+   总事件数: 5
+   最终状态: FAILED
+   事件序列: ['diagnose_start', 'diagnose_complete', 'patch_create', 'approval_granted', 'patch_failed']
+   时间戳完整: True
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceExecutor:File not found: src\components\Calculator.py
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction tx_e2e_hist_001 failed: Executor failed to apply patch for tx_e
+2e_hist_001. Rolling back.
+CRITICAL:src.governance.orchestrator:Governance flow failed for tx_e2e_hist_001: Executor failed to apply patch for tx_
+e2e_hist_001
+.
+✅ E2E-007 治理历史:
+   trace_id: e2e_hist_001
+   status: FAILED
+   steps: 4/5
+   runs in history: 7
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+INFO:GovernanceMonitor:{"timestamp": "2026-08-03T13:24:50.400087", "level": "INFO", "message": "Test message", "key": "
+value"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceMonitor:{"timestamp": "2026-08-03T13:24:51.604898", "level": "ERROR", "message": "Test error alert", "c
+omponent": "test-component", "trace_id": "trace-123", "details": {"test": "data"}}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:24:56.623630", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734691-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:24:57.213577", "level": "WARNING", "message": "Test", "component
+": "test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:02.237601", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734697-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:02.825697", "level": "WARNING", "message": "Warning 1", "comp
+onent": "test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:07.805170", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734702-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Max retries exceeded wi
+th url: /alert (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1007)')))"}
+ERROR:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:07.805170", "level": "ERROR", "message": "Error 1", "component"
+: "test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:12.818299", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734707-2: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:13.404518", "level": "WARNING", "message": "Test", "component
+": "test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:18.420059", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734713-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:19.006992", "level": "WARNING", "message": "Test", "component
+": "test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:24.021072", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734719-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+INFO:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:24.021629", "level": "INFO", "message": "Alert acknowledged by :
+ alert-1785734719-1"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:24.610757", "level": "WARNING", "message": "Failed to acknowl
+edge alert: nonexistent-alert (not found)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:25.196824", "level": "ERROR", "message": "Test", "component": "
+test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:30.219123", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734725-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:31.392383", "level": "WARNING", "message": "Test", "component
+": "test", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:36.433884", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734731-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:38.771847", "level": "ERROR", "message": "Patch application fai
+led", "component": "executor", "trace_id": null, "details": null}
+WARNING:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:43.786751", "level": "WARNING", "message": "Failed to send we
+bhook for alert alert-1785734738-1: HTTPSConnectionPool(host='your-webhook-url.com', port=443): Read timed out. (read t
+imeout=5)"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+INFO:GovernanceMonitor:{"timestamp": "2026-08-03T13:25:44.962935", "level": "INFO", "message": "Convergence achieved", 
+"component": "convergence"}
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.F......F..............................
+✅ [Namespace Isolation Passed] 结构化验证通过：ClassB 逻辑未被侵染！
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+.
+--- 治理引擎输出的代码 ---
+
+class ClassA:
+    def run(self):
+        return "Patched A"
+
+class ClassB:
+    def run(self):
+        return "Legacy B"
+
+--------------------------
+✅ 验证确认：ClassA 已变异，ClassB 保持原始逻辑。
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:ApprovalManager:[APPROVAL] Approval record already exists: tx_dup_001, status: pending
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:ApprovalManager:[APPROVAL] Approval expired: tx_exp_001
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:ApprovalManager:[APPROVAL] Approval expired: tx_imm
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:ApprovalManager:[APPROVAL] Approval record already exists: tx_conc_001, status: pending
+WARNING:ApprovalManager:[APPROVAL] Approval record already exists: tx_conc_001, status: pending
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction test_tx failed: test error. Rolling back.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+CRITICAL:GovernanceExecutor:SECURITY ALERT: Forbidden function call: eval
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:GovernanceTransaction:[AUDIT_FAILURE] Transaction tx_002 failed: Commit failed. Rolling back.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:src.governance.resilience:Circuit Breaker TRIP! Entering OPEN state.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+ERROR:src.governance.resilience:Circuit Breaker TRIP! Entering OPEN state.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+INFO:root:[TRACKER] converged | trace=trace_conv_001 | component=TestComponent | status=None | consecutive_convergences
+=1
+INFO:root:[TRACKER] converged | trace=trace_conv_002 | component=TestComponent | status=None | consecutive_convergences
+=2
+INFO:root:[TRACKER] Reached 3 consecutive convergences - SYSTEM CONVERGED
+INFO:root:[TRACKER] converged | trace=trace_conv_003 | component=TestComponent | status=None | consecutive_convergences
+=3
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+INFO:root:[TRACKER] diagnose_start | trace=trace_001 | component=TestComponent | status=None | consecutive_convergences
+=0
+INFO:root:[TRACKER] patch_applied | trace=trace_002 | component=TestComponent | status=None | consecutive_convergences=
+0
+INFO:root:[TRACKER] converged | trace=trace_conv_001 | component=TestComponent | status=None | consecutive_convergences
+=1
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+WARNING:src.security.auth:No SECRET_KEY found in environment variables. Generated a temporary key for development. Set 
+SECRET_KEY environment variable for production.
+............................................FFFF.F..FFFFFFFF..............F.....................................................................................F......................................................................
+[DEBUG] 会话销毁阶段 - Registry 内存地址: 1272020658512
+[DEBUG] Registry 数据大小: 0
+[WARNING] Registry 为空，没有测试数据生成！
+Running teardown with pytest sessionfinish...

@@ -1,0 +1,44 @@
+﻿........................................................................ [ 16%]
+........................................................................ [ 33%]
+.....FF.....F......F.................................................... [ 50%]
+.......................FFFF.F..FFFFFFFF..............F.................. [ 67%]
+...................................................................F.... [ 84%]
+...................................FEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE [ 97%]
+python : Traceback (most recent call last):
+At C:\Users\18907\AppData\Local\Temp\trae-agent-toolhost\jobs\job-72d4187ae9c644d29892c9c3ad1508c5\command.ps1:15 char:
+7041
++ ... orEach{$_}; python -m pytest @files --cov=src/governance --cov-report ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "D:\python310\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "D:\python310\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "D:\python310\lib\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(pytest.console_main())
+  File "D:\python310\lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "D:\python310\lib\site-packages\_pytest\config\__init__.py", line 205, in main
+    config._ensure_unconfigure()
+  File "D:\python310\lib\site-packages\_pytest\config\__init__.py", line 1177, in _ensure_unconfigure
+    self._cleanup_stack.close()
+  File "D:\python310\lib\contextlib.py", line 584, in close
+    self.__exit__(None, None, None)
+  File "D:\python310\lib\contextlib.py", line 576, in __exit__
+    raise exc_details[1]
+  File "D:\python310\lib\contextlib.py", line 561, in __exit__
+    if cb(*exc_details):
+  File "D:\python310\lib\contextlib.py", line 449, in _exit_wrapper
+    callback(*args, **kwds)
+  File "D:\python310\lib\site-packages\_pytest\capture.py", line 778, in stop_global_capturing
+    self._global_capturing.pop_outerr_to_orig()
+  File "D:\python310\lib\site-packages\_pytest\capture.py", line 659, in pop_outerr_to_orig
+    out, err = self.readouterr()
+  File "D:\python310\lib\site-packages\_pytest\capture.py", line 706, in readouterr
+    out = self.out.snap() if self.out else ""
+  File "D:\python310\lib\site-packages\_pytest\capture.py", line 591, in snap
+    self.tmpfile.seek(0)
+ValueError: I/O operation on closed file.
+EEEEEEEEEEEEEEEEEEEEEEEEE                                                [100%]

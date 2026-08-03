@@ -1,0 +1,137 @@
+{
+  "total_count": 1,
+  "jobs": [
+    {
+      "id": 91511227505,
+      "run_id": 30753366658,
+      "workflow_name": "Docker Prod Image Verification",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/TSTL198913/TESTAI/actions/runs/30753366658",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTbIKF88AAAAVTn6EcQ",
+      "head_sha": "248143457f5c05fe532d19dae1cda4cb52a95e52",
+      "url": "https://api.github.com/repos/TSTL198913/TESTAI/actions/jobs/91511227505",
+      "html_url": "https://github.com/TSTL198913/TESTAI/actions/runs/30753366658/job/91511227505",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-08-02T15:00:25Z",
+      "started_at": "2026-08-02T15:00:27Z",
+      "completed_at": "2026-08-02T15:00:32Z",
+      "name": "Dockerfile.prod Build & Smoke Test",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-08-02T15:00:28Z",
+          "completed_at": "2026-08-02T15:00:29Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-08-02T15:00:29Z",
+          "completed_at": "2026-08-02T15:00:29Z"
+        },
+        {
+          "name": "Build Dockerfile.prod",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 3,
+          "started_at": "2026-08-02T15:00:29Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Smoke test - verify app imports in prod image",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 4,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Validate secret enforcement (:? syntax)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Start prod stack (api + mongo + redis)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Wait for API health",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Verify API responds (health detail)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Test auth login endpoint (requires MongoDB)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Cleanup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Summary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-08-02T15:00:30Z",
+          "completed_at": "2026-08-02T15:00:30Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/TSTL198913/TESTAI/check-runs/91511227505",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000002315,
+      "runner_name": "GitHub Actions 1000002315",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}
