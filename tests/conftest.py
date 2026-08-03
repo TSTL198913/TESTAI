@@ -115,18 +115,22 @@ def reset_all_singletons():
 
     # 测试前重置
     _reset_all_singletons()
-    
+
     from src.security.auth import TokenManager
     token_manager = TokenManager()
     with token_manager._lock:
         token_manager._login_attempts.clear()
-    
+
     yield
     # 测试后再次重置(确保本测试不污染后续测试)
-    _reset_all_singletons()
-    
-    with token_manager._lock:
-        token_manager._login_attempts.clear()
+    # 使用 try/except 防止 teardown 期间 I/O 异常 (Linux CI -W error::RuntimeWarning)
+    try:
+        _reset_all_singletons()
+
+        with token_manager._lock:
+            token_manager._login_attempts.clear()
+    except (ValueError, OSError):
+        pass
 
 
 def _init_singleton_registry():
@@ -269,12 +273,22 @@ def _init_singleton_registry():
 @pytest.fixture(scope="session", autouse=True)
 def run_report_generator():
     yield
-    all_data = registry.get_all()
-    print(f"\n[DEBUG] 会话销毁阶段 - Registry 内存地址: {id(registry)}")
-    print(f"[DEBUG] Registry 数据大小: {len(all_data)}")
+    # Session teardown: pytest capture may already be closed on Linux CI
+    # (causes ValueError: I/O operation on closed file with -W error::RuntimeWarning).
+    # Use try/except + logging fallback to avoid crashing the last test's teardown.
+    try:
+        all_data = registry.get_all()
+        import sys
+        out = sys.stderr if sys.stderr and not sys.stderr.closed else None
+        if out:
+            out.write(f"\n[DEBUG] Registry size: {len(all_data)}\n")
+            out.flush()
 
-    if all_data:
-        report_path = generator.generate(all_data)
-        print(f"[SUCCESS] 报告生成成功: {report_path}")
-    else:
-        print("[WARNING] Registry 为空，没有测试数据生成！")
+        if all_data:
+            report_path = generator.generate(all_data)
+            if out:
+                out.write(f"[SUCCESS] Report generated: {report_path}\n")
+                out.flush()
+    except (ValueError, OSError):
+        # Capture system already torn down — report generation is best-effort
+        pass
