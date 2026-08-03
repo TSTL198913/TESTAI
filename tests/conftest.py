@@ -1,6 +1,8 @@
 # tests/conftest.py - 统一测试隔离 fixture
 
+import logging
 import os
+import sys
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,9 +10,53 @@ from fastapi.testclient import TestClient
 os.environ.setdefault("MONGO_URI", "mongodb://localhost:27017/testai")
 os.environ.setdefault("DEEPSEEK_API_KEY", "test-key-for-ci")
 
+
+class _SafeStreamHandler(logging.StreamHandler):
+    """StreamHandler that silently drops records when the underlying stream
+    is closed.
+
+    On Linux CI, the coverage plugin + ``-W error::RuntimeWarning`` can close
+    ``sys.stderr`` during fixture setup/teardown.  When a singleton (e.g.
+    ``TokenManager``) logs a warning, the default handler raises
+    ``ValueError: I/O operation on closed file``, which pytest reports as an
+    ERROR on the test (both setup and teardown).  This handler checks
+    ``stream.closed`` before writing and swallows the record if the stream
+    is unavailable, preventing the cascade.
+    """
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            stream = self.stream
+            if stream is None or getattr(stream, "closed", False):
+                return
+            super().emit(record)
+        except (ValueError, OSError):
+            pass
+
+
+def _install_safe_handlers() -> None:
+    """Replace every StreamHandler on the root logger with a _SafeStreamHandler."""
+    root = logging.getLogger()
+    for h in list(root.handlers):
+        if isinstance(h, logging.StreamHandler) and not isinstance(h, _SafeStreamHandler):
+            safe = _SafeStreamHandler(h.stream)
+            safe.setLevel(h.level)
+            safe.setFormatter(h.formatter)
+            safe.set_name(h.get_name())
+            root.removeHandler(h)
+            root.addHandler(safe)
+
+
+_install_safe_handlers()
+# Re-check after imports below — some modules attach handlers at import time.
+logging.getLogger().addHandler(_SafeStreamHandler(sys.stderr))
+
 from src.platform.api import app
 from src.report.generator import generator
 from src.report.storage import registry
+
+# Late re-install: module imports above may have added new StreamHandlers.
+_install_safe_handlers()
 
 GLOBAL_RESULTS = {}
 
@@ -113,22 +159,29 @@ def reset_all_singletons():
     if not _SINGLETON_REGISTRY:
         _init_singleton_registry()
 
-    # 测试前重置
-    _reset_all_singletons()
-
-    from src.security.auth import TokenManager
-    token_manager = TokenManager()
-    with token_manager._lock:
-        token_manager._login_attempts.clear()
-
-    yield
-    # 测试后再次重置(确保本测试不污染后续测试)
-    # 使用 try/except 防止 teardown 期间 I/O 异常 (Linux CI -W error::RuntimeWarning)
+    # 测试前重置 — 包裹 try/except 防止 Linux CI I/O 流异常
+    token_manager = None
     try:
         _reset_all_singletons()
 
+        from src.security.auth import TokenManager
+        token_manager = TokenManager()
         with token_manager._lock:
             token_manager._login_attempts.clear()
+    except (ValueError, OSError):
+        # Linux CI: coverage plugin 可能已关闭 stderr,
+        # TokenManager() 的日志写入会触发 ValueError。
+        # _SafeStreamHandler 应已拦截, 但此处做最后防线。
+        pass
+
+    yield
+    # 测试后再次重置(确保本测试不污染后续测试)
+    try:
+        _reset_all_singletons()
+
+        if token_manager is not None:
+            with token_manager._lock:
+                token_manager._login_attempts.clear()
     except (ValueError, OSError):
         pass
 
