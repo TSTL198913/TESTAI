@@ -10,53 +10,46 @@ from fastapi.testclient import TestClient
 os.environ.setdefault("MONGO_URI", "mongodb://localhost:27017/testai")
 os.environ.setdefault("DEEPSEEK_API_KEY", "test-key-for-ci")
 
+# =============================================================================
+# 修复 ValueError: I/O operation on closed file
+# =============================================================================
+# 根因: pytest capture 系统替换 sys.stderr 为 CaptureIO 对象 (使用 tmpfile)。
+# 当 TokenManager/GovernanceTracker 等单例在 fixture setup 期间 logging.warning()
+# 时,logging 的 StreamHandler 持有对 CaptureIO 的引用。session teardown 时
+# pytest 关闭 CaptureIO 的 tmpfile,但 handler 仍尝试写入 → ValueError。
+#
+# 此错误被 -W error::RuntimeWarning 升级为 ERROR,导致 fixture setup/teardown
+# 崩溃 (pytest 报 ERROR 而非 FAILED)。
+#
+# 修复策略: 在 conftest 加载时禁用所有 logging handler,改用 NullHandler。
+# 测试日志对 CI 门禁无价值,而禁用 handler 从根本上消除了对 closed stream 的写入。
+# =============================================================================
+_logging_root = logging.getLogger()
+_logging_root.handlers.clear()
+_logging_root.addHandler(logging.NullHandler())
+_logging_root.setLevel(logging.CRITICAL)
 
-class _SafeStreamHandler(logging.StreamHandler):
-    """StreamHandler that silently drops records when the underlying stream
-    is closed.
-
-    On Linux CI, the coverage plugin + ``-W error::RuntimeWarning`` can close
-    ``sys.stderr`` during fixture setup/teardown.  When a singleton (e.g.
-    ``TokenManager``) logs a warning, the default handler raises
-    ``ValueError: I/O operation on closed file``, which pytest reports as an
-    ERROR on the test (both setup and teardown).  This handler checks
-    ``stream.closed`` before writing and swallows the record if the stream
-    is unavailable, preventing the cascade.
-    """
-
-    def emit(self, record: logging.LogRecord) -> None:
-        try:
-            stream = self.stream
-            if stream is None or getattr(stream, "closed", False):
-                return
-            super().emit(record)
-        except (ValueError, OSError):
-            pass
-
-
-def _install_safe_handlers() -> None:
-    """Replace every StreamHandler on the root logger with a _SafeStreamHandler."""
-    root = logging.getLogger()
-    for h in list(root.handlers):
-        if isinstance(h, logging.StreamHandler) and not isinstance(h, _SafeStreamHandler):
-            safe = _SafeStreamHandler(h.stream)
-            safe.setLevel(h.level)
-            safe.setFormatter(h.formatter)
-            safe.set_name(h.get_name())
-            root.removeHandler(h)
-            root.addHandler(safe)
-
-
-_install_safe_handlers()
-# Re-check after imports below — some modules attach handlers at import time.
-logging.getLogger().addHandler(_SafeStreamHandler(sys.stderr))
+# 对所有已知的模块 logger 也设置 NullHandler
+for _logger_name in (
+    "src", "src.security", "src.security.auth", "src.governance",
+    "src.governance.tracker", "src.governance.approval", "src.platform",
+    "src.platform.api", "src.platform.config_manager", "src.ai",
+    "src.report", "src.report.generator", "src.report.storage",
+    "src.users", "src.teams", "src.storage", "src.core",
+):
+    _lg = logging.getLogger(_logger_name)
+    _lg.handlers.clear()
+    _lg.addHandler(logging.NullHandler())
+    _lg.setLevel(logging.CRITICAL)
+    _lg.propagate = True  # 让记录传播到 root NullHandler
 
 from src.platform.api import app
 from src.report.generator import generator
 from src.report.storage import registry
 
-# Late re-install: module imports above may have added new StreamHandlers.
-_install_safe_handlers()
+# 模块导入后再次清理 — 某些模块在 import 时添加了自己的 handler
+_logging_root.handlers.clear()
+_logging_root.addHandler(logging.NullHandler())
 
 GLOBAL_RESULTS = {}
 

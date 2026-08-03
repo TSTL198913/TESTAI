@@ -121,6 +121,14 @@ class TestGovernanceOrchestrator:
         self.orchestrator.agent.analyze_with_context.return_value = diagnosis
         self.orchestrator.approval_mgr.requires_approval.return_value = True
 
+        # Mock decision engine to return REQUIRE_MANUAL so the approval flow
+        # is triggered (real engine would AUTO_APPROVE at confidence=0.9 + SECURITY)
+        self.orchestrator.decision_engine = MagicMock()
+        mock_decision = MagicMock()
+        mock_decision.decision = "REQUIRE_MANUAL"
+        mock_decision.reason = "Manual approval required for security patch"
+        self.orchestrator.decision_engine.evaluate.return_value = mock_decision
+
         result = await self.orchestrator.execute_governance_flow(context)
 
         assert result["status"] == "PENDING_APPROVAL"
