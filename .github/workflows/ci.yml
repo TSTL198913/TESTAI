@@ -211,6 +211,26 @@ jobs:
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
 
+      - name: Start API server
+        env:
+          ENVIRONMENT: development
+        run: |
+          nohup python -m uvicorn src.platform.api:app --host 127.0.0.1 --port 8000 > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000/health > /dev/null; then
+              echo "API is healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::API server failed to start within 30s"
+          cat server.log
+          exit 1
+
       - name: Run Fast Track Integration Tests
         run: python -m pytest tests/integration/ -v --tb=short -W error::RuntimeWarning --ignore=tests/integration/test_real_network_extended.py --ignore=tests/integration/test_real_e2e_business.py --ignore=tests/integration/test_http_real.py --ignore=tests/integration/test_full_stack_integration.py
 
@@ -286,6 +306,44 @@ jobs:
           path: coverage.xml
           retention-days: 7
 
+  component-tests:
+    name: Component Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest-cov --no-cache-dir
+
+      - name: Run Component Tests (Bug Regressions + Engine + Storage + Scenarios)
+        run: python -m pytest tests/exposed_bugs/ tests/engine/ tests/storage/ tests/scenarios/ -v --tb=short -W error::RuntimeWarning
+
+      - name: Upload Component Test Report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: component-test-report
+          path: |
+            .pytest_cache/
+          retention-days: 7
+
   ui-tests:
     name: UI Tests
     runs-on: ubuntu-latest
@@ -310,6 +368,7 @@ jobs:
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
+          pip install playwright --no-cache-dir
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
@@ -545,7 +604,7 @@ jobs:
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
-    needs: [config-validation, lint, unit-tests, integration-tests, governance-tests, ai-tests, ui-tests, security-scan, build-validation, docker-build, environment-check]
+    needs: [config-validation, lint, unit-tests, component-tests, integration-tests, governance-tests, ai-tests, ui-tests, security-scan, build-validation, docker-build, environment-check]
     steps:
       - uses: actions/checkout@v4
 
@@ -606,6 +665,7 @@ jobs:
           echo "📋 Config Validation: Passed"
           echo "📊 Lint: Passed"
           echo "🧪 Unit Tests: Passed"
+          echo "🧩 Component Tests (Bug Regressions + Engine + Storage + Scenarios): Passed"
           echo "🔗 Integration Tests (Fast Track): Passed"
           echo "🏛️ Governance Tests: Passed"
           echo "🤖 AI Module Tests: Passed"
@@ -622,6 +682,7 @@ jobs:
           echo "- Config Validation: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Lint & CI Guard: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Unit Tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Component Tests: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Integration Tests (Fast Track): ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Governance Tests: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- AI Module Tests: ✅" >> $GITHUB_STEP_SUMMARY
