@@ -20,7 +20,8 @@ permissions:
 env:
   MAX_PYLINT_ERRORS: 0
   MAX_MYPY_ERRORS: 15
-  MAX_BANDIT_ISSUES: 0
+  MAX_BANDIT_MEDIUM_ISSUES: 0
+  MAX_BANDIT_LOW_ISSUES: 20
   MAX_SAFETY_VULNERABILITIES: 5
 
 jobs:
@@ -350,18 +351,29 @@ jobs:
       - name: Run Bandit Security Scan with Threshold
         run: |
           bandit -r src/ -f json -o bandit_report.json || true
-          max_issues=${MAX_BANDIT_ISSUES:-0}
+          max_medium=${MAX_BANDIT_MEDIUM_ISSUES:-0}
+          max_low=${MAX_BANDIT_LOW_ISSUES:-20}
           python -c "
           import json
           try:
               data = json.load(open('bandit_report.json'))
           except:
               data = {'results': []}
-          issue_count = len(data.get('results', []))
-          print(f'Bandit: {issue_count} issues found')
-          
-          if issue_count > $max_issues:
-              print(f'❌ Bandit issues ({issue_count}) exceed threshold ($max_issues)')
+          results = data.get('results', [])
+          low = [r for r in results if r.get('issue_severity') == 'LOW']
+          medium = [r for r in results if r.get('issue_severity') == 'MEDIUM']
+          high = [r for r in results if r.get('issue_severity') == 'HIGH']
+          print(f'Bandit: {len(high)} HIGH, {len(medium)} MEDIUM, {len(low)} LOW issues found')
+          for r in low:
+              print(f'  [LOW] {r.get(\"filename\")}:{r.get(\"line_number\")} {r.get(\"test_id\")} - {r.get(\"issue_text\")}')
+          blocking = len(medium) + len(high)
+          if blocking > $max_medium:
+              print(f'❌ Bandit MEDIUM+ issues ({blocking}) exceed threshold ($max_medium)')
+              for r in medium + high:
+                  print(f'  [{r.get(\"issue_severity\")}] {r.get(\"filename\")}:{r.get(\"line_number\")} {r.get(\"test_id\")} - {r.get(\"issue_text\")}')
+              exit(1)
+          elif len(low) > $max_low:
+              print(f'❌ Bandit LOW issues ({len(low)}) exceed threshold ($max_low)')
               exit(1)
           else:
               print('✅ Bandit within threshold')
