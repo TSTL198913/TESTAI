@@ -4,6 +4,35 @@ from src.governance.models import DiagnosticContext
 from src.governance.orchestrator import GovernanceOrchestrator
 
 
+def _get_validation_passed(validation_result) -> bool:
+    """安全读取 validation_result 的 passed 字段。
+
+    兼容两种形式:
+    - dict: ``{"passed": True/False, ...}`` (来自 step_result.get, 最常见)
+    - 对象: 具有 ``passed`` 属性 (兼容旧式对象形式)
+
+    Args:
+        validation_result: dict 或具有 passed 属性的对象
+
+    Returns:
+        bool: passed 值; 若无法读取则默认 True (不触发治理)
+    """
+    if validation_result is None:
+        return True
+    if isinstance(validation_result, dict):
+        return validation_result.get("passed", True)
+    return getattr(validation_result, "passed", True)
+
+
+def _get_validation_errors(validation_result) -> list:
+    """安全读取 validation_result 的 errors 字段, 兼容 dict/对象形式。"""
+    if validation_result is None:
+        return []
+    if isinstance(validation_result, dict):
+        return validation_result.get("errors", [])
+    return list(getattr(validation_result, "errors", []) or [])
+
+
 class GovernanceProcessor(BaseProcessor):
     def __init__(self):
         super().__init__()
@@ -19,9 +48,12 @@ class GovernanceProcessor(BaseProcessor):
         should_trigger = False
         errors = []
 
-        if validation_result and not validation_result.passed:
+        # P2-4 修复: validation_result 可能是 dict (来自 step_result.get),
+        # 用 dict 访问代替 .passed 属性访问, 避免 AttributeError。
+        # 同时兼容对象形式 (有 passed 属性)。
+        if validation_result and not _get_validation_passed(validation_result):
             should_trigger = True
-            errors = validation_result.errors
+            errors = _get_validation_errors(validation_result)
         elif is_failed and error:
             should_trigger = True
             errors = [str(error)]
