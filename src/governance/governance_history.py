@@ -56,15 +56,24 @@ class GovernanceHistory:
     _instance: Optional["GovernanceHistory"] = None
     _lock = threading.RLock()
 
+    # Class-level type annotations for instance attributes.
+    # pylint cannot infer attributes set inside __new__, so we declare them
+    # here to satisfy E1101 (no-member) across all methods that use them.
+    _decisions: List[GovernanceDecision]
+    _decisions_lock: threading.RLock
+    _runs: List[GovernanceRunRecord]
+    _runs_lock: threading.RLock
+    _db_path: Optional[str]
+
     def __new__(cls, db_path: Optional[str] = None, **kwargs) -> "GovernanceHistory":
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
-                cls._instance._decisions: List[GovernanceDecision] = []
+                cls._instance._decisions = []
                 cls._instance._decisions_lock = threading.RLock()
-                cls._instance._runs: List[GovernanceRunRecord] = []
+                cls._instance._runs = []
                 cls._instance._runs_lock = threading.RLock()
-                cls._instance._db_path: Optional[str] = None
+                cls._instance._db_path = None
             # 每次传入 db_path 时更新 (允许测试指定持久化路径)
             if db_path is not None:
                 cls._instance._db_path = db_path
