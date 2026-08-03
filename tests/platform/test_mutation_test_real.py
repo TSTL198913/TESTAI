@@ -70,9 +70,18 @@ def mutation_test_env(tmp_path):
 
 
 class TestMutationTestRealExecution:
-    """P1-4: 验证变异测试基于真实测试执行。"""
+    """P1-4: 验证变异测试基于真实测试执行。
 
-    @pytest.mark.timeout(60)
+    超时说明 (120s, 非放水):
+      _run_mutation_test (src/platform/workflow.py:669) 用 subprocess 隔离运行 pytest。
+      subprocess 会加载项目全部已安装插件 (deepeval/schemathesis/playwright/hypothesis 等,
+      通过 entry point 自动发现, 与 pytest.ini 无关), 每次导入约 15-20s。
+      test_kill_rate_reproducible 运行 2 个变异周期 (2 个 subprocess) → 约 40-50s,
+      加上 Windows 上插件加载方差, 60s 偶发超时。120s 提供合理 headroom, 测试仍验证
+      真实变异测试逻辑 (非 random 造假), 不降低断言严格性。
+    """
+
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_kill_rate_reproducible(self, mutation_test_env):
         """反证 random 造假:相同输入多次运行 kill_rate 必须一致。
@@ -97,7 +106,7 @@ class TestMutationTestRealExecution:
             f"kill_rate 必须可重现(反证 random 造假), 实际 2 次结果: {results}"
         )
 
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_mutation_killed_when_test_fails(self, mutation_test_env):
         """变异被测试发现(测试失败) → killed=True。
@@ -127,7 +136,7 @@ class TestMutationTestRealExecution:
             f"details 中必须存在 killed=True 的变异, 实际 details: {details}"
         )
 
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_kill_rate_calculation_correct(self, mutation_test_env):
         """kill_rate = killed / total_mutations,且 total = killed + survived。"""
@@ -161,7 +170,7 @@ class TestMutationTestRealExecution:
         else:
             assert report["kill_rate"] == 0.0
 
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_no_test_file_all_survived(self, tmp_path):
         """无对应测试文件时,所有变异应标记为 survived(无法验证)。"""
@@ -190,7 +199,7 @@ class TestMutationTestRealExecution:
         )
         assert report["survived"] == report["mutations"]
 
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_mutation_uses_subprocess_not_random(self, mutation_test_env):
         """验证实现使用 subprocess 执行测试,而非 random.random()。"""
@@ -209,7 +218,7 @@ class TestMutationTestRealExecution:
         # random.random 不应被调用(已弃用 random 造假)
         mock_random.assert_not_called()
 
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_mutation_details_contain_real_test_result(self, mutation_test_env):
         """details 中每个变异的 killed 字段必须基于真实测试结果,而非随机值。"""

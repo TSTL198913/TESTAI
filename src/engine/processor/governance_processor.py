@@ -19,9 +19,19 @@ class GovernanceProcessor(BaseProcessor):
         should_trigger = False
         errors = []
 
-        if validation_result and not validation_result.passed:
-            should_trigger = True
-            errors = validation_result.errors
+        # P2-4 修复: validation_result 是 dict，原 `validation_result.passed`
+        # 将 dict 当对象访问，触发 AttributeError。改为 dict 访问（兼容对象形式）。
+        if validation_result:
+            if isinstance(validation_result, dict):
+                passed = validation_result.get("passed", True)
+            else:
+                passed = getattr(validation_result, "passed", True)
+            if not passed:
+                should_trigger = True
+                if isinstance(validation_result, dict):
+                    errors = validation_result.get("errors", [])
+                else:
+                    errors = getattr(validation_result, "errors", [])
         elif is_failed and error:
             should_trigger = True
             errors = [str(error)]

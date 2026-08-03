@@ -49,8 +49,8 @@
 - [ ] Worker任务测试通过 (`tests/integration/test_worker.py`)
 
 ### 完整测试套件
-- [ ] 192+ 测试用例通过
-- [ ] 无阻塞性错误
+- [x] 1427 测试用例通过（2026-08-02 验证）
+- [x] 无阻塞性错误（0 failed, 0 hang）
 
 ## 五、Docker部署
 
@@ -103,15 +103,22 @@
 - [ ] 回滚流程已确认
 - [ ] 回滚脚本已准备
 
-## 九、已知问题（待后续修复）
+## 九、已知问题（已修复）
 
-1. **tracker.py死锁问题**：`get_summary` 方法调用 `get_events_by_trace` 时存在锁重入导致死锁
-   - 影响：`test_get_summary_by_trace` 测试用例超时
-   - 建议：在下一个迭代中修复
+1. ~~**tracker.py死锁问题**~~：已修复。`_lock = threading.RLock()` 可重入锁，
+   `get_summary` 在锁内调用 `get_events_by_trace`（同 RLock）不会死锁。
+   证据：[src/governance/tracker.py:45](../src/governance/tracker.py#L45)
 
-2. **test_fix_verify.py加载失败**：根目录下的测试文件加载 `data/buggy_module.py` 失败
-   - 影响：测试收集阶段报错
-   - 建议：修复或移除该测试文件
+2. ~~**test_fix_verify.py加载失败**~~：已删除。该测试文件已不存在，
+   `data/buggy_module.py` 仅 4 字节占位文件。
+
+3. ~~**Dockerfile.prod 缺失**~~：已修复（2026-08-02）。
+   `docker-compose.prod.yml` 引用 `Dockerfile.prod`，现已创建。
+   CMD 用 `uvicorn --workers 4`（与 `start.sh start_prod` 一致）。
+
+4. ~~**docker-compose.prod.yml container_name + replicas 冲突**~~：已修复（2026-08-02）。
+   删除 `deploy.replicas`（普通 `docker-compose up` 模式无效），保留 `container_name`。
+   `docker compose config` 验证通过。
 
 ## 十、上线审批
 
@@ -125,5 +132,8 @@
 
 ---
 
-**上线状态**: ✅ 已准备就绪（排除已知问题）
-**最后更新**: 2026-07-17
+**上线状态**: ⚠️ 阻塞已解除，待生产环境验证
+- 后端核心功能已达上线标准（1427 测试通过，P0 修复完成）
+- Docker 配置语法验证通过（`docker compose config` PASS）
+- 待验证项：docker build 实际构建、真实依赖链连通性、UI 端到端测试
+**最后更新**: 2026-08-02

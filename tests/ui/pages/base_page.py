@@ -1,4 +1,11 @@
-from playwright.sync_api import Page, Locator
+try:
+    from playwright.sync_api import Page, Locator
+    _playwright_available = True
+except ImportError:
+    _playwright_available = False
+    Page = None
+    Locator = None
+
 import time
 import logging
 from typing import Optional, List, Tuple

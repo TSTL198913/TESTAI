@@ -166,7 +166,10 @@ def _reload_auth_module():
     for mod in list(sys.modules.keys()):
         if mod == "src.security.auth":
             del sys.modules[mod]
-    return importlib.import_module("src.security.auth")
+    module = importlib.import_module("src.security.auth")
+    import src.security
+    src.security.auth = module
+    return module
 
 
 # ============ P0-7: JWT 密钥生产强制 ============

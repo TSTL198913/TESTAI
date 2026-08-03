@@ -4,9 +4,6 @@ import sys
 import io
 from typing import List, Dict
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-
 
 EXCLUDED_FILES = [
     'test_strict_validation.py',
@@ -176,6 +173,14 @@ def scan_for_exception_pass(directory: str) -> List[Dict]:
 
 
 if __name__ == '__main__':
+    # Only redirect stdout/stderr when running as standalone script (not pytest import)
+    import io
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except Exception:
+        pass
+
     violations = scan_for_weak_assertions('tests') + \
                  scan_for_pytest_skip('tests') + \
                  scan_for_exception_pass('tests')

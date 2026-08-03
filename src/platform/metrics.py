@@ -103,3 +103,7 @@ class APIMetrics:
 
     def set_system_health(self, component: str, healthy: bool):
         self.system_health.labels(component=component).set(1 if healthy else 0)
+
+    def record_evaluate_error(self, evaluation_type: str):
+        self.evaluate_requests.labels(evaluation_type=evaluation_type).inc()
+        self.evaluate_duration.labels(evaluation_type=evaluation_type).observe(0.0)

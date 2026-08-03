@@ -7,6 +7,7 @@ import shutil
 TASKLIST_PATH = shutil.which("tasklist") or "tasklist"
 TASKKILL_PATH = shutil.which("taskkill") or "taskkill"
 import time
+import logging
 from dataclasses import dataclass
 from typing import List, Optional, Callable
 
@@ -18,8 +19,6 @@ class ProcessInfo:
     timeout: Optional[float] = None
     callback: Optional[Callable] = None
 
-
-import logging
 
 class ProcessManager:
     _instance = None
@@ -39,50 +38,77 @@ class ProcessManager:
             return cls._instance
 
     def start_monitor(self, check_interval: float = 5.0):
-        if self._running:
-            return
-        self._running = True
-        self._monitor_thread = threading.Thread(
-            target=self._monitor_loop, args=(check_interval,), daemon=True
-        )
-        self._monitor_thread.start()
+        with self._lock:
+            if self._running:
+                return
+            self._running = True
+            self._monitor_thread = threading.Thread(
+                target=self._monitor_loop, args=(check_interval,), daemon=True
+            )
+            self._monitor_thread.start()
 
     def stop_monitor(self):
-        self._running = False
-        if self._monitor_thread:
-            self._monitor_thread.join(timeout=5)
+        with self._lock:
+            self._running = False
+            monitor = self._monitor_thread
+        if monitor:
+            monitor.join(timeout=5)
 
     def _monitor_loop(self, interval: float):
+        # P5 修复: 捕获具体异常 (OSError/subprocess.SubprocessError/RuntimeError),
+        # 禁止裸 except Exception 吞没监控真实失败; 非预期异常 (编程错误) 向上传播。
         while self._running:
             try:
                 self._check_timeouts()
                 self._cleanup_zombies()
-            except Exception as e:
-                self.logger.warning(f"Process monitor loop error: {e}")
+            except (OSError, subprocess.SubprocessError, RuntimeError) as e:
+                self.logger.warning(
+                    "Process monitor loop error: %s (type=%s)",
+                    e, type(e).__name__,
+                    exc_info=True,
+                )
             time.sleep(interval)
 
     def _check_timeouts(self):
         now = time.time()
-        to_remove = []
-        for pid, info in self._processes.items():
-            if info.timeout and (now - info.start_time) > info.timeout:
-                self.kill_process(pid)
-                to_remove.append(pid)
-        for pid in to_remove:
-            del self._processes[pid]
+        # P5 修复: 持锁快照迭代, 避免并发 register_process 修改字典触发
+        # RuntimeError: dictionary changed size during iteration。
+        with self._lock:
+            timed_out = [
+                pid for pid, info in self._processes.items()
+                if info.timeout and (now - info.start_time) > info.timeout
+            ]
+        # kill_process 可能阻塞 (subprocess 调用), 在锁外执行避免长时间持锁
+        for pid in timed_out:
+            self.kill_process(pid)
+        if timed_out:
+            with self._lock:
+                for pid in timed_out:
+                    self._processes.pop(pid, None)
 
     def _cleanup_zombies(self):
+        # P5 修复: 持锁快照迭代, 避免并发修改触发 RuntimeError。
+        with self._lock:
+            snapshot = list(self._processes.items())
         to_remove = []
-        for pid, info in self._processes.items():
+        for pid, info in snapshot:
             if not self._is_process_alive(pid):
                 if info.callback:
+                    # 回调为用户传入的任意 Callable, 可能抛任意异常;
+                    # 捕获 Exception 并结构化日志, 避免单个回调崩溃拖垮监控线程。
                     try:
                         info.callback(pid)
                     except Exception as e:
-                        self.logger.warning(f"Failed to execute callback for pid {pid}: {e}")
+                        self.logger.warning(
+                            "Failed to execute callback for pid %s: %s (type=%s)",
+                            pid, e, type(e).__name__,
+                            exc_info=True,
+                        )
                 to_remove.append(pid)
-        for pid in to_remove:
-            del self._processes[pid]
+        if to_remove:
+            with self._lock:
+                for pid in to_remove:
+                    self._processes.pop(pid, None)
 
     def _is_process_alive(self, pid: int) -> bool:
         try:
@@ -116,6 +142,9 @@ class ProcessManager:
             )
 
     def kill_process(self, pid: int) -> bool:
+        # P5 修复: 捕获具体异常 (OSError, subprocess.SubprocessError),
+        # 禁止裸 except Exception 吞没; 失败输出结构化日志 (规则1)。
+        # 非预期异常 (编程错误) 向上传播, 不静默吞没。
         try:
             if os.name == "nt":
                 subprocess.run(
@@ -128,23 +157,35 @@ class ProcessManager:
                     kill_signal = getattr(signal, "SIGKILL", signal.SIGTERM)
                     os.kill(pid, kill_signal)
             return True
-        except Exception:
+        except (OSError, subprocess.SubprocessError) as e:
+            self.logger.warning(
+                "kill_process failed for pid %s: %s (type=%s)",
+                pid, e, type(e).__name__,
+                exc_info=True,
+            )
             return False
 
     def cleanup_all(self) -> int:
+        # P5 修复: 持锁快照, 锁外 kill (避免阻塞其他操作), 持锁清空。
+        with self._lock:
+            pids = list(self._processes.keys())
         killed = 0
-        pids = list(self._processes.keys())
         for pid in pids:
             if self.kill_process(pid):
                 killed += 1
-        self._processes.clear()
+        with self._lock:
+            self._processes.clear()
         return killed
 
     def list_processes(self) -> List[ProcessInfo]:
-        return list(self._processes.values())
+        # P5 修复: 持锁快照, 避免并发修改触发 RuntimeError。
+        with self._lock:
+            return list(self._processes.values())
 
     def get_process(self, pid: int) -> Optional[ProcessInfo]:
-        return self._processes.get(pid)
+        # P5 修复: 持锁读取, 避免并发 clear 返回脏数据。
+        with self._lock:
+            return self._processes.get(pid)
 
     def shutdown(self):
         self.stop_monitor()

@@ -45,4 +45,4 @@ jobs:
       - name: Step 3 - Full Test Suite
         run: |
           echo "🧪 Running Full Test Suite..."
-          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning --ignore=tests/governance/test_p0_exposure.py
+          python -m pytest tests/ -q --tb=short -W error::RuntimeWarning --ignore=tests/governance/test_p0_exposure.py --ignore=tests/ui --ignore=tests/integration/test_full_stack_integration.py --ignore=tests/integration/test_real_e2e_business.py

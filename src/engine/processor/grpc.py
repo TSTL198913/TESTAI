@@ -1,16 +1,32 @@
 # src/engine/processor/grpc.py
+import warnings
 from typing import Any
 from src.core.exceptions import EngineError, InfrastructureError
 from src.engine.processor.base import BaseProcessor
 from src.models.contract import GrpcRequest
 from src.models.result import StepResult
 
-# src/engine/processor/grpc.py
-# ... imports 保持不变 ...
-
 
 class GrpcProcessor(BaseProcessor):
     _channels: dict[tuple[str, int], Any] = {}
+
+    def __init__(self):
+        """P2-6 废弃入口: 实例化时显式告警。
+
+        GrpcProcessor 当前未实现真实 gRPC 调用 (_get_channel / process 均抛
+        NotImplementedError, 系 P0-5 诚实报错修复)。保留于 registry 仅作为
+        "配置存在即诚实失败" 的路径, 不应被依赖为可用处理器。实例化时发出
+        DeprecationWarning, 提示运维该处理器未实现且 slated for removal。
+        """
+        super().__init__()
+        warnings.warn(
+            "GrpcProcessor is unimplemented and deprecated; gRPC steps will raise "
+            "NotImplementedError/EngineError. It is retained only as an honest "
+            "error path and will be removed in a future release. Do not rely on it "
+            "for gRPC testing.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     @classmethod
     def _get_channel(cls, host: str, port: int):

@@ -143,7 +143,12 @@ class TeamManager:
                             updated_at=datetime.fromisoformat(team_data["updated_at"]),
                             metadata=team_data.get("metadata", {}),
                         )
-            except Exception:
+            except Exception as e:
+                logger.error(
+                    f"Failed to load teams from {self.storage_path}: "
+                    f"{type(e).__name__}: {e}",
+                    exc_info=True,
+                )
                 self.teams = {}
 
     def _save_teams(self):

@@ -47,6 +47,7 @@ class TestOrchestratorApprovalFlow:
                                     is_fixable=True,
                                     reasoning="Test fix",
                                     confidence_score=0.9,
+                                    source="llm",
                                     patch_proposal=PatchProposal(
                                         target_function="test_func",
                                         suggested_code="pass",

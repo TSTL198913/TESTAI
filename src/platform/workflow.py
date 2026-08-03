@@ -547,7 +547,13 @@ class WorkflowEngine:
                                 f"{type(e).__name__}: {e}",
                                 exc_info=True,
                             )
-                except Exception:
+                except Exception as e:
+                    # P1-4: 严禁裸 except 吞没变异应用错误,否则 kill_rate 指标失真
+                    logger.warning(
+                        f"Mutation apply failed for {filepath}: "
+                        f"{type(e).__name__}: {e}",
+                        exc_info=True,
+                    )
                     continue
 
         total_mutations = killed + survived

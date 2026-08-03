@@ -2,10 +2,12 @@ import ast
 import json
 import logging
 import os
+import time
 from contextlib import contextmanager
 from typing import Optional, Dict, Any
 
 from src.governance.agent import AIGovernanceAgent
+from src.governance.metrics import GovernanceMetrics
 
 
 class _ClassCollector(ast.NodeVisitor):
@@ -25,7 +27,13 @@ class _ClassCollector(ast.NodeVisitor):
 from src.governance.approval import ApprovalManager, ApprovalStatus
 from src.governance.executor import GovernanceExecutor
 from src.governance.git_manager import GitTransactionManager
-from src.governance.models import DiagnosticContext, GovernanceAction, PatchProposal
+from src.governance.auto_decision_engine import AutoDecisionEngine
+from src.governance.models import (
+    DecisionContextInput,
+    DiagnosticContext,
+    GovernanceAction,
+    PatchProposal,
+)
 from src.governance.tracker import GovernanceActionType, GovernanceTracker
 
 
@@ -60,8 +68,28 @@ class GovernanceOrchestrator:
         self.git_mgr = GitTransactionManager(repo_path)
         self.approval_mgr = ApprovalManager()
         self.tracker = GovernanceTracker()
+        self._metrics = GovernanceMetrics()
+        # AutoDecisionEngine: AI 规则决策引擎 (单例), 处理置信度/source/已知模式规则。
+        # 与 ApprovalManager 结构闸门互补: 结构闸门优先, engine 处理 AI 规则。
+        self._decision_engine = AutoDecisionEngine()
 
     async def execute_governance_flow(self, context: DiagnosticContext):
+        """P4 治理指标接入: 在外层包装记录流程计数器与耗时直方图 (规则1)。
+
+        实际逻辑委托给 _execute_governance_flow_impl; 包装层捕获最终 status
+        (FIXED/FAILED/SKIPPED/PENDING_APPROVAL/DIAGNOSED) 并在 finally 中记录,
+        确保任何返回路径 (含异常) 都不漏记指标。
+        """
+        start = time.monotonic()
+        status = "ERROR"
+        try:
+            result = await self._execute_governance_flow_impl(context)
+            status = result.get("status", "UNKNOWN") if isinstance(result, dict) else "UNKNOWN"
+            return result
+        finally:
+            self._metrics.record_flow(status, time.monotonic() - start)
+
+    async def _execute_governance_flow_impl(self, context: DiagnosticContext):
         trace_id = context.step_id or "unknown"
         self.tracker.record_event(
             trace_id=trace_id,
@@ -160,11 +188,63 @@ class GovernanceOrchestrator:
 
         self.approval_mgr.create_approval(tx_id, proposal, context)
 
-        if self.approval_mgr.requires_approval(tx_id):
+        # P0/P1-1 修复: 审批决策接入 AutoDecisionEngine (AI 规则引擎) + ApprovalManager (结构闸门)。
+        # 两道闸门互补:
+        #   闸门1 ApprovalManager.requires_approval: security/refactoring/行数>=20 (结构性, 优先级最高)
+        #   闸门2 AutoDecisionEngine.evaluate: 置信度/source 来源/已知模式 (AI 规则)
+        # 关键修复: orchestrator 原不检查诊断 source, mock/fallback 降级诊断若高置信
+        # 会被自动批准写入真实代码 (P0)。AutoDecisionEngine 的 source 守卫补此缺口。
+        # 决策映射: 仅 AUTO_APPROVE 且闸门1通过才执行补丁; 其余一律 PENDING_APPROVAL (零行为回退)。
+        try:
+            decision_input = DecisionContextInput(
+                confidence=(
+                    diagnosis.confidence_score
+                    if diagnosis.confidence_score is not None
+                    else 0.0
+                ),
+                is_fixable=diagnosis.is_fixable,
+                source=diagnosis.source,
+                patch_type=proposal.patch_type.value,
+                consecutive_failures=0,  # TODO: 后续从 GovernanceTracker 查询组件历史失败次数
+                patch_category="",        # TODO: 后续从 PatchProposal 派生分类
+                status="",                # 审批阶段无 DIVERGED 状态
+            )
+            engine_decision = self._decision_engine.evaluate(
+                decision_input.model_dump(), trace_id=tx_id
+            )
+        except (ValueError, TypeError) as e:
+            # 安全降级: 引擎异常 → 走人工, 不阻断流程, 结构化日志记录 (禁止裸 except 吞没)
+            self.logger.error(
+                f"AutoDecisionEngine.evaluate failed for {tx_id}: "
+                f"{type(e).__name__}: {e}",
+                exc_info=True,
+            )
+            engine_decision = None
+
+        # 闸门1: 结构性规则 (security/refactoring/行数>=20) 优先级最高, 覆盖引擎决策。
+        # 原因: AutoDecisionEngine 的 rule_security_requires_manual(P80) 被
+        # rule_auto_approve_high_confidence(P100) 遮蔽, SECURITY+高置信会触发 AUTO_APPROVE,
+        # 故 SECURITY 守卫由 ApprovalManager 结构闸门负责。
+        structural_requires_approval = self.approval_mgr.requires_approval(tx_id)
+        if structural_requires_approval:
+            effective_decision = "REQUIRE_MANUAL"
+            effective_reason = "structural gate: security/refactoring/>=20 lines"
+        elif engine_decision is None:
+            effective_decision = "REQUIRE_MANUAL"
+            effective_reason = "engine unavailable (exception)"
+        else:
+            effective_decision = engine_decision.decision
+            effective_reason = engine_decision.reason
+
+        # 决策映射: 仅 AUTO_APPROVE 进入补丁执行;
+        # REJECT/REQUIRE_MANUAL/ESCALATE/AUTO_ROLLBACK 一律 PENDING_APPROVAL (保留人工)。
+        # AUTO_ROLLBACK 在审批阶段无补丁可回滚, 降级为人工。
+        if effective_decision != "AUTO_APPROVE":
             result["status"] = "PENDING_APPROVAL"
             result["approval_required"] = True
             result["tx_id"] = tx_id
             result["patch_type"] = proposal.patch_type.value
+            result["approval_reason"] = effective_reason
             self.tracker.record_event(
                 trace_id=trace_id,
                 action_type=GovernanceActionType.APPROVAL_REQUIRED,
@@ -175,7 +255,9 @@ class GovernanceOrchestrator:
                 status="PENDING_APPROVAL",
             )
             self.logger.info(
-                f"[GOVERNANCE] Approval required for {tx_id} ({proposal.patch_type.value})"
+                f"[GOVERNANCE] Approval required for {tx_id} "
+                f"({proposal.patch_type.value}, decision={effective_decision}, "
+                f"reason={effective_reason})"
             )
             return result
 
@@ -226,6 +308,13 @@ class GovernanceOrchestrator:
                 evaluation_score=evaluation_result.get("score", 0.0),
                 evaluation_grade=evaluation_result.get("grade", "unknown"),
             )
+
+            self._check_and_record_convergence(
+                trace_id=trace_id,
+                context=context,
+                evaluation_score=evaluation_result.get("score", 0.0),
+            )
+
             return result
 
         except Exception as e:
@@ -316,8 +405,44 @@ class GovernanceOrchestrator:
         if ".." in component_name or "/" in component_name or "\\" in component_name:
             raise ValueError(f"Invalid component name: {component_name}")
         
-        mapping = {"EvalPlatformProcessor": "extensions/eval_platform/processor.py"}
-        relative_path = mapping.get(component_name, f"src/components/{component_name}.py")
+        mapping = {
+            "EvalPlatformProcessor": "extensions/eval_platform/processor.py",
+            "HTTPProcessor": "src/engine/processor/http.py",
+            "AssertionProcessor": "src/engine/processor/assertion.py",
+            "GovernanceProcessor": "src/engine/processor/governance_processor.py",
+            "DataProcessor": "src/engine/processor/data.py",
+            "GRPCProcessor": "src/engine/processor/grpc.py",
+            "EngineProcessor": "src/engine/processor/base.py",
+        }
+        
+        # 动态查找: 先尝试精确映射, 再尝试在 src/ 下搜索
+        if component_name in mapping:
+            relative_path = mapping[component_name]
+        else:
+            # 通用回退策略: 搜索 src/ 目录下匹配的 .py 文件
+            import glob
+            component_lower = component_name.lower()
+            # 尝试在常见目录下查找
+            search_dirs = ["src/engine", "src/platform", "src/governance", "src/ai", "src/core", "src/security"]
+            found = None
+            for d in search_dirs:
+                # 查找文件名包含组件名的文件 (如 HTTPProcessor -> http.py 或 http_processor.py)
+                files = glob.glob(f"{d}/**/*.py", recursive=True)
+                for f in files:
+                    basename = os.path.basename(f).replace(".py", "")
+                    # 简单匹配: 文件名包含组件名的核心部分 (忽略大小写和 Processor 后缀)
+                    core_name = component_lower.replace("processor", "")
+                    if core_name in basename.lower():
+                        found = f
+                        break
+                if found:
+                    break
+            
+            if found:
+                relative_path = found
+            else:
+                # 最后兜底: 默认放到 engine 目录
+                relative_path = f"src/engine/processor/{component_name.lower().replace('processor', '')}.py"
         
         abs_path = os.path.abspath(relative_path)
         project_root = os.path.abspath(".")
@@ -365,6 +490,47 @@ class GovernanceOrchestrator:
                 "discrepancies": {},
                 "suggestions": {},
             }
+
+    def _check_and_record_convergence(
+        self,
+        trace_id: str,
+        context: DiagnosticContext,
+        evaluation_score: float,
+    ):
+        CONVERGENCE_THRESHOLD = 0.7
+        if evaluation_score >= CONVERGENCE_THRESHOLD:
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.CONVERGED,
+                component=context.component_name,
+                step_id=context.step_id,
+                status="CONVERGED",
+                metadata={
+                    "evaluation_score": evaluation_score,
+                    "consecutive_count": self.tracker.get_consecutive_convergence_count() + 1,
+                },
+            )
+            self.logger.info(
+                f"[CONVERGENCE] Patch quality score {evaluation_score:.2f} >= {CONVERGENCE_THRESHOLD}. "
+                f"Convergence recorded for trace {trace_id}"
+            )
+        else:
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.DIVERGED,
+                component=context.component_name,
+                step_id=context.step_id,
+                status="DIVERGED",
+                metadata={
+                    "evaluation_score": evaluation_score,
+                    "threshold": CONVERGENCE_THRESHOLD,
+                },
+            )
+            self.tracker.reset_consecutive_convergence_count()
+            self.logger.warning(
+                f"[DIVERGENCE] Patch quality score {evaluation_score:.2f} < {CONVERGENCE_THRESHOLD}. "
+                f"Convergence counter reset for trace {trace_id}"
+            )
 
     async def approve_and_apply(
         self, tx_id: str, approver: str, reason: Optional[str] = None

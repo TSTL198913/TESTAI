@@ -114,4 +114,5 @@ class AIGovernanceAgent:
             is_fixable=False,
             reasoning=f"Agent failed to produce valid JSON: {last_error}",
             confidence_score=0.0,
+            source="fallback",  # P0 修复: 标记降级来源, 下游可识别非真实诊断
         )

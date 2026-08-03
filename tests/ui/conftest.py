@@ -2,6 +2,7 @@ import pytest
 import os
 import uuid
 import time
+import socket
 import logging
 from tests.ui.utils.config import config
 from tests.ui.utils.logger import test_logger
@@ -10,6 +11,41 @@ from tests.ui.pages.workflow_page import WorkflowPage
 
 
 logging.basicConfig(level=logging.INFO)
+
+
+def _is_reachable(url: str, timeout: float = 1.0) -> bool:
+    """检测目标 URL 是否可达（TCP 连通即可）。"""
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(url)
+        host = parsed.hostname or "localhost"
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except (socket.timeout, ConnectionRefusedError, OSError):
+        return False
+
+
+@pytest.fixture(scope="session", autouse=True)
+def require_live_frontend():
+    """会话级守卫：前端服务不可达时跳过整个 UI 测试套件。
+
+    UI 测试依赖运行中的前端 (localhost:3000) 和后端 (localhost:8000)。
+    不可达时跳过，避免将"环境不具备"误报为"测试失败"。
+    """
+    if not _is_reachable(config.base_url):
+        pytest.skip(
+            f"UI 测试需要运行中的前端服务 ({config.base_url} 不可达)。"
+            "请先启动前端服务。",
+            allow_module_level=False,
+        )
+    if not _is_reachable(config.get_api_url()):
+        pytest.skip(
+            f"UI 测试需要运行中的后端 API ({config.get_api_url()} 不可达)。"
+            "请先启动: uvicorn src.platform.api:app --port 8000",
+            allow_module_level=False,
+        )
+    yield
 
 
 @pytest.fixture(scope="session")

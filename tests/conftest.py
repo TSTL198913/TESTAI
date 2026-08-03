@@ -9,8 +9,6 @@ os.environ.setdefault("MONGO_URI", "mongodb://localhost:27017/testai")
 os.environ.setdefault("DEEPSEEK_API_KEY", "test-key-for-ci")
 
 from src.platform.api import app
-from src.report.generator import generator
-from src.report.storage import registry
 
 GLOBAL_RESULTS = {}
 
@@ -103,11 +101,13 @@ def reset_all_singletons():
       2. 用户/团队数据持久化导致后续测试期望不一致
       3. WorkflowEngine 的 workflows/instances 积累导致 ID 冲突
       4. 登录速率限制状态未重置导致后续测试被拒绝
+      5. 模块级变量(api.token_manager)与单例实例不同步
 
     解决策略:
     - 在每个测试前后重置所有单例的 _instance 和可变状态
     - 使用注册表模式,新增单例只需注册即可
     - 同时重置类级别和实例级别的属性(影子覆盖问题)
+    - 同步更新 api 模块级变量,确保引用一致性
     """
     # 初始化注册表(延迟导入避免循环依赖)
     if not _SINGLETON_REGISTRY:
@@ -117,9 +117,16 @@ def reset_all_singletons():
     _reset_all_singletons()
     
     from src.security.auth import TokenManager
+    from src.security.permissions import PermissionManager
+    from src.platform import api as _api_module
+
     token_manager = TokenManager()
     with token_manager._lock:
         token_manager._login_attempts.clear()
+
+    # 同步 api 模块级变量,防止模块重载后引用不一致
+    _api_module.token_manager = token_manager
+    _api_module.permission_manager = PermissionManager()
     
     yield
     # 测试后再次重置(确保本测试不污染后续测试)
@@ -127,6 +134,10 @@ def reset_all_singletons():
     
     with token_manager._lock:
         token_manager._login_attempts.clear()
+
+    # 再次同步 api 模块级变量
+    _api_module.token_manager = token_manager
+    _api_module.permission_manager = PermissionManager()
 
 
 def _init_singleton_registry():
@@ -248,33 +259,15 @@ def _init_singleton_registry():
         "_initialized": False,
     })
 
-    # FileLockManager - 单例模式
-    from src.governance.file_lock import FileLockManager
-    _register_singleton(FileLockManager, {
-        "_instance": None,
-    })
-
     # ResourceContainer - 单例模式
     from src.core.container import ResourceContainer
     _register_singleton(ResourceContainer, {
         "_instance": None,
         "_client": None,
         "_repo": None,
+        # P0 修复: 重置 _async_lock 和 _lock_loop，避免跨测试事件循环污染
+        # 问题: asyncio.Lock 绑定到首次 acquire 的事件循环，若上个测试的
+        # 事件循环已关闭，下个测试用旧 Lock 会 RuntimeError 或死锁
+        "_async_lock": None,
+        "_lock_loop": None,
     })
-
-
-
-
-
-@pytest.fixture(scope="session", autouse=True)
-def run_report_generator():
-    yield
-    all_data = registry.get_all()
-    print(f"\n[DEBUG] 会话销毁阶段 - Registry 内存地址: {id(registry)}")
-    print(f"[DEBUG] Registry 数据大小: {len(all_data)}")
-
-    if all_data:
-        report_path = generator.generate(all_data)
-        print(f"[SUCCESS] 报告生成成功: {report_path}")
-    else:
-        print("[WARNING] Registry 为空，没有测试数据生成！")

@@ -105,17 +105,17 @@ start_dev() {
     pip install -e .
     
     echo "[启动] 启动API服务..."
-    uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    uvicorn src.platform.api:app --host 0.0.0.0 --port 8000 --reload
 }
 
 start_prod() {
     echo "[启动] 生产模式..."
-    
+
     echo "[启动] 安装依赖..."
     pip install -e .
-    
+
     echo "[启动] 启动API服务..."
-    uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4
+    uvicorn src.platform.api:app --host 0.0.0.0 --port 8000 --workers 4
 }
 
 if [ $# -eq 0 ]; then

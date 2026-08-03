@@ -172,7 +172,7 @@ python -m pytest tests/ -v --ignore=tests/ui
 
 ## 后续行动
 
-1. 提交 `docs/FRAMEWORK_DEFICIENCY_REPORT.md` 给技术委员会
+1. 提交缺陷报告给技术委员会
 2. 技术委员会审批 src/ 修复方案
 3. 修复 src/ 后,移除对应测试的 `@pytest.mark.xfail` 装饰器
 4. 把"强断言的 4 条规则"纳入 CI 守卫(ci_guard.py)的检测范围

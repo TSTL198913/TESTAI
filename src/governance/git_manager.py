@@ -80,10 +80,14 @@ class GitTransactionManager:
         with self._lock:
             try:
                 self._run(["git", "checkout", self.base_branch])
+                # P2-2 修复: 回滚分支名必须与 start_transaction 一致（都用 _sanitize_branch_name）。
+                # 原实现用 f"governance_{tx_id}"（原始 tx_id），与 start 的 sanitized 分支名不一致，
+                # 含特殊字符的 tx_id 会因分支名不匹配而删除失败，事务未真正回滚。
+                branch_name = self._sanitize_branch_name(tx_id)
                 try:
-                    self._run(["git", "branch", "-D", f"governance_{tx_id}"])
+                    self._run(["git", "branch", "-D", branch_name])
                 except Exception as e:
-                    self.logger.debug(f"Branch governance_{tx_id} does not exist or cannot be deleted: {e}")
+                    self.logger.debug(f"Branch {branch_name} does not exist or cannot be deleted: {e}")
                 self.logger.info(f"Transaction {tx_id} rolled back successfully.")
             except Exception as e:
                 self.logger.critical(f"FATAL: Rollback failed for {tx_id}: {e}")

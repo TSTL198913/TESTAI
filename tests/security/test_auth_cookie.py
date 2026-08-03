@@ -71,35 +71,52 @@ def test_login_cookie_secure_flag_in_production(monkeypatch):
     monkeypatch.setenv("SECRET_KEY", "a" * 64)
     monkeypatch.setenv("DEFAULT_USER_PASSWORD", "ProdPass123!")
     monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://example.com")
-    # 重新加载 api 模块以应用环境变量
-    for mod in list(sys.modules.keys()):
-        if mod == "src.platform.api" or mod == "src.security.auth":
-            del sys.modules[mod]
-    api_module = importlib.import_module("src.platform.api")
 
-    # 重新创建 client
-    api_module.token_manager._login_attempts.clear()
-    with TestClient(api_module.app) as c:
-        response = c.post(
-            "/auth/login",
-            json={"username": "admin", "password": "ProdPass123!"},
-        )
-        assert response.status_code == 200
-        set_cookie_headers = response.headers.get_list("set-cookie")
-        all_cookies = " ".join(set_cookie_headers).lower()
-        assert "secure" in all_cookies, (
-            f"生产环境 cookie 必须有 Secure 标志, 实际: {set_cookie_headers}"
-        )
+    orig_api = sys.modules.get("src.platform.api")
+    orig_auth = sys.modules.get("src.security.auth")
 
-    # 恢复
-    monkeypatch.setenv("ENVIRONMENT", "development")
-    monkeypatch.delenv("SECRET_KEY", raising=False)
-    monkeypatch.delenv("DEFAULT_USER_PASSWORD", raising=False)
-    monkeypatch.delenv("CORS_ALLOWED_ORIGINS", raising=False)
-    for mod in list(sys.modules.keys()):
-        if mod == "src.platform.api" or mod == "src.security.auth":
-            del sys.modules[mod]
-    importlib.import_module("src.platform.api")
+    try:
+        for mod in list(sys.modules.keys()):
+            if mod == "src.platform.api" or mod == "src.security.auth":
+                del sys.modules[mod]
+        api_module = importlib.import_module("src.platform.api")
+
+        api_module.token_manager._login_attempts.clear()
+        with TestClient(api_module.app) as c:
+            response = c.post(
+                "/auth/login",
+                json={"username": "admin", "password": "ProdPass123!"},
+            )
+            assert response.status_code == 200
+            set_cookie_headers = response.headers.get_list("set-cookie")
+            all_cookies = " ".join(set_cookie_headers).lower()
+            assert "secure" in all_cookies, (
+                f"生产环境 cookie 必须有 Secure 标志, 实际: {set_cookie_headers}"
+            )
+    finally:
+        if orig_auth is not None:
+            sys.modules["src.security.auth"] = orig_auth
+            import src.security
+            src.security.auth = orig_auth
+        elif "src.security.auth" in sys.modules:
+            del sys.modules["src.security.auth"]
+            import src.security
+            if hasattr(src.security, "auth"):
+                delattr(src.security, "auth")
+        if orig_api is not None:
+            sys.modules["src.platform.api"] = orig_api
+            import src.platform
+            src.platform.api = orig_api
+        elif "src.platform.api" in sys.modules:
+            del sys.modules["src.platform.api"]
+            import src.platform
+            if hasattr(src.platform, "api"):
+                delattr(src.platform, "api")
+
+        monkeypatch.setenv("ENVIRONMENT", "development")
+        monkeypatch.delenv("SECRET_KEY", raising=False)
+        monkeypatch.delenv("DEFAULT_USER_PASSWORD", raising=False)
+        monkeypatch.delenv("CORS_ALLOWED_ORIGINS", raising=False)
 
 
 def test_authenticated_route_reads_cookie(client_no_rate_limit):

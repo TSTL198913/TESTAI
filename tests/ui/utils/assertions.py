@@ -1,4 +1,11 @@
-from playwright.sync_api import Page, expect, Locator
+try:
+    from playwright.sync_api import Page, expect, Locator
+    _playwright_available = True
+except ImportError:
+    _playwright_available = False
+    Page = None
+    expect = None
+    Locator = None
 import logging
 from typing import Optional, Any
 
@@ -100,28 +107,34 @@ class Assertions:
             raise AssertionError(message or f"URL should be '{expected_url}', got '{current_url}'") from e
 
     def assert_url_contains(self, expected_substring: str, timeout: int = 30000, message: str = None) -> None:
+        # 关键: 必须用 Playwright 原生 wait_for_timeout 驱动事件循环,
+        # 禁止用 time.sleep() —— sync API 下 time.sleep 不泵事件, page.url 返回过期快照,
+        # 会漏掉客户端导航(如 router.push)导致永远读不到新 URL (暴露于 E2E 真实执行)
         import time
         start_time = time.time()
         while time.time() - start_time < timeout / 1000:
             current_url = self.page.url
             if expected_substring in current_url:
                 return
-            time.sleep(0.1)
-        
+            self.page.wait_for_timeout(100)
+
         current_url = self.page.url
         self.logger.error(f"URL contains assertion failed: expected substring '{expected_substring}', got '{current_url}'")
         self._take_screenshot(f"assert_url_contains_failure")
         raise AssertionError(message or f"URL should contain '{expected_substring}', got '{current_url}'")
 
     def assert_url_not_contains(self, substring: str, timeout: int = 5000, message: str = None) -> None:
+        # 关键: 必须用 Playwright 原生 wait_for_timeout 驱动事件循环,
+        # 禁止用 time.sleep() —— sync API 下 time.sleep 不泵事件, page.url 返回过期快照,
+        # 会漏掉客户端导航(如 router.push)导致永远读不到新 URL (暴露于 E2E 真实执行)
         import time
         start_time = time.time()
         while time.time() - start_time < timeout / 1000:
             current_url = self.page.url
             if substring not in current_url:
                 return
-            time.sleep(0.1)
-        
+            self.page.wait_for_timeout(100)
+
         current_url = self.page.url
         self.logger.error(f"URL not contains assertion failed: URL should not contain '{substring}', got '{current_url}'")
         self._take_screenshot(f"assert_url_not_contains_failure")

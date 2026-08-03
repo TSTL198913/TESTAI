@@ -111,7 +111,7 @@ python -m pytest tests/ --cov=src --cov-report=html
 
 ```bash
 # 启动 API 服务
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn src.platform.api:app --host 0.0.0.0 --port 8000 --reload
 
 # 启动 Worker
 celery -A src.worker.celery_app worker --loglevel=info

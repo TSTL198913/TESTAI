@@ -23,12 +23,70 @@ from src.platform.dashboard import DashboardService
 from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 from src.security.auth import TokenManager, User, Role
 from src.security.permissions import PermissionManager, Permission
-from src.users.user_manager import UserManager, UserProfile, UserStatus
-from src.teams.team_manager import TeamManager, Team, TeamMember, TeamRole
-from src.ai.evaluator import AIEvaluator
-from src.ai.qa_engine import AIQAEngine
-from src.ai.classifier import AITextClassifier
 from src.platform.metrics import APIMetrics
+from src.worker.tasks import run_test_pipeline
+from src.worker.celery_app import celery_app
+
+# /execute 同步回退: broker 不可用异常类型 (防御式导入, celery/redis 为硬依赖)。
+# delay() 在 broker 不可达时抛 kombu.OperationalError (Celery 包装) 或
+# redis.ConnectionError。捕获后降级为进程内 apply() 同步执行 pipeline+治理。
+try:
+    from kombu.exceptions import OperationalError as _KombuOperationalError
+except ImportError:
+    _KombuOperationalError = None
+try:
+    from redis.exceptions import ConnectionError as _RedisConnectionError
+except ImportError:
+    _RedisConnectionError = None
+_BROKER_UNAVAILABLE_EXC = tuple(
+    t for t in [_KombuOperationalError, _RedisConnectionError] if t is not None
+)
+
+# logger 必须在隔离 try/except 之前定义 — except 块中需要使用它记录警告。
+# (BUG1 修复: 旧代码在 except 块用 logger.warning 但 logger 定义在 67 行, 触发 NameError)
+logger = logging.getLogger(__name__)
+
+# HttpRequest 是 /execute 主路径的请求体类型, 属治理硬依赖, 不参与隔离。
+# src.models.contract 是共享数据契约, 非"测试+AI平台"方向代码。
+from src.models.contract import HttpRequest  # noqa: E402
+
+# 隔离解耦: 非治理模块 (users/teams/ai/api_test) 可选导入。
+# 这些模块属于"其他方向"(测试+AI平台), 治理核心不依赖它们。
+# 若模块不存在, api.py 仍可加载, 治理端点正常工作, 非治理端点通过中间件返回 503。
+# (BUG3 修复: 旧代码遗漏 src.api_test.* 和部分 src.ai.* 模块, 它们在 try/except 外裸导入)
+_NON_GOV_AVAILABLE = True
+try:
+    from src.users.user_manager import UserManager, UserProfile, UserStatus
+    from src.teams.team_manager import TeamManager, Team, TeamMember, TeamRole
+    from src.ai.evaluator import AIEvaluator
+    from src.ai.qa_engine import AIQAEngine
+    from src.ai.classifier import AITextClassifier
+    from src.api_test.test_runner import APITestRunner
+    from src.api_test.schema import APITestCase, APITestAssertion, HTTPMethod, AssertionType
+    from src.ai.test_case_generator import TestCaseGenerator
+    from src.ai.defect_analyzer import DefectAnalyzer
+    from src.ai.result_analyzer import ResultAnalyzer
+except ImportError as _e:
+    logger.warning(f"非治理模块不可用 (隔离模式), 相关端点将返回 503: {_e}")
+    UserManager = None
+    UserProfile = None
+    UserStatus = None
+    TeamManager = None
+    Team = None
+    TeamMember = None
+    TeamRole = None
+    AIEvaluator = None
+    AIQAEngine = None
+    AITextClassifier = None
+    APITestRunner = None
+    APITestCase = None
+    APITestAssertion = None
+    HTTPMethod = None
+    AssertionType = None
+    TestCaseGenerator = None
+    DefectAnalyzer = None
+    ResultAnalyzer = None
+    _NON_GOV_AVAILABLE = False
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST  # pylint: disable=import-error
 
 
@@ -40,8 +98,6 @@ app = FastAPI(
     redoc_url="/redoc",
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
 )
-
-logger = logging.getLogger(__name__)
 
 
 def _compute_cors_origins() -> list:
@@ -101,6 +157,38 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
+
+
+# BUG4 修复: 非治理端点隔离 503 守卫。
+# _NON_GOV_AVAILABLE=False 时, 匹配非治理路径前缀的请求直接返回 503,
+# 不进入端点函数(避免对 None 单例调用方法导致 AttributeError 500)。
+# 路径前缀经代码分析确认, 无治理端点冲突:
+#   /users, /teams, /evaluate, /qa, /classify, /test/, /diagnose/
+_NON_GOV_PATH_PREFIXES = (
+    "/users", "/teams", "/evaluate", "/qa", "/classify", "/test/", "/diagnose/",
+)
+
+
+@app.middleware("http")
+async def non_gov_isolation_middleware(request: Request, call_next):
+    """非治理端点隔离守卫。
+
+    隔离模式下(_NON_GOV_AVAILABLE=False), 非治理路径返回 503 Service Unavailable,
+    不进入端点函数。治理端点不受影响, 正常进入路由与依赖链。
+    """
+    if not _NON_GOV_AVAILABLE:
+        path = request.url.path
+        if path.startswith(_NON_GOV_PATH_PREFIXES):
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "success": False,
+                    "message": "该端点依赖非治理模块(测试+AI平台), 当前隔离模式不可用",
+                    "error_code": "NON_GOV_ISOLATED",
+                    "detail": f"Path {path} requires non-governance modules which are not available",
+                },
+            )
+    return await call_next(request)
 
 
 # P1-6 修复:统一 HTTPException 响应为 ErrorResponse 格式
@@ -188,8 +276,10 @@ config_manager = ConfigManager()
 dashboard_service = DashboardService()
 token_manager = TokenManager()
 permission_manager = PermissionManager()
-user_manager = UserManager()
-team_manager = TeamManager()
+# BUG2 修复: 隔离模式下 UserManager/TeamManager 为 None, 调用 None() 会 TypeError。
+# 必须检查 _NON_GOV_AVAILABLE, 为 False 时不实例化, 设为 None。
+user_manager = UserManager() if _NON_GOV_AVAILABLE else None
+team_manager = TeamManager() if _NON_GOV_AVAILABLE else None
 tracker = GovernanceTracker()
 baseline_manager = GoldenBaselineManager()
 api_metrics = APIMetrics()
@@ -489,6 +579,7 @@ async def get_task_status(
     task_id: str,
     user: User = Depends(require_permission(Permission.VIEW_WORKFLOW)),
 ):
+    # 1. 先查 Workflow 实例中的任务
     instances = workflow_engine.list_instances()
     for instance in instances:
         instance_status = workflow_engine.get_workflow_status(instance["instance_id"])
@@ -507,6 +598,29 @@ async def get_task_status(
                         },
                         message="Task status retrieved successfully",
                     )
+
+    # 2. 再查 Celery 异步任务结果后端 (/execute 提交的任务)
+    try:
+        async_result = celery_app.AsyncResult(task_id)
+        if async_result.state != "PENDING":
+            return ApiResponse(
+                success=True,
+                data={
+                    "task_id": task_id,
+                    "status": async_result.state,
+                    "result": async_result.result if async_result.successful() else {},
+                    "error": str(async_result.result) if async_result.failed() else None,
+                },
+                message="Task status retrieved from Celery backend",
+            )
+    except Exception as e:
+        # P1: 禁止裸 except 吞没——Celery 后端故障(如 Redis 不可达)须可观测,
+        # 与"任务不存在"区分。仍回退 404 以保持 API 契约,但记录结构化错误。
+        logger.error(
+            f"Failed to query Celery backend for task {task_id}: "
+            f"{type(e).__name__}: {e}",
+            exc_info=True,
+        )
 
     raise HTTPException(status_code=404, detail="Task not found")
 
@@ -1381,12 +1495,7 @@ async def get_baseline_convergence(
     )
 
 
-from src.api_test.test_runner import APITestRunner
-from src.api_test.schema import APITestCase, APITestAssertion, HTTPMethod, AssertionType
-from src.ai.test_case_generator import TestCaseGenerator
-from src.ai.defect_analyzer import DefectAnalyzer
-from src.ai.result_analyzer import ResultAnalyzer
-from typing import List, Any
+from typing import Any  # List 已在文件顶部导入; api_test/ai 模块已在隔离 try/except 中导入
 
 
 class APITestCaseRequest(BaseModel):
@@ -1622,3 +1731,72 @@ async def diagnose_workflow(
         },
         message="Workflow diagnosed successfully",
     )
+
+
+@app.post("/execute")
+async def execute_pipeline(
+    request: HttpRequest,
+    user: User = Depends(require_permission(Permission.RUN_TEST)),
+):
+    import uuid as _uuid
+    from fastapi.concurrency import run_in_threadpool
+    trace_id = str(_uuid.uuid4())[:8]
+    request_dict = request.model_dump(mode="json")
+    request_dict["_trace_id"] = trace_id
+    request_dict["_requester"] = user.username
+
+    # 异步优先: prod 主路径, Celery 入队
+    try:
+        task = run_test_pipeline.delay(request_dict)
+        return ApiResponse(
+            success=True,
+            data={
+                "status": "queued",
+                "task_id": task.id,
+                "trace_id": trace_id,
+            },
+            message="Pipeline 已入队",
+        )
+    except _BROKER_UNAVAILABLE_EXC as broker_err:
+        # 同步回退: broker 不可用 (dev/无 Redis), 进程内 eager 执行任务体。
+        # apply() 运行 run_test_pipeline 任务体本身 (pipeline + 失败触发治理闭环),
+        # 保证同步/异步走完全相同逻辑 (任务体即单一真相源, 零代码发散)。
+        # threadpool 包装避免阻塞 async 事件循环 (任务体 future.result(timeout=60) 同步阻塞)。
+        logger.warning(
+            f"Celery broker 不可用, 降级同步执行 pipeline+治理: {broker_err}"
+        )
+        try:
+            eager_result = await run_in_threadpool(
+                run_test_pipeline.apply, (request_dict,)
+            )
+            if eager_result.successful():
+                return ApiResponse(
+                    success=True,
+                    data={
+                        "status": "completed_sync",
+                        "trace_id": trace_id,
+                        "result": eager_result.result,
+                        "fallback": "sync",
+                    },
+                    message="Broker 不可用, 已同步执行 pipeline+治理闭环",
+                )
+            # 任务体重抛异常 (pipeline + 治理均失败) → 包装为失败响应
+            raise eager_result.result
+        except Exception as sync_err:
+            logger.error(
+                f"同步执行 pipeline+治理失败: {sync_err}", exc_info=True
+            )
+            return ApiResponse(
+                success=False,
+                data={"trace_id": trace_id},
+                message=f"同步执行失败: {sync_err}",
+                error_code="EXECUTION_FAILED",
+            )
+    except Exception as e:
+        logger.error(f"Pipeline submission failed: {e}", exc_info=True)
+        return ApiResponse(
+            success=False,
+            data={"trace_id": trace_id},
+            message=f"任务投递失败: {str(e)}",
+            error_code="TASK_SUBMISSION_FAILED",
+        )

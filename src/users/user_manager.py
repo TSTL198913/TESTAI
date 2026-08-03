@@ -115,7 +115,12 @@ class UserManager:
                             metadata=user_data.get("metadata", {}),
                             password_hash=user_data.get("password_hash", ""),
                         )
-            except Exception:
+            except Exception as e:
+                logger.error(
+                    f"Failed to load users from {self.storage_path}: "
+                    f"{type(e).__name__}: {e}",
+                    exc_info=True,
+                )
                 self.users = {}
 
     def _enforce_file_permissions(self, path: str, is_write: bool = False) -> None:

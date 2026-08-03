@@ -35,8 +35,9 @@ class TestUiPageMethodSafety:
 
     def test_workflow_page_is_workflow_created_empty_except(self):
         mock_page = Mock()
-        mock_page.locator.return_value = Mock()
-        mock_page.locator.return_value.wait_for.side_effect = Exception("Test timeout")
+        mock_locator = Mock()
+        mock_locator.count.return_value = 0
+        mock_page.locator.return_value = mock_locator
         
         base_page = BasePage(mock_page)
         workflow_page = WorkflowPage.__new__(WorkflowPage)
@@ -56,7 +57,7 @@ class TestUiPageMethodSafety:
         workflow_page.workflow_progress_pattern = '[data-testid*="workflow-progress-"]'
         workflow_page.error_message_pattern = 'p:has-text("请输入工作流名称"), span:has-text("请输入工作流名称")'
         
-        result = workflow_page.is_workflow_created("test_workflow")
+        result = workflow_page.is_workflow_created("test_workflow", timeout=1)
         
         assert result is False
 

@@ -23,5 +23,5 @@ class TestOrchestratorPathTraversal:
         valid_component = "TestComponent"
         resolved_path = orchestrator._resolve_file_path(valid_component)
         
-        assert "TestComponent" in resolved_path
+        assert "testcomponent" in resolved_path.lower()
         assert resolved_path.endswith(".py")

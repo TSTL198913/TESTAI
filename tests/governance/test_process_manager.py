@@ -187,14 +187,19 @@ class TestProcessManagerPlatform:
             assert result is False
 
     def test_kill_process_windows(self):
-        """Windows 平台进程杀死"""
+        """Windows 平台进程杀死
+
+        P5 修复后 kill_process 仅捕获具体异常 (OSError/subprocess.SubprocessError),
+        不再用裸 except Exception。故用 OSError 模拟真实失败类型。
+        """
         mgr = ProcessManager()
 
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             result = mgr.kill_process(1234)
             assert result is True
             mock_run.assert_called_once()
 
-        with patch('subprocess.run', side_effect=Exception("kill failed")):
+        # OSError (taskkill 不存在/权限不足) 应被捕获并返回 False
+        with patch("subprocess.run", side_effect=OSError("kill failed")):
             result = mgr.kill_process(1234)
             assert result is False

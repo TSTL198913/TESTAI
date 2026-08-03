@@ -1,9 +1,12 @@
 import os
 import json
+import logging
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class AlertLevel(str, Enum):
@@ -108,7 +111,12 @@ class AlertManager:
                             enabled=rule_data.get("enabled", True),
                             created_at=datetime.fromisoformat(rule_data["created_at"]),
                         )
-            except Exception:
+            except Exception as e:
+                logger.error(
+                    f"Failed to load alerts from {self.storage_path}: "
+                    f"{type(e).__name__}: {e}",
+                    exc_info=True,
+                )
                 self.alerts = []
                 self.rules = {}
                 self._file_load_failed = True

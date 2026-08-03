@@ -13,17 +13,17 @@ class TestOrchestratorResolvePath:
         orchestrator = GovernanceOrchestrator()
         
         path = orchestrator._resolve_file_path("UnknownComponent")
-        assert path == "src/components/UnknownComponent.py"
+        assert path == "src/engine/processor/unknowncomponent.py"
 
     def test_resolve_file_path_handles_empty_component(self):
         orchestrator = GovernanceOrchestrator()
         
         path = orchestrator._resolve_file_path("")
-        assert path == "src/components/.py"
+        assert path.endswith(".py"), "空字符串应返回 .py 后缀的路径"
 
     def test_resolve_file_path_handles_none_component(self):
         orchestrator = GovernanceOrchestrator()
         
         path = orchestrator._resolve_file_path(None)
-        assert path == "src/components/None.py", \
+        assert path == "src/engine/processor/none.py", \
             "None should be handled gracefully instead of raising AttributeError"

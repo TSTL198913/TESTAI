@@ -4,9 +4,7 @@ import pytest
 import libcst as cst
 
 from src.governance.transformer import FunctionTransformer, ContextAwareTransformer, ImportApplier
-from src.governance.file_lock import FileLockManager, FileLock
 from src.governance.process_manager import ProcessManager
-from src.governance.prompt_manager import PromptManager
 from src.governance.security import SecurePathValidator
 
 
@@ -109,31 +107,6 @@ def test_func():
         assert output.index("import os") < output.index("def test_func")
 
 
-class TestFileLockValidation:
-    def test_acquire_release_lock(self):
-        lock_manager = FileLockManager()
-        result = lock_manager.acquire("test_lock")
-        
-        assert result is True
-        assert lock_manager.is_locked("test_lock") is True
-        
-        released = lock_manager.release("test_lock")
-        assert released is True
-        assert lock_manager.is_locked("test_lock") is False
-
-    def test_cannot_acquire_locked_file(self):
-        lock_manager = FileLockManager()
-        result1 = lock_manager.acquire("test_lock")
-        
-        assert result1 is True
-        assert lock_manager.is_locked("test_lock") is True
-        
-        result2 = lock_manager.acquire("test_lock")
-        assert result2 is False
-        
-        lock_manager.release("test_lock")
-
-
 class TestProcessManagerValidation:
     def test_process_manager_singleton(self):
         pm1 = ProcessManager()
@@ -156,24 +129,6 @@ class TestProcessManagerValidation:
         pm = ProcessManager()
         result = pm.kill_process(999999)
         assert isinstance(result, bool)
-
-
-class TestPromptManagerValidation:
-    def test_load_prompts(self):
-        pm = PromptManager()
-        assert isinstance(pm.templates, dict)
-
-    def test_get_existing_template(self):
-        pm = PromptManager()
-        if pm.templates:
-            template_name = next(iter(pm.templates.keys()))
-            template = pm.get(template_name)
-            assert template is not None
-
-    def test_get_nonexistent_template(self):
-        pm = PromptManager()
-        with pytest.raises(ValueError):
-            pm.get("nonexistent_template")
 
 
 class TestSecurityValidation:

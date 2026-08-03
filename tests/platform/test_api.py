@@ -171,6 +171,30 @@ class TestGovernanceAPI:
                 f"approver 必须从认证用户获取,实际: {passed_approver!r}"
             )
 
+    def test_approve_patch_expired(self, client, auth_headers):
+        """审批记录过期时必须返回 400, 且不调用 approve_and_apply。"""
+        from src.governance.approval import ApprovalStatus
+        with patch('src.platform.api.orchestrator.approve_and_apply') as mock_approve, \
+             patch('src.platform.api.approval_manager.get_approval') as mock_get:
+            mock_record = MagicMock()
+            mock_record.is_expired = True
+            mock_record.status = ApprovalStatus.PENDING
+            mock_get.return_value = mock_record
+            response = client.post(
+                "/governance/approvals/tx_expired/approve",
+                headers=auth_headers,
+            )
+            assert response.status_code == 400, (
+                f"过期审批应返回 400, 实际: {response.status_code}"
+            )
+            data = response.json()
+            assert "已过期" in data.get("detail", ""), (
+                f"错误信息应包含 '已过期', 实际: {data}"
+            )
+            mock_approve.assert_not_called(), (
+                "过期审批不应调用 approve_and_apply"
+            )
+
     def test_reject_patch(self, client, auth_headers):
         # P0-2 修复后:approver 参数已移除,reason 为必填查询参数
         from src.governance.approval import ApprovalStatus
@@ -211,13 +235,114 @@ class TestMonitoringAPI:
             data = response.json()
             assert data["success"] is True
 
-    def test_acknowledge_alert(self, client, auth_headers):
+    def test_acknowledge_alert_success_contract(self, client, auth_headers):
+        """正向: acknowledge_alert 返回 True → 200 + 完整契约字段。
+
+        源码契约 (api.py:818-822):
+          ApiResponse(success=True, data={"alert_id": alert_id, "acknowledged": True},
+                      message="Alert acknowledged")
+
+        反模式修复: 旧版仅断言 success=True, 未验证 data.alert_id / data.acknowledged /
+        message, 也未验证 acknowledge_alert 收到的 alert_id 来自路径参数、user_id 来自
+        认证用户。弱断言无法发现 "返回 True 但 data 字段缺失/错位" 的回归。
+        """
         with patch('src.platform.api.alert_manager.acknowledge_alert') as mock_ack:
             mock_ack.return_value = True
-            response = client.post("/monitoring/alerts/alert1/acknowledge", headers=auth_headers)
-            assert response.status_code == 200
-            data = response.json()
-            assert data["success"] is True
+            response = client.post(
+                "/monitoring/alerts/alert-xyz-999/acknowledge",
+                headers=auth_headers,
+            )
+
+        # ---- Assert: HTTP 200 + success=True ----
+        assert response.status_code == 200, (
+            f"成功 ack 应返回 200, 实际: {response.status_code}, body: {response.text}"
+        )
+        data = response.json()
+        assert data["success"] is True, (
+            f"success 必须为 True, 实际: {data.get('success')}"
+        )
+
+        # ---- Assert: data 契约字段 (api.py:820) ----
+        assert data["data"]["alert_id"] == "alert-xyz-999", (
+            f"data.alert_id 必须来自路径参数, 实际: {data['data'].get('alert_id')!r}"
+        )
+        assert data["data"]["acknowledged"] is True, (
+            f"data.acknowledged 必须为 True, 实际: {data['data'].get('acknowledged')!r}"
+        )
+        assert data["message"] == "Alert acknowledged", (
+            f"message 必须为 'Alert acknowledged', 实际: {data.get('message')!r}"
+        )
+
+        # ---- Assert: acknowledge_alert 收到正确的 alert_id + 认证用户名 ----
+        # acknowledge_alert(alert_id, user_id) — alert_id 来自路径, user_id 来自认证用户
+        mock_ack.assert_called_once()
+        call_args = mock_ack.call_args
+        passed_alert_id = call_args[0][0] if call_args[0] else call_args[1].get("alert_id")
+        passed_user_id = (
+            call_args[0][1] if len(call_args[0]) > 1 else call_args[1].get("user_id")
+        )
+        assert passed_alert_id == "alert-xyz-999", (
+            f"alert_id 必须来自路径参数, 实际: {passed_alert_id!r}"
+        )
+        assert passed_user_id == "admin", (
+            f"user_id 必须来自认证用户 (admin), 实际: {passed_user_id!r} — "
+            "说明 endpoint 未正确传递 user.username"
+        )
+
+    def test_acknowledge_alert_not_found_returns_404(self, client, auth_headers):
+        """负向: acknowledge_alert 返回 False → 404 + success=False + error_code。
+
+        源码契约 (api.py:816-817 + 全局异常处理器 194-221):
+          HTTPException(status_code=404, detail="Alert not found")
+          → {success: False, message: "Alert not found", error_code: "HTTP_404",
+             detail: "Alert not found"}
+
+        反模式修复: 旧版无负向测试, 无法发现 BUG-005 类回归
+        ("acknowledge_alert 返回 False 仍返回 200 + success=True")。
+        """
+        with patch('src.platform.api.alert_manager.acknowledge_alert') as mock_ack:
+            mock_ack.return_value = False  # alert 不存在
+            response = client.post(
+                "/monitoring/alerts/nonexistent-alert/acknowledge",
+                headers=auth_headers,
+            )
+
+        assert response.status_code == 404, (
+            f"不存在的 alert 应返回 404, 实际: {response.status_code}, body: {response.text}"
+        )
+        data = response.json()
+        assert data["success"] is False, (
+            f"404 响应 success 必须为 False, 实际: {data.get('success')}"
+        )
+        assert data["error_code"] == "HTTP_404", (
+            f"error_code 必须为 'HTTP_404' (全局异常处理器 api.py:209), "
+            f"实际: {data.get('error_code')!r}"
+        )
+        assert "not found" in data["message"].lower(), (
+            f"message 应提示 alert 不存在, 实际: {data.get('message')!r}"
+        )
+        mock_ack.assert_called_once()
+
+    def test_acknowledge_alert_propagates_alert_id_from_path(self, client, auth_headers):
+        """边界: 不同 alert_id 路径参数必须原样传递给 acknowledge_alert。
+
+        防止路径参数被忽略或硬编码 (反模式: mock 不校验入参, 掩盖路径解析 bug)。
+        """
+        with patch('src.platform.api.alert_manager.acknowledge_alert') as mock_ack:
+            mock_ack.return_value = True
+            response = client.post(
+                "/monitoring/alerts/CUSTOM-ID-12345/acknowledge",
+                headers=auth_headers,
+            )
+
+        assert response.status_code == 200
+        received_alert_id = mock_ack.call_args[0][0]
+        assert received_alert_id == "CUSTOM-ID-12345", (
+            f"路径 alert_id 必须原样传递给 acknowledge_alert, 实际: {received_alert_id!r}"
+        )
+        assert response.json()["data"]["alert_id"] == "CUSTOM-ID-12345", (
+            "响应 data.alert_id 必须与路径参数一致"
+        )
 
     def test_get_metrics(self, client, auth_headers):
         response = client.get("/monitoring/metrics", headers=auth_headers)

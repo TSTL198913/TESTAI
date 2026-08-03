@@ -1,13 +1,9 @@
 import logging
 import time
 
-from src.core.container import ResourceContainer
-from src.core.context import ExecutionContext
 from src.core.loop_manager import AsyncLoopManager
 from src.core.tracer import reset_trace_id, set_trace_id
-from src.engine.pipeline import ExecutionPipeline
-from src.engine.registry import get_pipeline
-from src.governance.agent import AIGovernanceAgent
+from src.governance.orchestrator import GovernanceOrchestrator
 from src.governance.models import DiagnosticContext
 from src.worker.celery_app import celery_app
 
@@ -19,6 +15,13 @@ def run_test_pipeline(self, request_dict: dict):
 
     async def _execute():
         nonlocal execution_context
+
+        # 隔离解耦: engine 模块 lazy import, 使治理核心不硬依赖测试执行引擎。
+        # engine 不可用时 _execute() 抛 ImportError → except 块 → 走 governance 路径。
+        from src.core.container import ResourceContainer
+        from src.core.context import ExecutionContext
+        from src.engine.pipeline import ExecutionPipeline
+        from src.engine.registry import get_pipeline
 
         client = await ResourceContainer.get_client()
         repo = await ResourceContainer.get_repo()
@@ -45,7 +48,6 @@ def run_test_pipeline(self, request_dict: dict):
         try:
 
             async def _governance(err):
-                agent = AIGovernanceAgent()
                 diag_context = DiagnosticContext(
                     step_id=request_dict.get("case_id", "unknown"),
                     component_name="pipeline",
@@ -54,8 +56,13 @@ def run_test_pipeline(self, request_dict: dict):
                     expected_baseline=None,
                     exception_trace=str(err),
                 )
-                governance_result = await agent.analyze_with_context(diag_context)
-                return governance_result.model_dump()
+                # P0 修复: 异常 fallback 走 orchestrator 六步闭环 (分类→诊断→审批→Git→补丁→收敛)
+                # 而非只调 agent 做诊断。orchestrator 内部分类器作为触发策略:
+                #   RETRY/MANUAL_REQUIRED → SKIPPED (轻量)
+                #   AI_DIAGNOSE → 诊断 → 审批闸门 → 大部分 PENDING_APPROVAL (人工)
+                orchestrator = GovernanceOrchestrator()
+                governance_result = await orchestrator.execute_governance_flow(diag_context)
+                return governance_result
 
             gov_future = AsyncLoopManager.run_coroutine(_governance(e))
             return gov_future.result(timeout=60)

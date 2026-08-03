@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Callable, Dict, List, Optional, Any
 
 from src.governance.governance_history import GovernanceDecision, GovernanceHistory  # pylint: disable=import-error,no-name-in-module
+from src.governance.metrics import GovernanceMetrics  # pylint: disable=import-error,no-name-in-module
 
 
 @dataclass
@@ -40,6 +41,7 @@ class AutoDecisionEngine:
         self._logger = logging.getLogger("AutoDecisionEngine")
         self._decision_handlers: Dict[str, Callable] = {}
         self._rules_lock = threading.RLock()  # P0-7 Fix: Thread safety for rule operations
+        self._metrics = GovernanceMetrics()  # P4 治理指标 (规则1)
         self._register_default_rules()
         self._register_default_handlers()
 
@@ -142,6 +144,7 @@ class AutoDecisionEngine:
                         "patch_type": context.get("patch_type", "unknown"),
                     },
                 )
+                self._dispatch_handler(decision)
                 self._history.record_decision(decision)
                 self._logger.info(
                     f"Auto decision: {decision.decision} (rule: {rule.rule_id}, "
@@ -160,11 +163,50 @@ class AutoDecisionEngine:
             rule_triggered=None,
             metadata={"context_keys": list(context.keys())},
         )
+        self._dispatch_handler(decision)
         self._history.record_decision(decision)
         self._logger.info(
             f"Default decision: REQUIRE_MANUAL (trace: {trace_id})"
         )
         return decision
+
+    def _dispatch_handler(self, decision: GovernanceDecision) -> None:
+        """P2-5 修复: 实际调用 _decision_handlers 中注册的处理器。
+
+        原实现 _register_default_handlers 注册了 5 个处理器 (AUTO_APPROVE/
+        REJECT/REQUIRE_MANUAL/ESCALATE/AUTO_ROLLBACK), 但 evaluate() 从未调用,
+        _handle_auto_approve 等成为死代码 —— "自动决策引擎" 只记账无动作副作用,
+        与其语义不符 (例如 AUTO_ROLLBACK 永不触发回滚)。
+
+        本方法按 decision.decision 查找已注册处理器并执行, 将返回值写入
+        decision.metadata["handler_result"], 使动作副作用可观测、可追溯。
+        处理器异常不阻断决策本身 (决策已由规则确定), 但以结构化日志记录并
+        暴露于 metadata["handler_error"], 避免裸 except 静默吞没异常。
+        未注册处理器的动作安全降级 (handler_result=None) 并告警。
+        """
+        # P4 治理指标 (规则1): 按决策类型计数, 任何决策都记录一次。
+        self._metrics.record_decision(decision.decision)
+        handler = self._decision_handlers.get(decision.decision)
+        if handler is None:
+            self._logger.warning(
+                f"No handler registered for action '{decision.decision}' "
+                f"(trace={decision.trace_id}, rule={decision.rule_triggered}); "
+                f"decision recorded without side-effect execution."
+            )
+            decision.metadata["handler_result"] = None
+            return
+        try:
+            result = handler(decision)
+        except Exception as e:  # noqa: BLE001 - 处理器为外部 Callable, 须隔离其异常不污染决策
+            self._logger.error(
+                f"Decision handler '{decision.decision}' raised "
+                f"{type(e).__name__}: {e} (trace={decision.trace_id}, "
+                f"rule={decision.rule_triggered})",
+                exc_info=True,
+            )
+            decision.metadata["handler_error"] = f"{type(e).__name__}: {e}"
+            return
+        decision.metadata["handler_result"] = result
 
     def _evaluate_rule(self, rule: DecisionRule, context: Dict[str, Any]) -> bool:
         """P0-7 Fix: Improved error handling with specific exception types.
@@ -181,6 +223,14 @@ class AutoDecisionEngine:
                 is_fixable = context.get("is_fixable", False)
                 if not isinstance(confidence, (int, float)):
                     self._logger.warning(f"Invalid confidence type in context for rule {rule.rule_id}")
+                    return False
+                # P0 修复: mock/fallback 来源的诊断不自动批准, 即使 confidence 高
+                # mock=LLM 不可用假诊断, fallback=规则降级诊断, 均不可信, 不得自动批准
+                source = context.get("source", "llm")
+                if source in ("mock", "fallback"):
+                    self._logger.info(
+                        f"Rule {rule.rule_id} skipped: source={source!r} 降级诊断不自动批准"
+                    )
                     return False
                 return (
                     confidence >= 0.9

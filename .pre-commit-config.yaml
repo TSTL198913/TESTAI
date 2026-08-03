@@ -10,10 +10,10 @@ repos:
         
       - id: unit-tests
         name: Unit Tests
-        entry: python -m pytest tests/unit/ -x -q --tb=short
+        entry: python -m pytest tests/platform/ tests/security/ -x -q --tb=short
         language: python
         pass_filenames: false
-        description: "Run unit tests"
+        description: "Run unit tests (platform + security)"
         
       - id: governance-tests
         name: Governance Tests

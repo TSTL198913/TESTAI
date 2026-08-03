@@ -116,6 +116,7 @@ class TestGovernanceOrchestrator:
         diagnosis.is_fixable = True
         diagnosis.patch_proposal = patch_proposal
         diagnosis.confidence_score = 0.9
+        diagnosis.source = "llm"
         diagnosis.reasoning = "Needs fix"
 
         self.orchestrator.agent.analyze_with_context.return_value = diagnosis
@@ -148,6 +149,7 @@ class TestGovernanceOrchestrator:
         diagnosis.is_fixable = True
         diagnosis.patch_proposal = patch_proposal
         diagnosis.confidence_score = 0.9
+        diagnosis.source = "llm"
         diagnosis.reasoning = "Can fix"
 
         self.orchestrator.agent.analyze_with_context.return_value = diagnosis
@@ -180,6 +182,7 @@ class TestGovernanceOrchestrator:
         diagnosis.is_fixable = True
         diagnosis.patch_proposal = patch_proposal
         diagnosis.confidence_score = 0.9
+        diagnosis.source = "llm"
         diagnosis.reasoning = "Can fix"
 
         self.orchestrator.agent.analyze_with_context.return_value = diagnosis
@@ -211,6 +214,7 @@ class TestGovernanceOrchestrator:
         diagnosis.is_fixable = True
         diagnosis.patch_proposal = patch_proposal
         diagnosis.confidence_score = 0.9
+        diagnosis.source = "llm"
         diagnosis.reasoning = "Can fix"
 
         self.orchestrator.agent.analyze_with_context.return_value = diagnosis
@@ -333,6 +337,11 @@ class TestGovernanceOrchestrator:
             "KeyError: 'missing_key'",
             "IndexError: list index out of range",
             "ZeroDivisionError: division by zero",
+            "ImportError: bad import",
+            "ModuleNotFoundError: No module named 'x'",
+            "RecursionError: maximum recursion depth exceeded",
+            "NotImplementedError: should be overridden",
+            "AssertionError: assert 1 == 2",
         ]
         for trace in code_traces:
             context = DiagnosticContext(
@@ -439,7 +448,7 @@ class TestGovernanceOrchestrator:
 
     def test_resolve_file_path_default(self):
         result = self.orchestrator._resolve_file_path("UnknownComponent")
-        assert result == "src/components/UnknownComponent.py"
+        assert result == "src/engine/processor/unknowncomponent.py"
 
     @pytest.mark.asyncio
     async def test_approve_and_apply_record_not_found(self):
@@ -572,6 +581,7 @@ class TestGovernanceOrchestrator:
         diagnosis.is_fixable = True
         diagnosis.patch_proposal = patch_proposal
         diagnosis.confidence_score = 0.9
+        diagnosis.source = "llm"
         diagnosis.reasoning = "Can fix"
 
         self.orchestrator.agent.analyze_with_context.return_value = diagnosis

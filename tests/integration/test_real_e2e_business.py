@@ -1,24 +1,11 @@
-import pytest
 import os
 from httpx import Client
 
-
-@pytest.fixture(scope="module")
-def api_base_url():
-    return os.environ.get("API_BASE_URL", "http://localhost:8000")
-
-
-@pytest.fixture(scope="module")
-def auth_token(api_base_url):
-    with Client() as client:
-        response = client.post(
-            f"{api_base_url}/auth/login",
-            json={"username": "admin", "password": "password"}
-        )
-        data = response.json()
-        assert response.status_code == 200
-        assert data["success"] is True
-        return data["data"]["access_token"]
+# P0 修复 (429 碰撞隔离):
+#   旧版此处定义 module 级 api_base_url / auth_token fixture, 每个模块独立登录 admin。
+#   全量顺序运行时 admin 登录次数累计触发 5次/60秒 限流 → 后续测试 429 失败。
+#   现改用 tests/integration/conftest.py 的 session 级同名 fixture, 全 session 只登录 1 次。
+#   详见 conftest.py:_session_login 文档。
 
 
 class TestRealE2EBusiness:
@@ -31,7 +18,9 @@ class TestRealE2EBusiness:
                 json={
                     "name": f"E2E Test Workflow {os.urandom(4).hex()}",
                     "description": "E2E test workflow",
-                    "tasks": []
+                    # 业务规则: define_workflow 校验 "工作流必须包含至少一个任务" (workflow.py:~300),
+                    # tasks=[] 会被拒为 400。此处给一个最小有效任务以通过契约。
+                    "tasks": [{"type": "delay", "name": "占位任务", "params": {"duration": 1}}]
                 },
                 headers={"Authorization": f"Bearer {auth_token}"}
             )
@@ -135,25 +124,35 @@ class TestRealE2EBusiness:
             data = list_response.json()
             assert data["success"] is True
 
-    def test_token_refresh_flow(self, api_base_url):
+    def test_token_refresh_flow(self, api_base_url, auth_tokens):
+        """refresh 契约 (api.py:484-504): 优先 cookie, 回退 Authorization header, 不接受 JSON body。
+
+        P0 修复 (429 碰撞隔离):
+          旧版此处重新登录 admin 取 refresh_token, 全量运行累计触发限流。
+          现复用 conftest.py 的 session 级 auth_tokens["refresh_token"], 全 session 只登录 1 次。
+
+        真实契约 (2026-08-02 实测 + api.py:491-493):
+          /auth/refresh 优先从 cookie 读 refresh_token, 回退到 Authorization: Bearer <token>。
+          旧版用 json={"refresh_token": ...} → 401 "No refresh token provided" (端点不读 body)。
+          改用 Authorization header 与 test_refresh_token (test_full_stack_integration) 一致。
+          无 refresh token rotation (token_manager.refresh_token 不 invalidate 旧 token), 可多次复用。
+        """
         with Client() as client:
-            login_response = client.post(
-                f"{api_base_url}/auth/login",
-                json={"username": "admin", "password": "password"}
-            )
-            assert login_response.status_code == 200
-            login_data = login_response.json()
-            assert login_data["success"] is True
-            
+            refresh_token = auth_tokens["refresh_token"]
+            assert refresh_token, "session auth_tokens 缺 refresh_token, 无法测 refresh"
+
             refresh_response = client.post(
                 f"{api_base_url}/auth/refresh",
-                json={"refresh_token": login_data["data"]["refresh_token"]}
+                headers={"Authorization": f"Bearer {refresh_token}"}
             )
-            assert refresh_response.status_code == 200
+            assert refresh_response.status_code == 200, (
+                f"refresh 应 200, 实际: {refresh_response.status_code}, "
+                f"body: {refresh_response.text}"
+            )
             refresh_data = refresh_response.json()
             assert refresh_data["success"] is True
+            # 核心契约: refresh 后签发新 access_token
             assert "access_token" in refresh_data["data"]
-            assert "refresh_token" in refresh_data["data"]
 
     def test_permission_denied_for_unauthorized(self, api_base_url):
         with Client() as client:
@@ -172,7 +171,9 @@ class TestRealE2EBusiness:
             assert response.status_code == 200
             data = response.json()
             assert data["success"] is True
-            assert "total_users" in data["data"] or "workflows" in data["data"]
+            # dashboard/summary 当前契约: data 含 {platform, health, metrics, pending_actions, quality, summary}。
+            # 旧断言期望 total_users/workflows (已废弃的 schema), 改为校验当前真实业务字段存在。
+            assert "summary" in data["data"] or "metrics" in data["data"]
 
     def test_config_read_and_update(self, api_base_url, auth_token):
         with Client() as client:

@@ -71,15 +71,19 @@ class TestGovernanceFlow:
     def test_governance_empty_state(self, logged_in_page: Page):
         governance_page = GovernancePage(logged_in_page)
         assertions = Assertions(logged_in_page)
-        
+
         governance_page.load(config.base_url)
         governance_page.click_filter('pending')
-        
+
         rows = governance_page.get_approval_rows()
         if not rows:
             assertions.assert_element_visible('p:has-text("暂无审批任务")')
         else:
-            assertions.assert_element_visible('tbody tr')
+            # 有审批行时, 断言表格至少渲染 1 行。
+            # 禁止用 assert_element_visible('tbody tr') —— pending 有 9 行时该选择器匹配多元素,
+            # 触发 Playwright strict mode violation (E2E 真实执行暴露)。
+            # 业务意图是"行存在即表格已渲染", 用 count_at_least 精确表达且无歧义。
+            assertions.assert_element_count_at_least('tbody tr', 1)
 
     def test_governance_component_display(self, logged_in_page: Page):
         governance_page = GovernancePage(logged_in_page)

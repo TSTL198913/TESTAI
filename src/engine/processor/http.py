@@ -1,7 +1,9 @@
 # src/engine/processor/http.py
 import asyncio
+import ipaddress
 import logging
 from typing import Dict, Any, Optional
+from urllib.parse import urlparse
 
 import httpx
 from tenacity import (
@@ -19,6 +21,46 @@ from src.models.result import StepResult
 logger = logging.getLogger("ai_test_platform")
 
 
+def _validate_url_ssrf(url: str) -> None:
+    """P1-2 SSRF 防护：校验目标 URL，拒绝非 http(s) scheme、localhost 与内网/保留地址。
+
+    防护范围：
+    - scheme 白名单：仅允许 http/https（拒绝 file://、gopher://、ftp:// 等）
+    - 拒绝 localhost 主机名
+    - 拒绝字面量为内网/保留/回环/链路本地(含云元数据 169.254.0.0/16)/组播/未指定的 IP
+
+    限制说明：仅做字面量与 hostname 校验，未做 DNS 解析后再校验（防 DNS rebinding）。
+    生产环境如需更强防护，应在出网代理层叠加 DNS 解析校验。
+    校验失败抛 EngineError（业务异常，不触发 tenacity 重试）。
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise EngineError(
+            f"SSRF guard: URL scheme not allowed: {parsed.scheme!r} (only http/https)"
+        )
+    hostname = parsed.hostname
+    if not hostname:
+        raise EngineError(f"SSRF guard: URL missing hostname: {url!r}")
+    if hostname.lower() == "localhost":
+        raise EngineError(f"SSRF guard: localhost target rejected: {url!r}")
+    try:
+        ip = ipaddress.ip_address(hostname)
+    except ValueError:
+        # 非字面量 IP（域名），字面量校验通过
+        return
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    ):
+        raise EngineError(
+            f"SSRF guard: internal/reserved IP target rejected: {url!r}"
+        )
+
+
 class HTTPProcessor(BaseProcessor):
     @retry(
         stop=stop_after_attempt(3),
@@ -32,6 +74,9 @@ class HTTPProcessor(BaseProcessor):
     async def process(
         self, context, step: HttpRequest, client: httpx.AsyncClient
     ) -> HttpRequest:
+        # P1-2 修复: SSRF 防护 - 发起请求前校验目标 URL
+        _validate_url_ssrf(str(step.url))
+
         request_kwargs: Dict[str, Any] = {
             "method": step.method,
             "url": str(step.url),

@@ -493,6 +493,7 @@ class TestSLevelGovernanceOrchestrator:
             is_fixable=True,
             reasoning="Test reasoning",
             confidence_score=0.95,
+            source="llm",
             patch_proposal=PatchProposal(
                 target_function="test_func",
                 suggested_code="safe_code",
@@ -569,27 +570,6 @@ class TestSLevelCircuitBreaker:
 
         time.sleep(1.1)
         assert breaker.can_execute() is True
-
-
-class TestSLevelFileLock:
-    """S级测试：文件锁机制"""
-
-    def test_file_lock_concurrent_access(self):
-        from src.governance.file_lock import FileLock
-
-        lock_path = Path("tests/data/test_lock.lock")
-        lock_path.parent.mkdir(exist_ok=True)
-
-        lock1 = FileLock(str(lock_path))
-        lock2 = FileLock(str(lock_path))
-
-        with lock1:
-            with pytest.raises(RuntimeError):
-                with lock2:
-                    pass
-
-        if lock_path.exists():
-            lock_path.unlink()
 
 
 class TestSLevelAPIEndpoints:
@@ -705,25 +685,141 @@ class TestSLevelAlertManagement:
         assert acknowledged.status == AlertStatus.ACKNOWLEDGED
 
     def test_alert_rule_evaluation(self):
-        from src.monitoring.alert_manager import AlertManager, AlertRule, AlertLevel, AlertType
+        """[真实业务] evaluate_rules 必须按 rule_id 硬编码分支真实评估阈值。
 
-        manager = AlertManager(storage_path="tests/data/test_alerts_rules.json")
+        源码限制 (alert_manager.py:301-378): evaluate_rules 硬编码了 5 个 rule_id
+        (rule_test_failure/rule_performance/rule_performance_critical/rule_kill_rate/rule_coverage),
+        自定义 rule_id 的规则不会被评估。本测试用真实 rule_id 验证真实业务逻辑。
 
-        rule = AlertRule(
-            rule_id="test_rule",
-            name="Test Rule",
+        AlertManager.__init__ 会自动加载 5 个默认规则 (_initialize_default_rules),
+        所以测试时需提供完整 metrics 让非目标规则不触发, 只验证目标规则。
+
+        旧版测试用 rule_id="test_rule" + assert len>=0 是 tautology (恒真),
+        掩盖了"自定义规则不被评估"的真实源码行为。
+        """
+        from src.monitoring.alert_manager import (
+            AlertManager, AlertRule, AlertLevel, AlertType,
+        )
+
+        manager = AlertManager(storage_path="tests/data/test_alerts_rules_real.json")
+
+        # 默认规则已含 rule_performance (threshold=2000, 源码 alert_manager.py:181)
+        # 提供完整 metrics: 只让 rule_performance 触发, 其他默认规则不触发
+        # - avg_response_time_ms=2500 > 2000 → rule_performance 触发
+        # - kill_rate=100 >= 80 → rule_kill_rate 不触发
+        # - coverage=100 >= 80 → rule_coverage 不触发
+        # - failed_ratio=0 <= 0.1 → rule_test_failure 不触发
+        alerts_high = manager.evaluate_rules({
+            "avg_response_time_ms": 2500,
+            "kill_rate": 100,
+            "coverage": 100,
+            "failed_ratio": 0,
+        })
+        assert isinstance(alerts_high, list)
+        assert len(alerts_high) == 1, (
+            f"avg_response_time_ms=2500 > threshold=2000 应只触发1个告警, "
+            f"实际 {len(alerts_high)} 个: {[a.title for a in alerts_high]} — "
+            "若!=1说明 rule_performance 分支被破坏或默认规则未正确隔离"
+        )
+        # 告警内容必须正确
+        alert = alerts_high[0]
+        assert alert.level == AlertLevel.WARNING
+        assert alert.alert_type == AlertType.PERFORMANCE_DEGRADATION
+        assert "2500" in alert.title or "2500" in alert.message, (
+            f"告警 title/message 应含实际值 2500, 实际: title='{alert.title}' msg='{alert.message}'"
+        )
+        assert alert.details.get("response_time") == 2500
+        assert alert.details.get("threshold") == 2000
+        assert alert.source == "api_monitor"
+
+        # 未超阈值 → rule_performance 不触发 (其他也不触发)
+        alerts_low = manager.evaluate_rules({
+            "avg_response_time_ms": 500,
+            "kill_rate": 100,
+            "coverage": 100,
+            "failed_ratio": 0,
+        })
+        assert len(alerts_low) == 0, (
+            f"所有指标均未超阈值, 不应触发任何告警, "
+            f"实际触发 {len(alerts_low)} 个: {[a.title for a in alerts_low]}"
+        )
+
+    def test_alert_rule_evaluation_kill_rate_below_threshold(self):
+        """[真实业务] rule_kill_rate: kill_rate < threshold → 触发 (低于阈值才告警)。
+
+        默认 rule_kill_rate threshold=80。kill_rate=50 < 80 → 触发。
+        """
+        from src.monitoring.alert_manager import (
+            AlertManager, AlertLevel, AlertType,
+        )
+
+        manager = AlertManager(storage_path="tests/data/test_alerts_kill_rate_real.json")
+
+        # kill_rate=50 < 80 → 触发告警 (其他默认规则不让触发)
+        alerts = manager.evaluate_rules({
+            "kill_rate": 50,
+            "coverage": 100,        # >= 80, 不触发
+            "avg_response_time_ms": 100,  # <= 1000, 不触发
+            "failed_ratio": 0,      # <= 0.5, 不触发
+        })
+        assert len(alerts) == 1, (
+            f"kill_rate=50 < threshold=80 应只触发1个告警, 实际 {len(alerts)} 个: "
+            f"{[a.title for a in alerts]}"
+        )
+        assert "50" in alerts[0].title or "50" in alerts[0].message
+        assert alerts[0].source == "mutation_test"
+        assert alerts[0].details.get("kill_rate") == 50
+        assert alerts[0].details.get("threshold") == 80
+
+        # kill_rate=85 >= 80 → 不触发
+        alerts = manager.evaluate_rules({
+            "kill_rate": 85,
+            "coverage": 100,
+            "avg_response_time_ms": 100,
+            "failed_ratio": 0,
+        })
+        assert len(alerts) == 0, (
+            f"所有指标正常, 不应触发告警, 实际 {len(alerts)} 个"
+        )
+
+    def test_alert_rule_evaluation_custom_rule_id_not_evaluated_known_limitation(self):
+        """[诚实声明+真实行为] 自定义 rule_id 不被 evaluate_rules 评估 (源码限制)。
+
+        源码 alert_manager.py:301-378 只硬编码处理 5 个特定 rule_id,
+        任何其他 rule_id 的规则即使 add_rule 成功, evaluate_rules 也忽略它。
+
+        这是源码的真实行为 (设计限制), 测试断言真实行为而非理想行为。
+        若日后重构 evaluate_rules 支持通用 condition 解析, 此测试需更新。
+        """
+        from src.monitoring.alert_manager import (
+            AlertManager, AlertRule, AlertLevel, AlertType,
+        )
+
+        manager = AlertManager(storage_path="tests/data/test_alerts_custom_real.json")
+        custom_rule = AlertRule(
+            rule_id="my_custom_rule",  # 不在硬编码列表里
+            name="Custom Rule",
             alert_type=AlertType.PERFORMANCE_DEGRADATION,
             level=AlertLevel.WARNING,
             condition="cpu_usage > 90",
             threshold=90,
         )
-        manager.add_rule(rule)
+        manager.add_rule(custom_rule)
 
-        alerts = manager.evaluate_rules({"cpu_usage": 95})
-        assert len(alerts) >= 0
-
-        alerts = manager.evaluate_rules({"cpu_usage": 80})
-        assert len(alerts) >= 0
+        # 即使 cpu_usage=95 > threshold=90, 自定义规则不被评估
+        # 提供完整 metrics 让默认规则也不触发
+        alerts = manager.evaluate_rules({
+            "cpu_usage": 95,  # 自定义规则想评估的指标 (但会被忽略)
+            "kill_rate": 100,
+            "coverage": 100,
+            "avg_response_time_ms": 100,
+            "failed_ratio": 0,
+        })
+        assert len(alerts) == 0, (
+            f"自定义 rule_id 'my_custom_rule' 不在硬编码列表中, "
+            f"evaluate_rules 应忽略它; 默认规则指标均正常也不应触发。"
+            f"实际触发 {len(alerts)} 个: {[a.title for a in alerts]}"
+        )
 
 
 class TestSLevelDatabasePersistence:

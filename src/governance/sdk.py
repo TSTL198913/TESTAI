@@ -190,7 +190,8 @@ class GovernanceClientSDK:
         mock_response = {
             "is_fixable": True,
             "reasoning": reasoning,
-            "confidence_score": 0.95,
+            "confidence_score": 0.3,  # P0 修复: 压低 mock 置信度, 防止触发自动批准 (≥0.9)
+            "source": "mock",  # P0 修复: 标记来源为 mock, 下游可识别假诊断
             "patch_proposal": {
                 "patch_type": "functional",
                 "target_function": target_function,

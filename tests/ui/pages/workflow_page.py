@@ -1,5 +1,11 @@
 from .base_page import BasePage
-from playwright.sync_api import Page, expect
+try:
+    from playwright.sync_api import Page, expect
+    _playwright_available = True
+except ImportError:
+    _playwright_available = False
+    Page = None
+    expect = None
 import uuid
 
 

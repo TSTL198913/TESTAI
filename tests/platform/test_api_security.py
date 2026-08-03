@@ -15,9 +15,14 @@ import pytest
 
 def _reload_api_module():
     """重新加载 src.platform.api 模块以应用环境变量变更。"""
+    orig = sys.modules.get("src.platform.api")
     if "src.platform.api" in sys.modules:
         del sys.modules["src.platform.api"]
-    return importlib.import_module("src.platform.api")
+    module = importlib.import_module("src.platform.api")
+    # 同步更新父包引用,确保 from src.platform import api 一致性
+    import src.platform
+    src.platform.api = module
+    return module
 
 
 def test_cors_origins_from_env(monkeypatch):
