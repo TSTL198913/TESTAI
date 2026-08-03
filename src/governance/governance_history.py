@@ -56,14 +56,15 @@ class GovernanceHistory:
     _instance: Optional["GovernanceHistory"] = None
     _lock = threading.RLock()
 
-    # Class-level type annotations for instance attributes.
-    # pylint cannot infer attributes set inside __new__, so we declare them
-    # here to satisfy E1101 (no-member) across all methods that use them.
-    _decisions: List[GovernanceDecision]
-    _decisions_lock: threading.RLock
-    _runs: List[GovernanceRunRecord]
-    _runs_lock: threading.RLock
-    _db_path: Optional[str]
+    # Class-level defaults for instance attributes.
+    # pylint E1101 (no-member) cannot resolve attributes set inside __new__;
+    # providing real defaults at class level makes the members visible to
+    # static analysis across all pylint versions (2.x/3.x/4.x).
+    _decisions: List[GovernanceDecision] = []
+    _decisions_lock: threading.RLock = threading.RLock()
+    _runs: List[GovernanceRunRecord] = []
+    _runs_lock: threading.RLock = threading.RLock()
+    _db_path: Optional[str] = None
 
     def __new__(cls, db_path: Optional[str] = None, **kwargs) -> "GovernanceHistory":
         with cls._lock:
