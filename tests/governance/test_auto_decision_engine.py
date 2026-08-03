@@ -10,10 +10,22 @@ from src.governance.auto_decision_engine import (
 
 @pytest.fixture(autouse=True)
 def clean_engine():
+    """Reset AutoDecisionEngine singleton + GovernanceHistory per test.
+
+    Without this, tests that mutate shared singleton state leak into later
+    tests: test_remove_rule deletes rule_auto_approve_high_confidence,
+    test_disabled_rule_not_evaluated disables it, test_add_rule injects a
+    custom rule. The stale state then causes false failures such as
+    test_default_rule_not_triggered_for_security_patch expecting the
+    high-confidence rule to fire after a prior test removed it.
+    """
+    # Drop the singleton so __init__ re-registers default rules + handlers.
+    AutoDecisionEngine._instance = None
     engine = AutoDecisionEngine()
     engine._history.clear()
     yield
     engine._history.clear()
+    AutoDecisionEngine._instance = None
 
 
 class TestDecisionRule:
