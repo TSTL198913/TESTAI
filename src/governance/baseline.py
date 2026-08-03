@@ -94,6 +94,34 @@ class GoldenBaselineManager:
                 "expected_score_min": 0.8,
                 "expected_confidence_level": ["high", "good"],
             },
+            {
+                "id": "golden_qa_low_quality_001",
+                "type": "qa",
+                "name": "QA Evaluator - Low Quality Output",
+                "expected_score_max": 0.4,
+                "expected_confidence_level": ["low", "poor"],
+            },
+            {
+                "id": "golden_classifier_normal_001",
+                "type": "classifier",
+                "name": "Classifier - Correct Classification",
+                "expected_score_min": 0.85,
+                "expected_confidence_level": ["high", "good"],
+            },
+            {
+                "id": "golden_classifier_misclass_001",
+                "type": "classifier",
+                "name": "Classifier - Misclassification Detection",
+                "expected_score_max": 0.5,
+                "expected_detected": True,
+            },
+            {
+                "id": "golden_testgen_valid_001",
+                "type": "test_generator",
+                "name": "Test Case Generator - Valid Output",
+                "expected_score_min": 0.8,
+                "expected_confidence_level": ["high", "good"],
+            },
         ]
 
         for baseline in default_baselines:
@@ -197,6 +225,48 @@ class GoldenBaselineManager:
                 metadata={"baseline_id": record_id, "score": score, "errors": result["errors"]},
             )
             return {"converged": False, "score": score, "errors": result["errors"]}
+
+    def check_all_convergences(self, actual_data: Dict) -> Dict:
+        """批量检查所有基线的收敛性。
+
+        Args:
+            actual_data: 实际数据映射 (record_id -> metrics)。若为空则返回错误。
+
+        Returns:
+            dict: {
+                "all_converged": bool,
+                "total_baselines": int,
+                "converged_count": int,
+                "results": {record_id: check_convergence_result},
+                "error": str  # 仅在异常时存在
+            }
+        """
+        baseline_ids = self.get_all_baseline_ids()
+        total = len(baseline_ids)
+
+        if not actual_data:
+            return {
+                "all_converged": False,
+                "total_baselines": total,
+                "converged_count": 0,
+                "results": {},
+                "error": "actual_data is empty — cannot evaluate convergence",
+            }
+
+        results: Dict[str, Dict] = {}
+        converged_count = 0
+        for record_id in baseline_ids:
+            single = self.check_convergence(record_id, actual_data)
+            results[record_id] = single
+            if single.get("converged"):
+                converged_count += 1
+
+        return {
+            "all_converged": converged_count == total,
+            "total_baselines": total,
+            "converged_count": converged_count,
+            "results": results,
+        }
 
     def get_all_baseline_ids(self) -> List[str]:
         return list(self._baselines.keys())

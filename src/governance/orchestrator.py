@@ -23,8 +23,10 @@ class _ClassCollector(ast.NodeVisitor):
 
 
 from src.governance.approval import ApprovalManager, ApprovalStatus
+from src.governance.auto_decision_engine import AutoDecisionEngine
 from src.governance.executor import GovernanceExecutor
 from src.governance.git_manager import GitTransactionManager
+from src.governance.governance_history import GovernanceHistory
 from src.governance.models import DiagnosticContext, GovernanceAction, PatchProposal
 from src.governance.tracker import GovernanceActionType, GovernanceTracker
 
@@ -60,9 +62,18 @@ class GovernanceOrchestrator:
         self.git_mgr = GitTransactionManager(repo_path)
         self.approval_mgr = ApprovalManager()
         self.tracker = GovernanceTracker()
+        self.decision_engine = AutoDecisionEngine()
+        self._history = GovernanceHistory()
 
     async def execute_governance_flow(self, context: DiagnosticContext):
         trace_id = context.step_id or "unknown"
+        self._history.record_run(
+            trace_id=trace_id,
+            component_name=context.component_name,
+            status="STARTED",
+            completed_steps=0,
+            total_steps=5,
+        )
         self.tracker.record_event(
             trace_id=trace_id,
             action_type=GovernanceActionType.DIAGNOSE_START,
@@ -79,6 +90,12 @@ class GovernanceOrchestrator:
                 step_id=context.step_id,
                 status="SKIPPED",
                 message="Non-governable action",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="SKIPPED",
+                completed_steps=1,
             )
             return {
                 "status": "SKIPPED",
@@ -103,6 +120,12 @@ class GovernanceOrchestrator:
                 step_id=context.step_id,
                 status="FAILED",
                 message=f"Agent exception: {type(e).__name__}: {e}",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="FAILED",
+                completed_steps=2,
             )
             return {
                 "status": "FAILED",
@@ -144,6 +167,12 @@ class GovernanceOrchestrator:
                 status="SKIPPED",
                 message="Not fixable",
             )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="SKIPPED",
+                completed_steps=2,
+            )
             return result
 
         tx_id = f"tx_{context.step_id}"
@@ -160,7 +189,47 @@ class GovernanceOrchestrator:
 
         self.approval_mgr.create_approval(tx_id, proposal, context)
 
-        if self.approval_mgr.requires_approval(tx_id):
+        # Decision engine gate: evaluate before approval (六步闭环 - 审批门)
+        decision = None
+        try:
+            decision_context = {
+                "confidence": diagnosis.confidence_score,
+                "is_fixable": diagnosis.is_fixable,
+                "patch_type": proposal.patch_type.value,
+            }
+            decision = self.decision_engine.evaluate(decision_context, trace_id)
+        except Exception as e:
+            self.logger.warning(
+                f"Decision engine error for {trace_id}: {e}; falling back to approval flow"
+            )
+
+        if decision and decision.decision == "REJECT":
+            result["status"] = "REJECTED"
+            result["reason"] = decision.reason
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.APPROVAL_REJECTED,
+                component=context.component_name,
+                step_id=context.step_id,
+                tx_id=tx_id,
+                patch_type=proposal.patch_type,
+                status="REJECTED",
+                message=decision.reason,
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="REJECTED",
+                completed_steps=3,
+            )
+            self.logger.info(
+                f"[GOVERNANCE] Patch rejected by decision engine for {tx_id}: {decision.reason}"
+            )
+            return result
+
+        # AUTO_APPROVE bypasses approval; others go through requires_approval
+        auto_approved = decision is not None and decision.decision == "AUTO_APPROVE"
+        if not auto_approved and self.approval_mgr.requires_approval(tx_id):
             result["status"] = "PENDING_APPROVAL"
             result["approval_required"] = True
             result["tx_id"] = tx_id
@@ -173,6 +242,12 @@ class GovernanceOrchestrator:
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
                 status="PENDING_APPROVAL",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="PENDING_APPROVAL",
+                completed_steps=3,
             )
             self.logger.info(
                 f"[GOVERNANCE] Approval required for {tx_id} ({proposal.patch_type.value})"
@@ -226,6 +301,12 @@ class GovernanceOrchestrator:
                 evaluation_score=evaluation_result.get("score", 0.0),
                 evaluation_grade=evaluation_result.get("grade", "unknown"),
             )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="FIXED",
+                completed_steps=5,
+            )
             return result
 
         except Exception as e:
@@ -241,6 +322,12 @@ class GovernanceOrchestrator:
                 patch_type=proposal.patch_type,
                 status="FAILED",
                 message=str(e),
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="FAILED",
+                completed_steps=4,
             )
             return result
 
