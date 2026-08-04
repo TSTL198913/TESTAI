@@ -107,6 +107,7 @@ jobs:
           PROD_SECRET_KEY: ci-test-secret-key-not-for-prod-use
           PROD_JWT_SECRET_KEY: ci-test-jwt-secret-not-for-prod-use
           DEEPSEEK_API_KEY: ci-test-deepseek-key
+          GRAFANA_ADMIN_PASSWORD: ci-test-grafana-admin
         run: |
           echo "=== 启动 prod compose 栈 (api+mongo+redis) ==="
           # 仅启动 api 及其依赖 (mongo, redis), 不启动 prometheus/grafana/nginx
