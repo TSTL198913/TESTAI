@@ -2,14 +2,22 @@ import uuid
 import os
 import re
 import logging
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, field_validator
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST  # pylint: disable=import-error
 
+logger = logging.getLogger(__name__)
+
+# =============================================================================
+# 治理硬依赖 (必须存在, 隔离模式下不可缺失)
+# 包含: governance/*, security/*, platform/workflow, platform/config_manager,
+#   platform/dashboard, platform/metrics, worker/*, models/contract(HttpRequest — /execute 主路径依赖)
+# =============================================================================
 from src.governance.orchestrator import GovernanceOrchestrator
 from src.governance.approval import ApprovalManager, ApprovalStatus
 from src.governance.monitoring import HealthMonitor, AlertManager
@@ -23,13 +31,36 @@ from src.platform.dashboard import DashboardService
 from src.governance.models import DiagnosticContext, PatchProposal, PatchType
 from src.security.auth import TokenManager, User, Role
 from src.security.permissions import PermissionManager, Permission
-from src.users.user_manager import UserManager, UserProfile, UserStatus
-from src.teams.team_manager import TeamManager, Team, TeamMember, TeamRole
-from src.ai.evaluator import AIEvaluator
-from src.ai.qa_engine import AIQAEngine
-from src.ai.classifier import AITextClassifier
 from src.platform.metrics import APIMetrics
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST  # pylint: disable=import-error
+from src.models.contract import HttpRequest  # /execute 主路径的请求体类型 (治理硬依赖)
+from src.worker.celery_app import celery_app  # Celery 应用实例
+from src.worker.tasks import run_test_pipeline  # Celery 异步任务
+
+# =============================================================================
+# 非治理可选依赖 (隔离对象: 测试+AI平台方向)
+# 当这些模块缺失时, api.py 必须仍能加载, 治理核心正常工作,
+# 非治理端点返回 503 Service Unavailable。
+# =============================================================================
+_NON_GOV_AVAILABLE = True
+try:
+    from src.users.user_manager import UserManager, UserProfile, UserStatus
+    from src.teams.team_manager import TeamManager, Team, TeamMember, TeamRole
+    from src.ai.evaluator import AIEvaluator
+    from src.ai.qa_engine import AIQAEngine
+    from src.ai.classifier import AITextClassifier
+except ImportError:
+    _NON_GOV_AVAILABLE = False
+    UserManager = None  # type: ignore[assignment,misc]
+    UserProfile = None  # type: ignore[assignment]
+    UserStatus = None  # type: ignore[assignment]
+    TeamManager = None  # type: ignore[assignment,misc]
+    Team = None  # type: ignore[assignment]
+    TeamMember = None  # type: ignore[assignment]
+    TeamRole = None  # type: ignore[assignment]
+    AIEvaluator = None  # type: ignore[assignment,misc]
+    AIQAEngine = None  # type: ignore[assignment,misc]
+    AITextClassifier = None  # type: ignore[assignment,misc]
+    logger.warning("非治理模块 (users/teams/ai) 加载失败 — 隔离模式启用, 相关端点将返回 503")
 
 
 app = FastAPI(
@@ -40,8 +71,6 @@ app = FastAPI(
     redoc_url="/redoc",
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
 )
-
-logger = logging.getLogger(__name__)
 
 
 def _compute_cors_origins() -> list:
@@ -101,6 +130,53 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
+
+
+# =============================================================================
+# 503 隔离守卫 (BUG4 修复)
+# 非治理模块缺失时 (_NON_GOV_AVAILABLE=False), 非治理端点必须返回 503,
+# 而非调用 None.list_users() 导致 AttributeError 500。
+# 503 语义: "端点存在但依赖不可用" — 区别于 404 "路由不存在"。
+# =============================================================================
+_NON_GOV_PATH_PREFIXES = (
+    "/users",
+    "/teams",
+    "/evaluate",
+    "/qa",
+    "/classify",
+    "/diagnose",
+)
+# /test 下仅 execute 和 generate 为非治理; /test/workflow 使用治理引擎, 不拦截
+_NON_GOV_PATH_EXACT = frozenset({
+    "/test/execute",
+    "/test/generate",
+})
+
+
+def _is_non_gov_path(path: str) -> bool:
+    """判断请求路径是否属于非治理端点。"""
+    for prefix in _NON_GOV_PATH_PREFIXES:
+        if path == prefix or path.startswith(prefix + "/"):
+            return True
+    return path in _NON_GOV_PATH_EXACT
+
+
+@app.middleware("http")
+async def non_gov_isolation_guard(request: Request, call_next):
+    """隔离模式守卫: _NON_GOV_AVAILABLE=False 时拦截非治理端点返回 503。"""
+    if not _NON_GOV_AVAILABLE:
+        path = request.url.path
+        if _is_non_gov_path(path):
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "success": False,
+                    "message": "非治理模块不可用 (隔离模式) — users/teams/ai 模块未加载",
+                    "error_code": "NON_GOV_UNAVAILABLE",
+                    "detail": None,
+                },
+            )
+    return await call_next(request)
 
 
 # P1-6 修复:统一 HTTPException 响应为 ErrorResponse 格式
@@ -188,8 +264,10 @@ config_manager = ConfigManager()
 dashboard_service = DashboardService()
 token_manager = TokenManager()
 permission_manager = PermissionManager()
-user_manager = UserManager()
-team_manager = TeamManager()
+# 非治理单例: 隔离模式下 (_NON_GOV_AVAILABLE=False) 设为 None,
+# 避免调用 None() 触发 TypeError (BUG2 修复)
+user_manager = UserManager() if _NON_GOV_AVAILABLE else None
+team_manager = TeamManager() if _NON_GOV_AVAILABLE else None
 tracker = GovernanceTracker()
 baseline_manager = GoldenBaselineManager()
 api_metrics = APIMetrics()
@@ -484,11 +562,104 @@ async def metrics():
     return PlainTextResponse(content=data.decode("utf-8"), media_type=CONTENT_TYPE_LATEST)
 
 
+class ExecuteRequest(BaseModel):
+    """POST /execute 请求体 — 提交测试管道到 Celery 异步执行。
+
+    Pydantic 强校验: 禁止弱类型隐式转换, 所有字段显式声明类型。
+    """
+    step_id: str
+    description: str = ""
+    url: str
+    method: str = "GET"
+    headers: Dict[str, str] = {}
+    body: Optional[Dict[str, Any]] = None
+    params: Dict[str, Any] = {}
+    pipeline: List[str] = ["data", "request", "assertion"]
+
+    @field_validator("method")
+    @classmethod
+    def validate_method(cls, v):  # pylint: disable=no-self-argument
+        allowed = {"GET", "POST", "PUT", "DELETE", "PATCH"}
+        upper = v.upper()
+        if upper not in allowed:
+            raise ValueError(f"method must be one of {allowed}, got '{v}'")
+        return upper
+
+
+@app.post("/execute")
+async def execute_pipeline(
+    request: ExecuteRequest,
+    user: User = Depends(require_permission(Permission.RUN_TEST)),
+):
+    """提交测试管道到 Celery 异步执行。
+
+    流程:
+      1. 生成 8 字符 trace_id (用于全链路追踪)
+      2. 构造 request_dict, 注入 _trace_id 和 _requester (当前用户名)
+      3. 调用 run_test_pipeline.delay() 投递到 Celery 队列
+      4. 返回 task_id + trace_id, status=queued
+
+    Prometheus 指标: 通过 api_metrics_middleware 自动记录。
+    """
+    trace_id = uuid.uuid4().hex[:8]
+
+    # 构造 Celery 任务参数 — 注入追踪元数据
+    request_dict = {
+        **request.model_dump(),
+        "case_id": request.step_id,
+        "_trace_id": trace_id,
+        "_requester": user.username,
+    }
+
+    try:
+        task = run_test_pipeline.delay(request_dict)
+    except Exception as exc:
+        logger.error(
+            "Celery 任务投递失败 | trace_id=%s | step_id=%s | error=%s",
+            trace_id, request.step_id, exc, exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"任务队列不可用: {type(exc).__name__}: {exc}",
+        )
+
+    logger.info(
+        "管道已提交 | trace_id=%s | task_id=%s | step_id=%s | requester=%s",
+        trace_id, task.id, request.step_id, user.username,
+    )
+
+    return ApiResponse(
+        success=True,
+        data={
+            "task_id": task.id,
+            "trace_id": trace_id,
+            "status": "queued",
+        },
+        message="Pipeline submitted to Celery queue",
+    )
+
+
 @app.get("/tasks/{task_id}")
 async def get_task_status(
     task_id: str,
     user: User = Depends(require_permission(Permission.VIEW_WORKFLOW)),
 ):
+    """查询任务状态 — 双源查询: WorkflowEngine 优先, 回退 Celery AsyncResult。
+
+    BUG #2 修复: /execute 提交的任务是 Celery 异步任务, 不在 WorkflowEngine 实例中。
+    原实现只搜索 WorkflowEngine, 导致 /tasks/{task_id} 始终返回 404。
+
+    查询顺序:
+      1. WorkflowEngine 实例 (优先级高 — 工作流任务有更丰富的上下文)
+      2. Celery AsyncResult 后端 (覆盖 /execute 提交的独立任务)
+
+    状态映射:
+      - SUCCESS → 200 + result
+      - FAILURE → 200 + error 字段 (不是 404, 用户需要知道失败原因)
+      - PENDING → 404 (任务未处理或不存在)
+      - STARTED/RETRY → 200 + 当前状态 (任务运行中)
+    """
+    # Step 1: 查询 WorkflowEngine 实例 (优先级高于 Celery)
     instances = workflow_engine.list_instances()
     for instance in instances:
         instance_status = workflow_engine.get_workflow_status(instance["instance_id"])
@@ -504,11 +675,59 @@ async def get_task_status(
                             "status": task_info.get("status", "unknown"),
                             "result": task_info.get("result", {}),
                             "workflow_status": instance_status["status"],
+                            "error": None,
                         },
                         message="Task status retrieved successfully",
                     )
 
-    raise HTTPException(status_code=404, detail="Task not found")
+    # Step 2: 查询 Celery AsyncResult 后端
+    # /execute 提交的任务是 Celery 异步任务, 不在 WorkflowEngine 实例中
+    celery_result = celery_app.AsyncResult(task_id)
+    state = celery_result.state
+
+    if state == "PENDING":
+        # 任务未处理或不存在 → 404
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if state == "SUCCESS":
+        return ApiResponse(
+            success=True,
+            data={
+                "task_id": task_id,
+                "status": "SUCCESS",
+                "result": celery_result.result,
+                "error": None,
+            },
+            message="Task completed successfully",
+        )
+
+    if state == "FAILURE":
+        # 任务失败: result 是异常对象, 转为字符串放入 error 字段
+        # 不抛 404 — 用户需要知道失败原因 (而非"找不到")
+        err_result = celery_result.result
+        error_str = str(err_result) if err_result is not None else "Unknown error"
+        return ApiResponse(
+            success=True,
+            data={
+                "task_id": task_id,
+                "status": "FAILURE",
+                "result": None,
+                "error": error_str,
+            },
+            message="Task failed",
+        )
+
+    # STARTED / RETRY 等中间状态: 返回当前状态, success=True (任务运行中)
+    return ApiResponse(
+        success=True,
+        data={
+            "task_id": task_id,
+            "status": state,
+            "result": celery_result.result,
+            "error": None,
+        },
+        message=f"Task state: {state}",
+    )
 
 
 @app.post("/evaluate")
@@ -1381,12 +1600,33 @@ async def get_baseline_convergence(
     )
 
 
-from src.api_test.test_runner import APITestRunner
-from src.api_test.schema import APITestCase, APITestAssertion, HTTPMethod, AssertionType
-from src.ai.test_case_generator import TestCaseGenerator
-from src.ai.defect_analyzer import DefectAnalyzer
-from src.ai.result_analyzer import ResultAnalyzer
-from typing import List, Any
+# 非治理可选依赖 (测试+AI平台方向) — 延迟导入, 隔离模式下设为 None
+# BUG3 修复: 原代码在 try/except 外裸导入, ImportError 时直接崩溃
+if _NON_GOV_AVAILABLE:
+    try:
+        from src.api_test.test_runner import APITestRunner
+        from src.api_test.schema import APITestCase, APITestAssertion, HTTPMethod, AssertionType
+        from src.ai.test_case_generator import TestCaseGenerator
+        from src.ai.defect_analyzer import DefectAnalyzer
+        from src.ai.result_analyzer import ResultAnalyzer
+    except ImportError:
+        APITestRunner = None  # type: ignore[assignment,misc]
+        APITestCase = None  # type: ignore[assignment]
+        APITestAssertion = None  # type: ignore[assignment]
+        HTTPMethod = None  # type: ignore[assignment]
+        AssertionType = None  # type: ignore[assignment]
+        TestCaseGenerator = None  # type: ignore[assignment,misc]
+        DefectAnalyzer = None  # type: ignore[assignment,misc]
+        ResultAnalyzer = None  # type: ignore[assignment,misc]
+else:
+    APITestRunner = None  # type: ignore[assignment,misc]
+    APITestCase = None  # type: ignore[assignment]
+    APITestAssertion = None  # type: ignore[assignment]
+    HTTPMethod = None  # type: ignore[assignment]
+    AssertionType = None  # type: ignore[assignment]
+    TestCaseGenerator = None  # type: ignore[assignment,misc]
+    DefectAnalyzer = None  # type: ignore[assignment,misc]
+    ResultAnalyzer = None  # type: ignore[assignment,misc]
 
 
 class APITestCaseRequest(BaseModel):
