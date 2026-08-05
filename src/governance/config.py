@@ -8,6 +8,7 @@ load_dotenv()
 class GovernanceConfig:
     DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
     DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+    DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash")
     GOVERNANCE_DB_PATH = os.getenv("GOVERNANCE_DB_PATH", "./data/governance.sqlite")
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", "")

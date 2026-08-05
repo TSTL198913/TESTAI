@@ -116,7 +116,7 @@ def test_llm():
         url = f"{base}/chat/completions"
         # 最小请求: 1 token 输出, 验证连通 + 鉴权
         payload = {
-            "model": "deepseek-chat",
+            "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash"),
             "messages": [{"role": "user", "content": "ping"}],
             "max_tokens": 1,
             "stream": False,

@@ -67,7 +67,10 @@ class GovernanceClientSDK:
     def get_api_key_status(self) -> dict:
         return GovernanceConfig.validate_api_key()
 
-    async def chat_completion(self, messages, model="deepseek-chat", temperature=0.2):
+    async def chat_completion(self, messages, model=None, temperature=0.2):
+        if model is None:
+            model = GovernanceConfig.DEEPSEEK_MODEL
+
         if GovernanceConfig.USE_MOCK_LLM and not GovernanceConfig.TESTAI_RULE_13:
             return await self.get_mock_response(messages)
 
