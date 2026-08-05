@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
@@ -50,6 +51,7 @@ class TestGovernanceOrchestrator:
         self.orchestrator.agent = AsyncMock()
         self.orchestrator.executor = AsyncMock()
         self.orchestrator.git_mgr = MagicMock()
+        self.orchestrator.git_mgr.repo_path = os.getcwd()
         self.orchestrator.approval_mgr = MagicMock()
         self.orchestrator.tracker = MagicMock()
 
@@ -443,11 +445,15 @@ class TestGovernanceOrchestrator:
 
     def test_resolve_file_path_with_mapping(self):
         result = self.orchestrator._resolve_file_path("EvalPlatformProcessor")
-        assert result == "extensions/eval_platform/processor.py"
+        repo_root = os.path.abspath(os.getcwd())
+        expected = os.path.join(repo_root, "extensions/eval_platform/processor.py")
+        assert result == expected
 
     def test_resolve_file_path_default(self):
         result = self.orchestrator._resolve_file_path("UnknownComponent")
-        assert result == "src/components/UnknownComponent.py"
+        repo_root = os.path.abspath(os.getcwd())
+        expected = os.path.join(repo_root, "src/components/UnknownComponent.py")
+        assert result == expected
 
     @pytest.mark.asyncio
     async def test_approve_and_apply_record_not_found(self):

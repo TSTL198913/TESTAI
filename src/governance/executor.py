@@ -63,9 +63,9 @@ class SecurityVisitor(cst.CSTVisitor):
 
 class GovernanceExecutor:
 
-    def __init__(self):
+    def __init__(self, project_root: str = None):
         self.logger = logging.getLogger('GovernanceExecutor')
-        self._path_validator = SecurePathValidator()
+        self._path_validator = SecurePathValidator(project_root=project_root)
 
     def validate_file_path(self, file_path: str) -> bool:
         (valid, reason) = self._path_validator.validate_path(file_path)

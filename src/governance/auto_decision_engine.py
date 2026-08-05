@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Callable, Dict, List, Optional, Any
 
 from src.governance.governance_history import GovernanceDecision, GovernanceHistory  # pylint: disable=import-error,no-name-in-module
+from src.governance.metrics import GovernanceMetrics
 
 
 @dataclass
@@ -40,6 +41,7 @@ class AutoDecisionEngine:
         self._logger = logging.getLogger("AutoDecisionEngine")
         self._decision_handlers: Dict[str, Callable] = {}
         self._rules_lock = threading.RLock()  # P0-7 Fix: Thread safety for rule operations
+        self._metrics = GovernanceMetrics()
         self._register_default_rules()
         self._register_default_handlers()
 
@@ -147,6 +149,7 @@ class AutoDecisionEngine:
                     f"Auto decision: {decision.decision} (rule: {rule.rule_id}, "
                     f"trace: {trace_id}, confidence: {decision.confidence})"
                 )
+                self._metrics.record_decision(decision.decision)
                 return decision
 
         decision = GovernanceDecision(
@@ -164,6 +167,7 @@ class AutoDecisionEngine:
         self._logger.info(
             f"Default decision: REQUIRE_MANUAL (trace: {trace_id})"
         )
+        self._metrics.record_decision(decision.decision)
         return decision
 
     def _evaluate_rule(self, rule: DecisionRule, context: Dict[str, Any]) -> bool:

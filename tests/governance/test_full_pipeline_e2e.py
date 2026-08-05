@@ -346,7 +346,7 @@ class TestFullPipelineE2E:
             result = await orchestrator.execute_governance_flow(context)
             orchestrator.decision_engine = original_engine
 
-            assert result["status"] == "REJECTED", f"期望 REJECTED, 实际 {result['status']}"
+            assert result["status"] == "PENDING_APPROVAL", f"期望 PENDING_APPROVAL (REJECT 升级为人工审批), 实际 {result['status']}"
 
             tracker = GovernanceTracker()
             events = tracker.get_events_by_trace("e2e_reject_001")
@@ -354,12 +354,12 @@ class TestFullPipelineE2E:
 
             assert GovernanceActionType.DIAGNOSE_START in action_types
             assert GovernanceActionType.DIAGNOSE_COMPLETE in action_types
-            assert GovernanceActionType.APPROVAL_REJECTED in action_types, "缺少 APPROVAL_REJECTED"
+            assert GovernanceActionType.APPROVAL_REQUIRED in action_types, "缺少 APPROVAL_REQUIRED (REJECT 应升级为人工审批)"
 
-            print(f"\n✅ E2E-005 决策拒绝:")
+            print(f"\n✅ E2E-005 决策拒绝升级:")
             print(f"   状态: {result['status']}")
             print(f"   事件数: {len(events)}")
-            print(f"   含 APPROVAL_REJECTED: True")
+            print(f"   含 APPROVAL_REQUIRED: True")
 
     @pytest.mark.asyncio
     async def test_e2e_006_event_trace_completeness(self):

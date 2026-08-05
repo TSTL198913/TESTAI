@@ -703,7 +703,7 @@ class TestDependencyScenarios:
             result = _run_async(
                 orchestrator.execute_governance_flow(context)
             )
-            assert result["status"] == "REJECTED"
+            assert result["status"] == "PENDING_APPROVAL"
 
     def test_dependency_mock_ai_service_unavailable(self):
         """依赖: Mock AI 服务不可用"""

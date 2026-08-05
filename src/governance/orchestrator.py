@@ -2,6 +2,7 @@ import ast
 import json
 import logging
 import os
+import time
 from contextlib import contextmanager
 from typing import Optional, Dict, Any
 
@@ -24,9 +25,11 @@ class _ClassCollector(ast.NodeVisitor):
 
 from src.governance.approval import ApprovalManager, ApprovalStatus
 from src.governance.auto_decision_engine import AutoDecisionEngine
+from src.governance.baseline import GoldenBaselineManager, BaselineRecord
 from src.governance.executor import GovernanceExecutor
 from src.governance.git_manager import GitTransactionManager
 from src.governance.governance_history import GovernanceHistory
+from src.governance.metrics import GovernanceMetrics
 from src.governance.models import DiagnosticContext, GovernanceAction, PatchProposal
 from src.governance.tracker import GovernanceActionType, GovernanceTracker
 
@@ -58,15 +61,26 @@ class GovernanceOrchestrator:
     def __init__(self, repo_path: str = "."):
         self.logger = logging.getLogger(__name__)
         self.agent = AIGovernanceAgent()
-        self.executor = GovernanceExecutor()
+        self.executor = GovernanceExecutor(project_root=repo_path)
         self.git_mgr = GitTransactionManager(repo_path)
         self.approval_mgr = ApprovalManager()
         self.tracker = GovernanceTracker()
-        self.decision_engine = AutoDecisionEngine()
+        self._decision_engine = AutoDecisionEngine()
+        self._baseline_mgr = GoldenBaselineManager()
         self._history = GovernanceHistory()
+        self._metrics = GovernanceMetrics()
+
+    @property
+    def decision_engine(self):
+        return self._decision_engine
+
+    @decision_engine.setter
+    def decision_engine(self, value):
+        self._decision_engine = value
 
     async def execute_governance_flow(self, context: DiagnosticContext):
         trace_id = context.step_id or "unknown"
+        start_time = time.time()
         self._history.record_run(
             trace_id=trace_id,
             component_name=context.component_name,
@@ -97,6 +111,7 @@ class GovernanceOrchestrator:
                 status="SKIPPED",
                 completed_steps=1,
             )
+            self._metrics.record_flow("SKIPPED", time.time() - start_time)
             return {
                 "status": "SKIPPED",
                 "reason": "Non-governable",
@@ -127,6 +142,7 @@ class GovernanceOrchestrator:
                 status="FAILED",
                 completed_steps=2,
             )
+            self._metrics.record_flow("FAILED", time.time() - start_time)
             return {
                 "status": "FAILED",
                 "error": str(e),
@@ -173,6 +189,7 @@ class GovernanceOrchestrator:
                 status="SKIPPED",
                 completed_steps=2,
             )
+            self._metrics.record_flow("SKIPPED", time.time() - start_time)
             return result
 
         tx_id = f"tx_{context.step_id}"
@@ -196,40 +213,154 @@ class GovernanceOrchestrator:
                 "confidence": diagnosis.confidence_score,
                 "is_fixable": diagnosis.is_fixable,
                 "patch_type": proposal.patch_type.value,
+                "patch_category": getattr(diagnosis, "source", "llm"),
+                "source": getattr(diagnosis, "source", "llm"),
             }
-            decision = self.decision_engine.evaluate(decision_context, trace_id)
+            decision = self._decision_engine.evaluate(decision_context, trace_id)
         except Exception as e:
             self.logger.warning(
-                f"Decision engine error for {trace_id}: {e}; falling back to approval flow"
+                f"Decision engine error for {trace_id}: {e}; degrading to manual review"
             )
+            decision = None
 
-        if decision and decision.decision == "REJECT":
-            result["status"] = "REJECTED"
-            result["reason"] = decision.reason
+        # Mock/fallback diagnoses always require manual review (P0 fix)
+        diag_source = getattr(diagnosis, "source", "llm")
+        if diag_source in ("mock", "fallback"):
+            result["status"] = "PENDING_APPROVAL"
+            result["approval_required"] = True
+            result["tx_id"] = tx_id
+            result["patch_type"] = proposal.patch_type.value
             self.tracker.record_event(
                 trace_id=trace_id,
-                action_type=GovernanceActionType.APPROVAL_REJECTED,
+                action_type=GovernanceActionType.APPROVAL_REQUIRED,
                 component=context.component_name,
                 step_id=context.step_id,
                 tx_id=tx_id,
                 patch_type=proposal.patch_type,
-                status="REJECTED",
-                message=decision.reason,
+                status="PENDING_APPROVAL",
+                message=f"Diagnosis source '{diag_source}' requires manual review",
             )
             self._history.record_run(
                 trace_id=trace_id,
                 component_name=context.component_name,
-                status="REJECTED",
+                status="PENDING_APPROVAL",
                 completed_steps=3,
             )
+            self._metrics.record_flow("PENDING_APPROVAL", time.time() - start_time)
             self.logger.info(
-                f"[GOVERNANCE] Patch rejected by decision engine for {tx_id}: {decision.reason}"
+                f"[GOVERNANCE] {diag_source} diagnosis requires manual review for {tx_id}"
             )
             return result
 
-        # AUTO_APPROVE bypasses approval; others go through requires_approval
-        auto_approved = decision is not None and decision.decision == "AUTO_APPROVE"
-        if not auto_approved and self.approval_mgr.requires_approval(tx_id):
+        # Engine exception → safe degrade to manual review
+        if decision is None:
+            result["status"] = "PENDING_APPROVAL"
+            result["approval_required"] = True
+            result["tx_id"] = tx_id
+            result["patch_type"] = proposal.patch_type.value
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.APPROVAL_REQUIRED,
+                component=context.component_name,
+                step_id=context.step_id,
+                tx_id=tx_id,
+                patch_type=proposal.patch_type,
+                status="PENDING_APPROVAL",
+                message="Decision engine unavailable, requiring manual review",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="PENDING_APPROVAL",
+                completed_steps=3,
+            )
+            self._metrics.record_flow("PENDING_APPROVAL", time.time() - start_time)
+            return result
+
+        if decision.decision == "REJECT":
+            result["status"] = "PENDING_APPROVAL"
+            result["approval_required"] = True
+            result["tx_id"] = tx_id
+            result["patch_type"] = proposal.patch_type.value
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.APPROVAL_REQUIRED,
+                component=context.component_name,
+                step_id=context.step_id,
+                tx_id=tx_id,
+                patch_type=proposal.patch_type,
+                status="PENDING_APPROVAL",
+                message=f"Rejected decision escalated to manual review: {decision.reason}",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="PENDING_APPROVAL",
+                completed_steps=3,
+            )
+            self._metrics.record_flow("PENDING_APPROVAL", time.time() - start_time)
+            self.logger.info(
+                f"[GOVERNANCE] REJECT escalated to PENDING_APPROVAL for {tx_id}: {decision.reason}"
+            )
+            return result
+
+        if decision.decision == "REQUIRE_MANUAL":
+            result["status"] = "PENDING_APPROVAL"
+            result["approval_required"] = True
+            result["tx_id"] = tx_id
+            result["patch_type"] = proposal.patch_type.value
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.APPROVAL_REQUIRED,
+                component=context.component_name,
+                step_id=context.step_id,
+                tx_id=tx_id,
+                patch_type=proposal.patch_type,
+                status="PENDING_APPROVAL",
+                message="Decision engine requires manual review",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="PENDING_APPROVAL",
+                completed_steps=3,
+            )
+            self._metrics.record_flow("PENDING_APPROVAL", time.time() - start_time)
+            self.logger.info(
+                f"[GOVERNANCE] Manual review required for {tx_id} ({proposal.patch_type.value})"
+            )
+            return result
+
+        # AUTO_APPROVE: check structural gate (requires_approval) even if engine approves
+        auto_approved = decision.decision == "AUTO_APPROVE"
+        if self.approval_mgr.requires_approval(tx_id):
+            result["status"] = "PENDING_APPROVAL"
+            result["approval_required"] = True
+            result["tx_id"] = tx_id
+            result["patch_type"] = proposal.patch_type.value
+            self.tracker.record_event(
+                trace_id=trace_id,
+                action_type=GovernanceActionType.APPROVAL_REQUIRED,
+                component=context.component_name,
+                step_id=context.step_id,
+                tx_id=tx_id,
+                patch_type=proposal.patch_type,
+                status="PENDING_APPROVAL",
+                message="Structural gate requires approval (overrides engine decision)",
+            )
+            self._history.record_run(
+                trace_id=trace_id,
+                component_name=context.component_name,
+                status="PENDING_APPROVAL",
+                completed_steps=3,
+            )
+            self._metrics.record_flow("PENDING_APPROVAL", time.time() - start_time)
+            self.logger.info(
+                f"[GOVERNANCE] Structural gate blocks auto-approval for {tx_id} ({proposal.patch_type.value})"
+            )
+            return result
+
+        if not auto_approved and decision.decision not in ("AUTO_APPROVE",):
             result["status"] = "PENDING_APPROVAL"
             result["approval_required"] = True
             result["tx_id"] = tx_id
@@ -249,6 +380,7 @@ class GovernanceOrchestrator:
                 status="PENDING_APPROVAL",
                 completed_steps=3,
             )
+            self._metrics.record_flow("PENDING_APPROVAL", time.time() - start_time)
             self.logger.info(
                 f"[GOVERNANCE] Approval required for {tx_id} ({proposal.patch_type.value})"
             )
@@ -307,6 +439,13 @@ class GovernanceOrchestrator:
                 status="FIXED",
                 completed_steps=5,
             )
+            self._evaluate_and_record_convergence(
+                proposal=proposal,
+                context=context,
+                evaluation_result=evaluation_result,
+                trace_id=trace_id,
+            )
+            self._metrics.record_flow("FIXED", time.time() - start_time)
             return result
 
         except Exception as e:
@@ -329,6 +468,7 @@ class GovernanceOrchestrator:
                 status="FAILED",
                 completed_steps=4,
             )
+            self._metrics.record_flow("FAILED", time.time() - start_time)
             return result
 
     def _classify_exception(self, context: DiagnosticContext) -> GovernanceAction:
@@ -406,13 +546,13 @@ class GovernanceOrchestrator:
         mapping = {"EvalPlatformProcessor": "extensions/eval_platform/processor.py"}
         relative_path = mapping.get(component_name, f"src/components/{component_name}.py")
         
-        abs_path = os.path.abspath(relative_path)
-        project_root = os.path.abspath(".")
+        repo_root = os.path.abspath(self.git_mgr.repo_path)
+        abs_path = os.path.join(repo_root, relative_path)
         
-        if not abs_path.startswith(project_root + os.sep) and abs_path != project_root:
+        if not os.path.abspath(abs_path).startswith(repo_root):
             raise ValueError(f"Path traversal detected: {component_name} -> {abs_path}")
         
-        return relative_path
+        return abs_path
 
     def _evaluate_patch_quality(self, proposal, context) -> Dict[str, Any]:
         try:
@@ -452,6 +592,57 @@ class GovernanceOrchestrator:
                 "discrepancies": {},
                 "suggestions": {},
             }
+
+    def _evaluate_and_record_convergence(
+        self, proposal, context, evaluation_result: Dict[str, Any], trace_id: str
+    ) -> None:
+        try:
+            baseline_id = f"baseline_{context.component_name}"
+
+            if not self._baseline_mgr.get_baseline(baseline_id):
+                self._baseline_mgr.add_baseline(
+                    BaselineRecord(
+                        record_id=baseline_id,
+                        baseline_type=proposal.patch_type.value,
+                        data={
+                            "id": baseline_id,
+                            "type": proposal.patch_type.value,
+                            "expected_score_min": 0.7,
+                            "expected_confidence_level": ["high", "good"],
+                        },
+                    )
+                )
+
+            actual_data = {
+                "data": {
+                    "score": evaluation_result.get("score", 0.0),
+                    "confidence_level": evaluation_result.get("confidence", "low"),
+                }
+            }
+
+            score = self._baseline_mgr.calculate_convergence_score(actual_data, baseline_id)
+            passed = score >= 0.9
+
+            if passed:
+                self.tracker.record_event(
+                    trace_id=trace_id,
+                    action_type=GovernanceActionType.CONVERGED,
+                    component=context.component_name,
+                    step_id=context.step_id,
+                    message=f"Converged with score {score:.2f}",
+                )
+            else:
+                self.tracker.record_event(
+                    trace_id=trace_id,
+                    action_type=GovernanceActionType.DIVERGED,
+                    component=context.component_name,
+                    step_id=context.step_id,
+                    message=f"Diverged with score {score:.2f}",
+                )
+        except Exception as e:
+            self.logger.warning(
+                f"Convergence evaluation failed for {trace_id}: {e}"
+            )
 
     async def approve_and_apply(
         self, tx_id: str, approver: str, reason: Optional[str] = None
