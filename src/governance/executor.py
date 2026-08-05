@@ -7,6 +7,7 @@ from typing import List, Optional
 import libcst as cst
 from src.governance.registry import GovernanceRegistry, PatchType
 from src.governance.security import SecurePathValidator
+from src.governance.transformer import ImportApplier
 
 class SecurityVisitor(cst.CSTVisitor):
 
@@ -133,6 +134,19 @@ class GovernanceExecutor:
         except (PermissionError, OSError):
             return False
 
+    def _get_current_user(self) -> Optional[str]:
+        """获取当前用户名 (优先 USERNAME/USER 环境变量, 回退 os.getlogin)。
+
+        返回 None 表示无法确定用户名 (不应调用 icacls)。
+        """
+        username = os.environ.get("USERNAME") or os.environ.get("USER")
+        if username:
+            return username
+        try:
+            return os.getlogin()
+        except OSError:
+            return None
+
     def _grant_write_permission(self, path: Path) -> bool:
         try:
             current_stat = path.stat()
@@ -140,17 +154,33 @@ class GovernanceExecutor:
             return True
         except Exception as e:
             self.logger.error(f'Failed to change permissions via chmod: {e}')
+
+        # 安全修复: 原 `icacls /grant Users:F` 给本机所有用户完全控制权, 过度授权。
+        # 改为仅授予当前用户修改权限 (M), 拒绝 Users:F。
+        username = self._get_current_user()
+        if not username:
+            # 边界: 无法确定用户名时不得调用 icacls (否则会退回过度授权或无效调用)
+            self.logger.error('Cannot determine current username; refuse to call icacls.')
+            return False
+
         try:
             import subprocess
             import shutil
             icacls_path = shutil.which('icacls') or 'icacls'
-            result = subprocess.run([icacls_path, str(path), '/grant', 'Users:F'], capture_output=True, text=True)
+            # 关键: 仅授予当前用户修改权限 (M), 不再使用 Users:F 完全控制
+            result = subprocess.run(
+                [icacls_path, str(path), '/grant', f'{username}:M'],
+                capture_output=True, text=True, timeout=10,
+            )  # nosec B603
             if result.returncode == 0:
                 self.logger.info(f'Permissions granted via icacls: {str(path)}')
                 return True
             else:
                 self.logger.error(f'icacls failed: {result.stderr}')
                 return False
+        except subprocess.TimeoutExpired as e:
+            self.logger.error(f'icacls timed out: {e}')
+            return False
         except Exception as e:
             self.logger.error(f'Failed to grant permissions via icacls: {e}')
             return False
@@ -162,6 +192,12 @@ class GovernanceExecutor:
         new_tree = tree.visit(transformer)
         if not getattr(transformer, 'patched', False):
             raise RuntimeError(f"Target '{target_class or ''}.{target_function}' not found.")
+        # 关键修复: 原 _write_patch 接收 required_imports 但从未实例化 ImportApplier,
+        # 导致补丁缺 import, 运行时 NameError。现在函数体改写后, 用 ImportApplier
+        # 把 required_imports 实际插入到文件 (已有 import 前或文件开头)。
+        if required_imports:
+            import_applier = ImportApplier(required_imports)
+            new_tree = new_tree.visit(import_applier)
         temp_file = file_path.with_suffix('.tmp')
         with open(temp_file, 'w', encoding='utf-8') as tf:
             tf.write(new_tree.code)

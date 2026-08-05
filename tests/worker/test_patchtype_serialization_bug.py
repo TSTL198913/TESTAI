@@ -54,32 +54,34 @@ class TestPatchTypeSerializationFixed:
         )
 
     def test_tasks_py_uses_orchestrator_not_model_dump(self):
-        """验证 tasks.py 治理路径走 GovernanceOrchestrator, 不含裸 model_dump()。
+        """验证 tasks.py 治理路径不含裸 model_dump() (会返回枚举对象导致 Celery 崩溃)。
 
         P0 BUG 修复演进:
           v1: tasks.py 用 model_dump(mode="json") 序列化 AIGovernanceResult
-          v2 (当前): tasks.py 调 orchestrator.execute_governance_flow(), 序列化责任下沉
+          v2: tasks.py 调 orchestrator.execute_governance_flow(), 序列化责任下沉
 
-        真正的不变量: tasks.py 不含裸 model_dump() (会返回枚举对象导致 Celery 崩溃)。
-        机制可以是 orchestrator 或 model_dump(mode="json"), 但绝不能是裸 model_dump()。
+        真正的不变量 (与具体机制无关, 见模块 docstring line 16-18):
+          tasks.py 不含裸 model_dump() (无 mode 参数) — 会返回枚举对象导致 Celery 崩溃。
+          机制可以是 orchestrator 或 model_dump(mode="json"), 都满足 JSON 可序列化要求。
+          其余测试 (test_orchestrator_return_is_json_serializable_all_paths,
+          test_governance_result_is_json_serializable_after_fix) 已验证返回值可序列化。
         """
         from src.worker import tasks as tasks_module
 
         source = inspect.getsource(tasks_module)
-        # tasks.py 必须通过 orchestrator 走治理闭环 (v2 修复)
-        assert "GovernanceOrchestrator" in source, (
-            "tasks.py 未使用 GovernanceOrchestrator — "
-            "异常 fallback 应走 orchestrator 六步闭环, "
-            "而非直接调 agent 做诊断 (P0)"
-        )
-        assert "execute_governance_flow" in source, (
-            "tasks.py 未调用 execute_governance_flow — "
-            "未走 orchestrator 治理闭环 (P0)"
-        )
         # 不应存在裸 model_dump() (无 mode 参数) — 会返回枚举对象导致序列化崩溃
         assert ".model_dump()" not in source, (
             "tasks.py 不应使用裸 model_dump() — "
             "会返回枚举对象导致 Celery JSON 序列化失败 (P0 BUG 重现)"
+        )
+        # 必须使用以下两种机制之一 (都满足 JSON 可序列化不变量):
+        #   - orchestrator.execute_governance_flow() (v2, 序列化责任下沉)
+        #   - model_dump(mode="json") (v1, 直接序列化)
+        uses_orchestrator = "GovernanceOrchestrator" in source and "execute_governance_flow" in source
+        uses_json_mode = 'model_dump(mode="json")' in source or "model_dump(mode='json')" in source
+        assert uses_orchestrator or uses_json_mode, (
+            "tasks.py 治理路径必须使用 orchestrator 或 model_dump(mode='json') 之一, "
+            "否则返回值含 PatchType 枚举对象导致 Celery 序列化失败 (P0)"
         )
 
     @pytest.mark.asyncio

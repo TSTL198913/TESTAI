@@ -14,13 +14,18 @@ Worker 层真实严格测试
 7. [反 tautology] 禁止逐字段断言测试自己注入 mock 的数据 (循环论证)。
    治理结果传播用 `result is gov_future.result()返回值` 同一性断言验证传播路径,
    结构/序列化正确性由真实执行协程的 TestGovernanceCoroutineRealRun 覆盖。
-8. [反死 patch] GovernanceOrchestrator 在 _governance() 协程体内 (tasks.py:63) 实例化,
-   协程因 run_coroutine 被 mock 而不执行 → patch GovernanceOrchestrator 是死代码, 已全部移除。
-   真实 orchestrator 调用由 TestGovernanceCoroutineRealRun 验证。
+8. [反死 patch] _governance() 协程体内 (tasks.py:48) 实例化 AIGovernanceAgent,
+   协程因 run_coroutine 被 mock 而不执行时, patch AIGovernanceAgent 是死代码 —
+   故 TestWorkerGovernancePath/TestTraceIdLifecycle/TestWorkerBoundaryScenarios 不 patch 它。
+   真实 agent.analyze_with_context 调用由 TestGovernanceCoroutineRealRun (真实执行协程) 验证。
+   注意: tasks.py 从未 import GovernanceOrchestrator (那是 orchestrator.py 的类);
+   任何 patch("src.worker.tasks.GovernanceOrchestrator") 都是死 patch, 必然 AttributeError。
 
 已知限制 (诚实声明):
 - _execute() 协程体因 AsyncLoopManager.run_coroutine 被 mock 而不执行 (涉及 ResourceContainer/ExecutionPipeline, 需集成测试)
 - _governance() 协程体已通过独立 async 单元测试真实执行 (见 TestGovernanceCoroutineRealRun)
+  注意: tasks.py 用 AIGovernanceAgent (非 GovernanceOrchestrator) 做治理诊断;
+  返回值是 AIGovernanceResult.model_dump(mode="json") (含 patch_type 字符串, 可 JSON 序列化)
 - ResourceContainer.get_client/get_repo, ExecutionPipeline.run, get_pipeline 等内部调用需集成测试覆盖
 - set_trace_id/reset_trace_id 被 mock, 真实 None/空值处理由 src.core.tracer 单元测试覆盖;
   此处仅做契约断言 (验证 set_trace_id 收到原样透传的 request.id)
@@ -460,28 +465,50 @@ class TestWorkerBoundaryScenarios:
 
 
 class TestGovernanceCoroutineRealRun:
-    """[真实严格] 直接执行 _governance() 协程体, 验证走 orchestrator 返回治理结果。
+    """[真实严格] 直接执行 _governance() 协程体, 验证走 AIGovernanceAgent 返回治理结果。
 
-    P0 修复后: _governance 调 orchestrator.execute_governance_flow 而非 agent.analyze_with_context。
-    返回值是 orchestrator 治理结果 dict (有 status 字段), 非 AIGovernanceResult.model_dump()。
+    真实源码 (tasks.py:47-58): _governance 实例化 AIGovernanceAgent,
+    调 agent.analyze_with_context(diag_context) → 返回 AIGovernanceResult.model_dump(mode="json")。
+    mode="json" 使 PatchType enum 序列化为 value 字符串, 保证 Celery json serializer 可序列化。
+    返回值是 dict, 字段为 is_fixable/reasoning/root_cause/patch_proposal/confidence_score
+    (无 status 字段 — status 属于 orchestrator 层, agent 层不产生)。
     """
 
-    def test_governance_coroutine_returns_orchestrator_result(self, sample_request_dict):
-        """真实执行 _execute + _governance, 验证返回 orchestrator 治理结果 (有 status 字段)。
+    def test_governance_coroutine_returns_agent_model_dump(self, sample_request_dict):
+        """真实执行 _execute + _governance, 验证返回 AIGovernanceResult.model_dump(mode="json")。
 
-        覆盖:
+        覆盖源码:
         - tasks.py:20-39 (_execute 真实执行到 pipeline.run 抛错)
         - tasks.py:41-62 (except + 真实的 _governance() 协程执行)
-        - tasks.py:60-61 (orchestrator.execute_governance_flow → 返回治理 dict)
+        - tasks.py:48-58 (AIGovernanceAgent + analyze_with_context + model_dump(mode="json"))
+
+        反 tautology:
+          - 不逐字段断言测试自己塞进 mock 的 dict (那只会验证 mock 自己)。
+          - 断言 AIGovernanceResult.model_dump(mode="json") 的真实序列化结果 (Pydantic 行为),
+            验证源码 line 58 `return governance_result.model_dump(mode="json")` 的传播路径。
+          - 断言 analyze_with_context 收到的 DiagnosticContext 字段, 验证源码
+            line 49-56 的构造逻辑 (step_id 从 case_id 取默认 "unknown",
+            component_name 硬编码 "pipeline", actual_output=str(err) 等)。
+
+        mode="json" 关键: 递归将 PatchType enum 转为其 value 字符串,
+        保证 Celery json serializer 可序列化返回值。
         """
-        # orchestrator 返回的治理结果结构 (有 status 字段, 非 AIGovernanceResult)
-        gov_result_dict = {
-            "status": "PENDING_APPROVAL",
-            "reason": "Patch requires manual approval",
-            "confidence_score": 0.3,
-            "reasoning": "真实执行后的治理分析结果",
-            "suggested_fix": "def real_target_fn(self):\n    pass",
-        }
+        from src.governance.models import AIGovernanceResult, PatchProposal
+        from src.governance.registry import PatchType
+
+        # 真实 AIGovernanceResult 对象 (非 dict) — 验证源码 line 58 model_dump(mode="json") 被调用
+        real_gov_result = AIGovernanceResult(
+            is_fixable=True,
+            reasoning="真实治理分析: Pipeline 抛 RuntimeError, 需修复 target_function",
+            root_cause="pipeline.run 执行失败",
+            patch_proposal=PatchProposal(
+                target_function="real_target_fn",
+                suggested_code="def real_target_fn(self):\n    pass",
+                patch_type=PatchType.FUNCTIONAL,
+            ),
+            confidence_score=0.3,
+        )
+        pipeline_err_msg = "真实Pipeline运行失败触发治理"
 
         def _run_coro_side_effect(coro):
             """真实运行传入的协程, 并将结果包装成 future 模拟。"""
@@ -496,13 +523,13 @@ class TestGovernanceCoroutineRealRun:
 
         mock_set_ret = "trace-real-run"
 
-        with patch("src.engine.pipeline.ExecutionPipeline") as mock_pipe_cls, \
-             patch("src.core.container.ResourceContainer") as mock_container_cls, \
+        with patch("src.worker.tasks.ExecutionPipeline") as mock_pipe_cls, \
+             patch("src.worker.tasks.ResourceContainer") as mock_container_cls, \
              patch("src.worker.tasks.AsyncLoopManager") as mock_loop_cls, \
              patch("src.worker.tasks.set_trace_id", return_value=mock_set_ret) as mock_set, \
              patch("src.worker.tasks.reset_trace_id") as mock_reset, \
-             patch("src.engine.registry.get_pipeline", return_value=[]), \
-             patch("src.worker.tasks.GovernanceOrchestrator") as mock_orch_cls:
+             patch("src.worker.tasks.get_pipeline", return_value=[]), \
+             patch("src.worker.tasks.AIGovernanceAgent") as mock_agent_cls:
 
             # ResourceContainer
             mock_client = MagicMock()
@@ -513,13 +540,14 @@ class TestGovernanceCoroutineRealRun:
 
             # ExecutionPipeline.run 抛错 → _execute 真实执行到抛错
             mock_pipe_inst = MagicMock()
-            mock_pipe_inst.run = AsyncMock(side_effect=RuntimeError("真实Pipeline运行失败触发治理"))
+            mock_pipe_inst.run = AsyncMock(side_effect=RuntimeError(pipeline_err_msg))
             mock_pipe_cls.return_value = mock_pipe_inst
 
-            # GovernanceOrchestrator.execute_governance_flow → 返回治理结果 dict
-            mock_orch_inst = MagicMock()
-            mock_orch_inst.execute_governance_flow = AsyncMock(return_value=gov_result_dict)
-            mock_orch_cls.return_value = mock_orch_inst
+            # AIGovernanceAgent.analyze_with_context → 返回真实 AIGovernanceResult 对象
+            # (非 dict — 验证源码 line 58 model_dump() 被调用, 而非直接返回对象)
+            mock_agent_inst = MagicMock()
+            mock_agent_inst.analyze_with_context = AsyncMock(return_value=real_gov_result)
+            mock_agent_cls.return_value = mock_agent_inst
 
             # AsyncLoopManager.run_coroutine → 真实执行传入的协程
             mock_loop_cls.run_coroutine.side_effect = _run_coro_side_effect
@@ -530,24 +558,73 @@ class TestGovernanceCoroutineRealRun:
             result = run_test_pipeline.run.__func__(mock_self, sample_request_dict)
 
             # ====== 严格真实断言 ======
-            # 1. result 必须是 dict
-            assert isinstance(result, dict), f"治理结果必须是dict, 实际: {type(result)}"
-            # 2. 必须有 status 字段 (orchestrator 返回结构, 非 AIGovernanceResult)
-            assert "status" in result, (
-                f"返回值缺 'status' 字段 — 应是 orchestrator 治理结果, "
-                f"实际字段: {list(result.keys())}"
+            # 1. result 必须是 dict (源码 line 58 model_dump() 的产物, 非 AIGovernanceResult 对象)
+            assert isinstance(result, dict), (
+                f"治理结果应是 dict (model_dump 产物), 实际: {type(result)}"
             )
-            assert result["status"] == "PENDING_APPROVAL"
-            # 3. 可被 JSON 序列化 (Celery result backend 要求)
+
+            # 2. 字段集与 AIGovernanceResult 真实字段一致
+            #    (无 status — 那是 orchestrator 层字段, agent 层不产生)
+            expected_keys = {
+                "is_fixable", "reasoning", "root_cause",
+                "patch_proposal", "confidence_score",
+            }
+            assert set(result.keys()) == expected_keys, (
+                f"字段集与 AIGovernanceResult 不一致, 实际: {set(result.keys())}"
+            )
+            assert "status" not in result, \
+                "agent 层不应产生 status 字段 (那是 orchestrator 层)"
+
+            # 3. model_dump(mode="json") 真实序列化值 (验证传播未丢失/转换字段)
+            assert result["is_fixable"] is True
+            assert result["confidence_score"] == 0.3
+            assert result["root_cause"] == "pipeline.run 执行失败"
+            # [严格真实] mode="json" 使 PatchType.FUNCTIONAL 序列化为 value 字符串 "functional",
+            # 而非 enum 对象 <PatchType.FUNCTIONAL: 'functional'>。
+            # 这是 Celery json serializer 可序列化的前提。
+            assert result["patch_proposal"]["patch_type"] == "functional", (
+                "mode='json' 应将 PatchType enum 序列化为其 value 字符串 'functional'"
+            )
+            assert result["patch_proposal"]["target_function"] == "real_target_fn"
+
+            # 4. Celery 返回值必须可被 json.dumps 序列化 (celery_app.py json serializer 要求)。
+            #    mode="json" 保证 dict 内无 enum 对象, 全为 JSON 兼容类型。
             serialized = json.dumps(result)
             roundtripped = json.loads(serialized)
-            assert roundtripped["status"] == "PENDING_APPROVAL"
-            # 4. trace id 正确重置
+            assert roundtripped["is_fixable"] is True
+            assert roundtripped["patch_proposal"]["patch_type"] == "functional", (
+                "JSON roundtrip 后 patch_type 应为 'functional' 字符串"
+            )
+
+            # 5. trace id 正确设置/重置
             mock_set.assert_called_once_with("real-governance-001")
             mock_reset.assert_called_once_with(mock_set_ret)
-            # 5. run_coroutine 被调用 2 次 (_execute + _governance)
+
+            # 6. run_coroutine 被调用 2 次 (_execute + _governance)
             assert mock_loop_cls.run_coroutine.call_count == 2
-            # 6. orchestrator.execute_governance_flow 被真实调用过 (证明 _governance 真走了 orchestrator)
-            mock_orch_inst.execute_governance_flow.assert_awaited_once()
-            # 7. Pipeline.run 被真实调用过 (证明 _execute 真跑了)
+
+            # 7. AIGovernanceAgent.analyze_with_context 被真实 await 调用
+            #    (证明 _governance 真走了 agent, 非 orchestrator.execute_governance_flow)
+            mock_agent_inst.analyze_with_context.assert_awaited_once()
+
+            # 8. [反 tautology 关键] 验证源码 line 49-56 DiagnosticContext 构造逻辑
+            #    (非验证 mock 数据 — 验证源码如何把 err/request_dict 装配进 context)
+            diag_context_arg = mock_agent_inst.analyze_with_context.await_args.args[0]
+            # 源码 line 50: step_id=request_dict.get("case_id", "unknown") — fixture 无 case_id → "unknown"
+            assert diag_context_arg.step_id == "unknown", (
+                "源码应从 request_dict.get('case_id', 'unknown') 取 step_id; "
+                "fixture 无 case_id, 应为 'unknown'"
+            )
+            # 源码 line 51: component_name="pipeline" (硬编码)
+            assert diag_context_arg.component_name == "pipeline"
+            # 源码 line 52: input_data=request_dict (原样透传)
+            assert diag_context_arg.input_data == sample_request_dict
+            # 源码 line 53: actual_output=str(err)
+            assert pipeline_err_msg in diag_context_arg.actual_output
+            # 源码 line 54: expected_baseline=None
+            assert diag_context_arg.expected_baseline is None
+            # 源码 line 55: exception_trace=str(err)
+            assert pipeline_err_msg in diag_context_arg.exception_trace
+
+            # 9. Pipeline.run 被真实 await (证明 _execute 真跑了, 抛错后才进 _governance)
             mock_pipe_inst.run.assert_awaited_once()

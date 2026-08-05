@@ -195,6 +195,6 @@ class TestProcessManagerPlatform:
             assert result is True
             mock_run.assert_called_once()
 
-        with patch('subprocess.run', side_effect=Exception("kill failed")):
+        with patch('subprocess.run', side_effect=OSError("kill failed")):
             result = mgr.kill_process(1234)
             assert result is False

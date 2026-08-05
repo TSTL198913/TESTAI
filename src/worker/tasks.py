@@ -55,7 +55,7 @@ def run_test_pipeline(self, request_dict: dict):
                     exception_trace=str(err),
                 )
                 governance_result = await agent.analyze_with_context(diag_context)
-                return governance_result.model_dump()
+                return governance_result.model_dump(mode="json")
 
             gov_future = AsyncLoopManager.run_coroutine(_governance(e))
             return gov_future.result(timeout=60)

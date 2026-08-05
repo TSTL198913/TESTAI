@@ -54,35 +54,42 @@ class ProcessManager:
 
     def _monitor_loop(self, interval: float):
         while self._running:
+            # 修复: 捕获具体异常 (OSError/subprocess.SubprocessError),
+            # 不再用裸 except Exception 吞没监控异常 (会掩盖 _check_timeouts/_cleanup_zombies 真实失败)。
             try:
                 self._check_timeouts()
                 self._cleanup_zombies()
-            except Exception as e:
-                self.logger.warning(f"Process monitor loop error: {e}")
+            except (OSError, subprocess.SubprocessError) as e:
+                self.logger.warning(f"Process monitor loop error: {type(e).__name__}: {e}")
             time.sleep(interval)
 
     def _check_timeouts(self):
-        now = time.time()
-        to_remove = []
-        for pid, info in self._processes.items():
-            if info.timeout and (now - info.start_time) > info.timeout:
-                self.kill_process(pid)
-                to_remove.append(pid)
-        for pid in to_remove:
-            del self._processes[pid]
+        # 修复: 持锁快照迭代, 防止并发 register_process 修改字典触发
+        # 'RuntimeError: dictionary changed size during iteration'。
+        with self._lock:
+            now = time.time()
+            to_remove = []
+            for pid, info in self._processes.items():
+                if info.timeout and (now - info.start_time) > info.timeout:
+                    self.kill_process(pid)
+                    to_remove.append(pid)
+            for pid in to_remove:
+                del self._processes[pid]
 
     def _cleanup_zombies(self):
-        to_remove = []
-        for pid, info in self._processes.items():
-            if not self._is_process_alive(pid):
-                if info.callback:
-                    try:
-                        info.callback(pid)
-                    except Exception as e:
-                        self.logger.warning(f"Failed to execute callback for pid {pid}: {e}")
-                to_remove.append(pid)
-        for pid in to_remove:
-            del self._processes[pid]
+        # 修复: 持锁快照迭代, 防止并发修改触发 RuntimeError。
+        with self._lock:
+            to_remove = []
+            for pid, info in self._processes.items():
+                if not self._is_process_alive(pid):
+                    if info.callback:
+                        try:
+                            info.callback(pid)
+                        except (OSError, subprocess.SubprocessError, ValueError) as e:
+                            self.logger.warning(f"Failed to execute callback for pid {pid}: {e}")
+                    to_remove.append(pid)
+            for pid in to_remove:
+                del self._processes[pid]
 
     def _is_process_alive(self, pid: int) -> bool:
         try:
@@ -116,6 +123,9 @@ class ProcessManager:
             )
 
     def kill_process(self, pid: int) -> bool:
+        # 修复: 捕获具体异常 (OSError/subprocess.SubprocessError),
+        # 不再用裸 except Exception 吞没异常; 失败时输出结构化日志 (规则1)。
+        # ValueError 等非预期异常向上传播, 不被静默吞没。
         try:
             if os.name == "nt":
                 subprocess.run(
@@ -128,23 +138,30 @@ class ProcessManager:
                     kill_signal = getattr(signal, "SIGKILL", signal.SIGTERM)
                     os.kill(pid, kill_signal)
             return True
-        except Exception:
+        except (OSError, subprocess.SubprocessError) as e:
+            self.logger.warning(f"kill_process failed for pid {pid}: {type(e).__name__}: {e}")
             return False
 
     def cleanup_all(self) -> int:
-        killed = 0
-        pids = list(self._processes.keys())
-        for pid in pids:
-            if self.kill_process(pid):
-                killed += 1
-        self._processes.clear()
-        return killed
+        # 修复: 持锁读写 self._processes, 防止并发 register 漏杀/双杀。
+        with self._lock:
+            killed = 0
+            pids = list(self._processes.keys())
+            for pid in pids:
+                if self.kill_process(pid):
+                    killed += 1
+            self._processes.clear()
+            return killed
 
     def list_processes(self) -> List[ProcessInfo]:
-        return list(self._processes.values())
+        # 修复: 持锁快照, 防止并发修改触发 RuntimeError。
+        with self._lock:
+            return list(self._processes.values())
 
     def get_process(self, pid: int) -> Optional[ProcessInfo]:
-        return self._processes.get(pid)
+        # 修复: 持锁读取, 防止并发 clear 返回脏数据。
+        with self._lock:
+            return self._processes.get(pid)
 
     def shutdown(self):
         self.stop_monitor()

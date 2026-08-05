@@ -78,12 +78,16 @@ class GitTransactionManager:
     def rollback(self, tx_id: str):
         """回滚并清理现场"""
         with self._lock:
+            # 关键修复: rollback 必须用 _sanitize_branch_name(tx_id) 与 start_transaction 一致,
+            # 否则 tx_id 含特殊字符时, start 创建的是 governance_tx_a_b_c,
+            # rollback 删除的是 governance_tx_a/b:c → branch -D 失败 → 假回滚。
+            branch_name = self._sanitize_branch_name(tx_id)
             try:
                 self._run(["git", "checkout", self.base_branch])
                 try:
-                    self._run(["git", "branch", "-D", f"governance_{tx_id}"])
+                    self._run(["git", "branch", "-D", branch_name])
                 except Exception as e:
-                    self.logger.debug(f"Branch governance_{tx_id} does not exist or cannot be deleted: {e}")
+                    self.logger.debug(f"Branch {branch_name} does not exist or cannot be deleted: {e}")
                 self.logger.info(f"Transaction {tx_id} rolled back successfully.")
             except Exception as e:
                 self.logger.critical(f"FATAL: Rollback failed for {tx_id}: {e}")
