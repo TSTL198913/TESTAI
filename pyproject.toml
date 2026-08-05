@@ -37,6 +37,7 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "pyjwt>=2.0.0",
     "respx>=0.23.0",
+    "prometheus_client>=0.20.0",
 ]
 
 [project.optional-dependencies]

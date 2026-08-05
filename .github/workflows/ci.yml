@@ -262,6 +262,8 @@ jobs:
 
       - name: Run Governance Tests
         run: python -m pytest tests/governance/ -v --tb=short -W error::RuntimeWarning --cov=src/governance --cov-report=xml --cov-fail-under=70
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v5
@@ -298,6 +300,8 @@ jobs:
 
       - name: Run AI Module Tests
         run: python -m pytest tests/ai/ -v --tb=short -W error::RuntimeWarning --cov=src/ai --cov-report=xml --cov-fail-under=70
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 
       - name: Upload AI coverage report
         uses: actions/upload-artifact@v5
